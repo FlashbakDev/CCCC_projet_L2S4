@@ -3,8 +3,14 @@
 #include <SDL2/SDL_mixer.h>
 
 #include <stdio.h>
+#include "stdbool.h"
 
-int main(int argc, char** argv){
+#include "constants.h"
+#include "game.h"
+#include "files.h"
+#include "editor.h"
+
+int main(int argc, char* argv[]){
 
     /* Initialisation */
 
@@ -43,10 +49,15 @@ int main(int argc, char** argv){
         SDL_Texture* pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface);
 
         // affichage
+
         SDL_Rect position;
-        position.x = 100;
-        position.y = 200;
+        position.x = 0;
+        position.y = 0;
         SDL_QueryTexture(pTexture, NULL, NULL, &position.w, &position.h);
+
+        // redimensionement de la fenetre
+        SDL_SetWindowSize(pWindow, position.w, position.h );
+
         SDL_RenderCopy(pRenderer,pTexture,NULL,&position);
         SDL_RenderPresent(pRenderer);
 
