@@ -32,6 +32,10 @@ int main(int argc, char* argv[]){
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
     SDL_SetWindowSize(pWindow,grid1->width * TOKEN_WIDTH, grid1->height * TOKEN_HEIGHT);
 
+    // renderer = canvas ( endroit où l'on va déssiner )
+    SDL_Renderer *pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Rect *pBackground = {0,0,grid1->width * TOKEN_WIDTH,grid1->height * TOKEN_HEIGHT};
+
     /* boucle de jeu */
     while( loop ){
 
@@ -40,19 +44,13 @@ int main(int argc, char* argv[]){
         /* logique */
 
         /* affichage */
+        SDL_RenderClear(pRenderer);                             // efface tout le contenu du renderer
 
-        // renderer = canvas ( endroit où l'on va déssiner )
-        SDL_Renderer *pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 0 );   // pour faire déssiner en blanc
+        SDL_RenderFillRect(pRenderer,pBackground);              // pour déssiner le background
+        DrawGrid(grid1,pRenderer);                              // déssine la grille sur le renderer
 
-        DrawGrid(grid1,pRenderer); // déssine la grille sur le renderer
-
-        SDL_RenderPresent(pRenderer); // déssine le renderer à l'écran
-
-        //SDL_Delay(3000); /* Attendre trois secondes, que l'utilisateur voie la fenêtre */
-
-        SDL_RenderClear(pRenderer);
-
-        //loop = false;
+        SDL_RenderPresent(pRenderer);                           // déssine le renderer à l'écran
     }
 
     /* fin du programme */
