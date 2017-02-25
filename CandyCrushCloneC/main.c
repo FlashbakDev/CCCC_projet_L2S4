@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "stdbool.h"
 
 #include "constants.h"
 #include "game.h"
@@ -24,14 +23,37 @@ int main(int argc, char* argv[]){
     pWindow = SDL_CreateWindow("Candy Crush Clone C",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,WINDOW_WIDTH,WINDOW_HEIGHT,SDL_WINDOW_SHOWN);
     // void SDL_SetWindowIcon(SDL_Window*  window , SDL_Surface* icon); //ajoute une icône à la fenêtre
 
-    /* programme */
+    /* initialisation du jeu */
+    int gridHeight = 10;
+    int gridWidth = 10;
+    int nbMove = 20;
+    int nbColor = 5;
 
-    Grid *grid1 = NewGrid(10,10,20);
+    Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
+    SDL_SetWindowSize(pWindow,grid1->width * TOKEN_WIDTH, grid1->height * TOKEN_HEIGHT);
 
-    /* affichage */
-    /*SDL_Renderer *pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); // Création du renderer
-    DrawGrid(grid1,pRenderer);*/
-    SDL_Delay(3000); /* Attendre trois secondes, que l'utilisateur voie la fenêtre */
+    /* boucle de jeu */
+    while( loop ){
+
+        /* évènements */
+
+        /* logique */
+
+        /* affichage */
+
+        // renderer = canvas ( endroit où l'on va déssiner )
+        SDL_Renderer *pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+        DrawGrid(grid1,pRenderer); // déssine la grille sur le renderer
+
+        SDL_RenderPresent(pRenderer); // déssine le renderer à l'écran
+
+        //SDL_Delay(3000); /* Attendre trois secondes, que l'utilisateur voie la fenêtre */
+
+        SDL_RenderClear(pRenderer);
+
+        //loop = false;
+    }
 
     /* fin du programme */
 

@@ -6,75 +6,111 @@
 
 // =========================================================
 
-Grid *NewGrid(int width, int height, int nbMove){
+Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
-    Grid *grid;
-
-    grid->width = width;
-    grid->height = height;
-    grid->nbMove = nbMove;
-
-    grid->pastTokens = NULL;
-
-    grid->tokens = malloc(sizeof(*grid->tokens) * height);
-
-    if ( grid->tokens == NULL ){ return NULL; }
-
-    for(int i = 0; i < height; i++){
-
-        grid->tokens[i] = malloc(sizeof(*grid->tokens[i]) * width);
-
-        if ( grid->tokens[i] == NULL ){ return NULL; }
-    }
-
-    // aléatoire
+    /* aléatoire */
     srand(time(NULL));
 
-    for(int i = 0; i < grid->height; i++){
-        for(int j = 0; j < grid->width; j++){
+    Grid *pGrid = malloc(sizeof(Grid));
 
-            grid->tokens[i][j].position.x = j;
-            grid->tokens[i][j].position.y = i;
-            grid->tokens[i][j].type = TOKEN;
+    pGrid->width = width;
+    pGrid->height = height;
+    pGrid->nbMove = nbMove;
+    pGrid->nbColor = nbColor;
+    pGrid->pastTokens = NULL;
 
-            int r = rand() % 5;
+    /* allocation de la grille et remplissage */
+    pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
+    if ( pGrid->tokens == NULL ){ return NULL; }
 
-            switch(r){
+    for(int i = 0; i < pGrid->height; i++){
 
-                case 0:{
+        pGrid->tokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
 
-                    grid->tokens[i][j].color = "red";
-                }
-                break;
+        /* désallocation de la mémoire en cas d'erreur */
+        if ( pGrid->tokens[i] == NULL ){
 
-                case 1:{
-
-                    grid->tokens[i][j].color = "blue";
-                }
-                break;
-
-                case 2:{
-
-                    grid->tokens[i][j].color = "green";
-                }
-                break;
-
-                case 3:{
-
-                    grid->tokens[i][j].color = "yellow";
-                }
-                break;
-
-                case 4:{
-
-                    grid->tokens[i][j].color = "purple";
-                }
-                break;
+            for(i=i-1 ; i >= 0 ; i--){
+                free(pGrid->tokens[i]);
             }
+            free(pGrid->tokens);
+
+            return NULL;
         }
     }
 
-    return grid;
+    RandomizeGrid(pGrid);
+
+    return pGrid;
+}
+
+// =========================================================
+
+void RandomizeGrid(Grid *pGrid){
+
+    int i = 0;
+
+    do{
+
+        i++;
+
+        for(int i = 0; i < pGrid->height; i++){
+            for(int j = 0; j < pGrid->width; j++){
+
+                pGrid->tokens[i][j].type = TOKEN;
+                pGrid->tokens[i][j].color = (Colors)(rand() % pGrid->nbColor);
+            }
+        }
+
+    }while(IsLigneOnGrid(pGrid) == true );
+
+    fprintf(stdout, "grille trouve en %d fois.\n", i);
+}
+
+// =========================================================
+
+void CheckGrid(Grid *pGrid){
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            pGrid->tokens[i][j].aligned = false;
+
+            // vérification verticale
+            if ( i > 0 && i < pGrid->height - 1){
+
+                if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
+
+                    pGrid->tokens[i][j].aligned = true;
+                }
+            }
+
+            // vérification horizontale
+            if ( j > 0 && j < pGrid->width - 1){
+
+                if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
+
+                    pGrid->tokens[i][j].aligned = true;
+                }
+            }
+        }
+    }
+}
+
+// =========================================================
+
+bool IsLigneOnGrid(Grid *pGrid){
+
+    CheckGrid(pGrid);
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].aligned == true ){ return true; }
+        }
+    }
+
+    return false;
 }
 
 // =========================================================
@@ -92,9 +128,37 @@ void *DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
 
             SDL_Texture *pTexture = NULL;
 
-            if( strcmp( pGrid->tokens[i][j].color, "blue") == 0 ){
+            switch(pGrid->tokens[i][j].color){
 
-                pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Blue);
+                case RED :{
+
+                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Red);
+                }
+                break;
+
+                case BLUE :{
+
+                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Blue);
+                }
+                break;
+
+                case GREEN :{
+
+                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Green);
+                }
+                break;
+
+                case YELLOW :{
+
+                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Yellow);
+                }
+                break;
+
+                case PURPLE :{
+
+                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Purple);
+                }
+                break;
             }
 
             SDL_Rect position;
@@ -105,7 +169,6 @@ void *DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
             SDL_RenderCopy(pRenderer,pTexture,NULL,&position);
 
             SDL_free(pTexture);
-
         }
     }
 
