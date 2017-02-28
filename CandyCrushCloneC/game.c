@@ -53,14 +53,27 @@ void RandomizeGrid(Grid *pGrid){
         for(int i = 0; i < pGrid->height; i++){
             for(int j = 0; j < pGrid->width; j++){
 
-                pGrid->tokens[i][j].type = TOKEN;
-                pGrid->tokens[i][j].color = (Colors)(rand() % pGrid->nbColor);
+                InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, i, j);
             }
         }
 
     }while(IsLigneOnGrid(pGrid) == true );
 
     fprintf(stdout, "grille trouve en %d fois.\n", i);
+}
+
+// =========================================================
+
+void InitRandomToken(Token *token, int nbColor, int x, int y){
+
+    token->type = TOKEN;
+    token->color = (Colors)(rand() % nbColor);
+    token->isMoving = false;
+
+    token->texturePosition.h = TOKEN_HEIGHT;
+    token->texturePosition.w = TOKEN_WIDTH;
+    token->texturePosition.x = x * token->texturePosition.h;
+    token->texturePosition.y = y * token->texturePosition.w;
 }
 
 // =========================================================
@@ -123,6 +136,20 @@ bool IsLigneOnGrid(Grid *pGrid){
 
 // =========================================================
 
+bool IsTokenMoving(Grid *pGrid){
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].isMoving == true ){ return true; }
+        }
+    }
+
+    return false;
+}
+
+// =========================================================
+
 bool IsTokenOfType(Grid *pGrid, TokenTypes type){
 
    for(int i = 0; i < pGrid->height; i++){
@@ -133,6 +160,16 @@ bool IsTokenOfType(Grid *pGrid, TokenTypes type){
     }
 
     return false;
+}
+
+// =========================================================
+
+Token *GetColumnUpperToken(Grid *pGrid,int x){
+
+    for(int i = 0; i < pGrid->height; i ++ ){
+
+        if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
+    }
 }
 
 // =========================================================
@@ -178,10 +215,7 @@ void RegroupTokens(Grid *pGrid, Directions dir){
 
                         if ( pGrid->tokens[(i + DirectionsVectors[dir][1])][(j + DirectionsVectors[dir][0])].type == NONE ){
 
-                            pGrid->tokens[(i + DirectionsVectors[dir][1])][(j + DirectionsVectors[dir][0])].type = TOKEN;
-                            pGrid->tokens[(i + DirectionsVectors[dir][1])][(j + DirectionsVectors[dir][0])].color = pGrid->tokens[i][j].color;
-
-                            pGrid->tokens[i][j].type = NONE;
+                            PermuteToken(pGrid, i + DirectionsVectors[dir][1], j + DirectionsVectors[dir][0], i , j );
 
                             ok = false;
                         }
@@ -202,27 +236,23 @@ void InjectLigne(Grid *pGrid, Directions dir){
 
             for(int i = 0; i < pGrid->width; i++){
 
-                //fprintf(stdout,"! Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",0, i, pGrid->tokens[i][0].color, pGrid->tokens[i][0].type,pGrid->tokens[i][0].aligned);
-
                 if ( pGrid->tokens[i][0].type == NONE ){
 
-                    pGrid->tokens[i][0].type = TOKEN;
-                    pGrid->tokens[i][0].color = (Colors)(rand() % pGrid->nbColor);
+                    //fprintf(stdout,"GetColumnUpperToken return (%d, %d).\n",GetColumnUpperToken(pGrid,i)->texturePosition.x, GetColumnUpperToken(pGrid,i)->texturePosition.y);
 
-                    //fprintf(stdout,"Ajout d'un jeton aleatoire en (%d, %d) de couleur %d.\n",0,i,pGrid->tokens[i][0].color);
+                    InitRandomToken( &pGrid->tokens[i][0], pGrid->nbColor, i , -( GetColumnUpperToken(pGrid,i)->texturePosition.y / TOKEN_HEIGHT )-1 );
                 }
             }
         }
         break;
 
-        case DOWN:{
+        /*case DOWN:{
 
             for(int i = 0; i < pGrid->width; i++){
 
                 if ( pGrid->tokens[i][pGrid->height-1].type == NONE ){
 
-                    pGrid->tokens[i][pGrid->height-1].type = TOKEN;
-                    pGrid->tokens[i][pGrid->height-1].color = (Colors)(rand() % pGrid->nbColor);
+                    InitRandomToken( &pGrid->tokens[i][pGrid->height-1], pGrid->nbColor, pGrid->height-1, i);
                 }
             }
         }
@@ -234,8 +264,7 @@ void InjectLigne(Grid *pGrid, Directions dir){
 
                 if ( pGrid->tokens[0][i].type == NONE ){
 
-                    pGrid->tokens[0][i].type = TOKEN;
-                    pGrid->tokens[0][i].color = (Colors)(rand() % pGrid->nbColor);
+                    InitRandomToken( &pGrid->tokens[0][i], pGrid->nbColor, i, 0);
                 }
             }
         }
@@ -247,12 +276,11 @@ void InjectLigne(Grid *pGrid, Directions dir){
 
                 if ( pGrid->tokens[pGrid->width-1][i].type == NONE ){
 
-                    pGrid->tokens[pGrid->width-1][i].type = TOKEN;
-                    pGrid->tokens[pGrid->width-1][i].color = (Colors)(rand() % pGrid->nbColor);
+                    InitRandomToken( &pGrid->tokens[pGrid->width-1][i], pGrid->nbColor, i, pGrid->width-1);
                 }
             }
         }
-        break;
+        break;*/
     }
 }
 
@@ -267,12 +295,7 @@ void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[
 
                 SDL_Texture *pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token[pGrid->tokens[i][j].color]);
 
-                SDL_Rect position;
-                SDL_QueryTexture(pTexture, NULL, NULL, &position.w, &position.h);
-                position.x = i * position.h;
-                position.y = j * position.w;
-
-                SDL_RenderCopy(pRenderer,pTexture,NULL,&position);
+                SDL_RenderCopy(pRenderer,pTexture,NULL,&pGrid->tokens[i][j].texturePosition);
 
                 SDL_DestroyTexture(pTexture);
             }
@@ -280,8 +303,58 @@ void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[
     }
 }
 
+// =========================================================
 
+void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 
+    Token tmp = pGrid->tokens[x1][y1];
+    pGrid->tokens[x1][y1] = pGrid->tokens[x2][y2];
+    pGrid->tokens[x2][y2] = tmp;
+}
+
+// =========================================================
+
+void AnimTokens(Grid *pGrid){
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].texturePosition.y != j * TOKEN_WIDTH ){
+
+                pGrid->tokens[i][j].isMoving = true;
+
+                if ( pGrid->tokens[i][j].texturePosition.y > j * TOKEN_WIDTH )
+                    pGrid->tokens[i][j].texturePosition.y -= FALL_SPEED ;
+                else
+                    pGrid->tokens[i][j].texturePosition.y += FALL_SPEED ;
+
+                if ( sqrt( pow( pGrid->tokens[i][j].texturePosition.y - j * TOKEN_WIDTH ,2) ) < FALL_SPEED ){
+
+                    pGrid->tokens[i][j].texturePosition.y = j * TOKEN_WIDTH;
+                    pGrid->tokens[i][j].isMoving = false;
+                }
+            }
+
+            if ( pGrid->tokens[i][j].texturePosition.x != i * TOKEN_HEIGHT ){
+
+                pGrid->tokens[i][j].isMoving = true;
+
+                if ( pGrid->tokens[i][j].texturePosition.x > i * TOKEN_HEIGHT )
+                    pGrid->tokens[i][j].texturePosition.x -= FALL_SPEED ;
+                else
+                    pGrid->tokens[i][j].texturePosition.x += FALL_SPEED ;
+
+                if ( sqrt( pow( pGrid->tokens[i][j].texturePosition.x - i * TOKEN_HEIGHT ,2) ) < FALL_SPEED ){
+
+                    pGrid->tokens[i][j].texturePosition.x = i * TOKEN_HEIGHT;
+                    pGrid->tokens[i][j].isMoving = false;
+                }
+            }
+        }
+    }
+}
+
+// =========================================================
 
 
 
