@@ -27,6 +27,8 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #define WINDOW_HEIGHT       600
     #define TOKEN_WIDTH         64
     #define TOKEN_HEIGHT        64
+    #define FRAME_PER_SECOND    60
+    #define FALL_SPEED          5
 
     typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
@@ -41,15 +43,22 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
         TokenTypes type;
         Colors color;
         bool aligned;
+
+        //SDL_Texture texture;
+        SDL_Rect texturePosition;
+
+        bool isMoving;
+
     }Token;
 
     typedef struct Grid{
 
-        Token **pastTokens;
+        Token **pastTokens; // historique
         Token **tokens;
         int nbMove;
         int width, height;
         int nbColor;
+
     }Grid;
 
 #endif // CONSTANTS_H_INCLUDED
