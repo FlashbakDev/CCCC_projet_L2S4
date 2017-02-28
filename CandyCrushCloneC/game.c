@@ -117,49 +117,17 @@ bool IsLigneOnGrid(Grid *pGrid){
 
 void *DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
 
-    SDL_Surface *pSurface_Token_Blue = IMG_Load("./data/Token_blue.png");
-    SDL_Surface *pSurface_Token_Red = IMG_Load("./data/Token_red.png");
-    SDL_Surface *pSurface_Token_Green = IMG_Load("./data/Token_green.png");
-    SDL_Surface *pSurface_Token_Yellow = IMG_Load("./data/Token_yellow.png");
-    SDL_Surface *pSurface_Token_Purple = IMG_Load("./data/Token_purple.png");
+    SDL_Surface *pSurface_Token[5];
+    pSurface_Token[0] = IMG_Load("./data/Token_red.png");
+    pSurface_Token[1] = IMG_Load("./data/Token_blue.png");
+    pSurface_Token[2] = IMG_Load("./data/Token_green.png");
+    pSurface_Token[3] = IMG_Load("./data/Token_yellow.png");
+    pSurface_Token[4] = IMG_Load("./data/Token_purple.png");
 
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            SDL_Texture *pTexture = NULL;
-
-            switch(pGrid->tokens[i][j].color){
-
-                case RED :{
-
-                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Red);
-                }
-                break;
-
-                case BLUE :{
-
-                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Blue);
-                }
-                break;
-
-                case GREEN :{
-
-                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Green);
-                }
-                break;
-
-                case YELLOW :{
-
-                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Yellow);
-                }
-                break;
-
-                case PURPLE :{
-
-                    pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token_Purple);
-                }
-                break;
-            }
+            SDL_Texture *pTexture = SDL_CreateTextureFromSurface(pRenderer,pSurface_Token[pGrid->tokens[i][j].color]);
 
             SDL_Rect position;
             SDL_QueryTexture(pTexture, NULL, NULL, &position.w, &position.h);
@@ -172,11 +140,8 @@ void *DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
         }
     }
 
-    SDL_free(pSurface_Token_Blue);
-    SDL_free(pSurface_Token_Red);
-    SDL_free(pSurface_Token_Green);
-    SDL_free(pSurface_Token_Yellow);
-    SDL_free(pSurface_Token_Purple);
+    for(int i = 0; i < 5; i ++){ SDL_free(pSurface_Token[i]); }
+    SDL_free(pSurface_Token);
 }
 
 
