@@ -16,6 +16,11 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #include <SDL2/SDL_image.h>
     #include <SDL2/SDL_mixer.h>
 
+    #include <stdio.h>
+    #include <math.h>
+    #include <stdlib.h>
+    #include <time.h>
+
     #include "stdbool.h"
 
     #define WINDOW_WIDTH        800
@@ -25,7 +30,7 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
 
     typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
-    typedef enum TokenTypes { VIDE, TOKEN }TokenTypes;
+    typedef enum TokenTypes { NONE, TOKEN }TokenTypes;
 
     typedef enum GameStates { MENU, GAME, EDITOR }GameStates;
 

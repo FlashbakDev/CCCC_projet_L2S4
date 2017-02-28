@@ -1,10 +1,5 @@
-#include <stdio.h>
-#include <math.h>
-
 #include "constants.h"
 #include "game.h"
-#include "files.h"
-#include "editor.h"
 
 int main(int argc, char* argv[]){
 
@@ -26,7 +21,7 @@ int main(int argc, char* argv[]){
 
     // renderer = canvas ( endroit où l'on va déssiner )
     SDL_Renderer *pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    SDL_Rect *pBackground = {0,0,grid1->width * TOKEN_WIDTH,grid1->height * TOKEN_HEIGHT};
+    SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 0 ); // pour faire déssiner en blanc
 
     // curseur
     SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver.png");
@@ -36,6 +31,14 @@ int main(int argc, char* argv[]){
 
     SDL_Point dragStart, dragEnd;
     bool dragAndDrop = false;
+
+    // textures
+    SDL_Surface *pSurface_Token[5];
+    pSurface_Token[0] = IMG_Load("./data/Token_red.png");
+    pSurface_Token[1] = IMG_Load("./data/Token_blue.png");
+    pSurface_Token[2] = IMG_Load("./data/Token_green.png");
+    pSurface_Token[3] = IMG_Load("./data/Token_yellow.png");
+    pSurface_Token[4] = IMG_Load("./data/Token_purple.png");
 
     // gestionnaire d'évènement
     SDL_Event event;
@@ -72,12 +75,21 @@ int main(int argc, char* argv[]){
                     // bouton gauche
                     case SDL_BUTTON_LEFT:{
 
-                        fprintf(stdout,"Bouton de la souris gauche appuiye.\n");
+                        //fprintf(stdout,"Bouton de la souris gauche appuiye.\n");
 
                         dragStart.x = (event.motion.x / TOKEN_WIDTH);
                         dragStart.y = (event.motion.y / TOKEN_HEIGHT);
 
-                        dragAndDrop = true;
+                        dragAndDrop = grid1->tokens[dragStart.x][dragStart.y].type != NONE;
+                    }
+                    break;
+
+                    // click droit pour afficher les stats du jeton
+                    case SDL_BUTTON_RIGHT:{
+
+                        int posX = (event.motion.x / TOKEN_WIDTH);
+                        int posY = (event.motion.y / TOKEN_HEIGHT);
+                        fprintf(stdout,"Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",posX, posY, grid1->tokens[posX][posY].color, grid1->tokens[posX][posY].type,grid1->tokens[posX][posY].aligned);
                     }
                     break;
                 }
@@ -90,26 +102,57 @@ int main(int argc, char* argv[]){
 
                     case SDL_BUTTON_LEFT:{
 
-                        fprintf(stdout,"Bouton de la souris gauche relache.\n");
+                        //fprintf(stdout,"Bouton de la souris gauche relache.\n");
 
-                        dragEnd.x = (event.motion.x / TOKEN_WIDTH);
-                        dragEnd.y = (event.motion.y / TOKEN_HEIGHT);
+                        if ( dragAndDrop == true ){
 
-                        fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
+                            dragEnd.x = (event.motion.x / TOKEN_WIDTH);
+                            dragEnd.y = (event.motion.y / TOKEN_HEIGHT);
 
-                        if ( sqrt( pow( dragEnd.x - dragStart.x, 2) ) >= 0 && sqrt( pow( dragEnd.x - dragStart.x, 2) ) <= 1 &&
-                             sqrt( pow( dragEnd.y - dragStart.y, 2) ) >= 0 && sqrt( pow( dragEnd.y - dragStart.y, 2) ) <= 1 ){
+                            fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
 
-                             Colors colorTmp = grid1->tokens[dragEnd.x][dragEnd.y].color;
+                            int distX = sqrt( pow( dragEnd.x - dragStart.x, 2) );
+                            int distY = sqrt( pow( dragEnd.y - dragStart.y, 2) );
 
-                            //fprintf(stdout,"changement de couleur du jeton d'arrive ( %d, %d, %d", dragEnd.x, dragEnd.y, grid1->tokens[dragEnd.y][dragEnd.x].color );
-                            grid1->tokens[dragEnd.x][dragEnd.y].color = grid1->tokens[dragStart.x][dragStart.y].color;
-                            //fprintf(stdout," -> %d)\n", grid1->tokens[dragEnd.x][dragEnd.y].color );
+                            if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                            grid1->tokens[dragStart.x][dragStart.y].color = colorTmp;
+                                 Colors colorTmp = grid1->tokens[dragEnd.x][dragEnd.y].color;
+
+                                //fprintf(stdout,"changement de couleur du jeton d'arrive ( %d, %d, %d", dragEnd.x, dragEnd.y, grid1->tokens[dragEnd.y][dragEnd.x].color );
+                                grid1->tokens[dragEnd.x][dragEnd.y].color = grid1->tokens[dragStart.x][dragStart.y].color;
+                                //fprintf(stdout," -> %d)\n", grid1->tokens[dragEnd.x][dragEnd.y].color );
+
+                                grid1->tokens[dragStart.x][dragStart.y].color = colorTmp;
+
+                                if ( IsLigneOnGrid(grid1) == false ){
+
+                                    grid1->tokens[dragStart.x][dragStart.y].color = grid1->tokens[dragEnd.x][dragEnd.y].color;
+                                    grid1->tokens[dragEnd.x][dragEnd.y].color = colorTmp;
+                                }
+                                else{
+
+                                    while( IsLigneOnGrid(grid1) == true){
+
+                                        // détruit les lignes et remplie les cases manquantes du tableau
+                                        fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
+
+                                        // regroupe tout les jetons
+                                        RegroupTokens(grid1, DOWN);
+
+                                        while( IsTokenOfType(grid1, NONE ) == true ){
+
+                                            // remplie les espaces vides
+                                            InjectLigne(grid1, UP);
+
+                                            // regroupe tout les jetons
+                                            RegroupTokens(grid1, DOWN);
+                                        }
+                                    }
+                                }
+                            }
+
+                            dragAndDrop = false;
                         }
-
-                        dragAndDrop = false;
                     }
                     break;
                 }
@@ -132,19 +175,16 @@ int main(int argc, char* argv[]){
         /* affichage */
         SDL_RenderClear(pRenderer);                                                 // efface tout le contenu du renderer
 
-        SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 0 );                       // pour faire déssiner en blanc
-        SDL_RenderFillRect(pRenderer,pBackground);                                  // pour déssiner le background
         SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&position_CursorOver);    // pour le curseur de la souris
-
-        DrawGrid(grid1,pRenderer);                                                  // déssine la grille sur le renderer
+        DrawGrid(grid1,pRenderer,pSurface_Token);                                   // déssine la grille sur le renderer
 
         SDL_RenderPresent(pRenderer);                                               // déssine le renderer à l'écran
     }
 
     /* fin du programme */
 
+    SDL_DestroyRenderer(pRenderer);
     SDL_DestroyWindow(pWindow);
-
     SDL_Quit();
 
     return 0;

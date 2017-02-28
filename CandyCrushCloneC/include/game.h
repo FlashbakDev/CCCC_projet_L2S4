@@ -26,7 +26,19 @@ void CheckGrid(Grid *pGrid);
 /* vérifie s'il y a des lignes complete sur la grille */
 bool IsLigneOnGrid(Grid *pGrid);
 
+/* vérifie s'il y a un token du type donné */
+bool IsTokenOfType(Grid *pGrid, TokenTypes type);
+
+/* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
+int DestroyAlignedTokens(Grid *pGrid);
+
+/* regroupe les jetons dans la direction donné */
+void RegroupTokens(Grid *pGrid, Directions dir);
+
+/* insère de nouveaux jetons aléatoirement */
+void InjectLigne(Grid *pGrid, Directions dir);
+
 /* affiche la grille */
-void *DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer);
+void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[5]);
 
 #endif // GAME_H_INCLUDED
