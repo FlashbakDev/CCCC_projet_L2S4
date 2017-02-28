@@ -47,127 +47,130 @@ int main(int argc, char* argv[]){
     bool loop = true;
     while( loop ){
 
-        int frameStart = SDL_GetTicks();
-
         /* évènements */
-        while( SDL_PollEvent( &event ) != 0 ){
+        SDL_WaitEvent(&event);
+        switch(event.type){
 
-            switch(event.type){
+            // appuie d'une touche du clavier
+            case SDL_KEYDOWN:{
 
-                // appuie d'une touche du clavier
-                case SDL_KEYDOWN:{
+                switch(event.key.keysym.sym){
 
-                    switch(event.key.keysym.sym){
+                    // appuie sur echap
+                    case SDLK_ESCAPE: {
 
-                        // appuie sur echap
-                        case SDLK_ESCAPE: {
-
-                            fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
-                            loop = false;
-                        }
-                        break;
+                        fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
+                        loop = false;
                     }
+                    break;
                 }
-                break;
+            }
+            break;
 
-                // bouttons de souris appuié
-                case SDL_MOUSEBUTTONDOWN:{
+            // bouttons de souris appuié
+            case SDL_MOUSEBUTTONDOWN:{
 
-                    switch(event.button.button){
+                switch(event.button.button){
 
-                        // bouton gauche
-                        case SDL_BUTTON_LEFT:{
+                    // bouton gauche
+                    case SDL_BUTTON_LEFT:{
 
-                            if ( IsTokenMoving(grid1) == false ){
+                        //fprintf(stdout,"Bouton de la souris gauche appuiye.\n");
 
-                                dragStart.x = (event.motion.x / TOKEN_WIDTH);
-                                dragStart.y = (event.motion.y / TOKEN_HEIGHT);
+                        dragStart.x = (event.motion.x / TOKEN_WIDTH);
+                        dragStart.y = (event.motion.y / TOKEN_HEIGHT);
 
-                                dragAndDrop = grid1->tokens[dragStart.x][dragStart.y].type != NONE;
-                            }
-                        }
-                        break;
-
-                        // click droit pour afficher les stats du jeton
-                        case SDL_BUTTON_RIGHT:{
-
-                            int posX = (event.motion.x / TOKEN_WIDTH);
-                            int posY = (event.motion.y / TOKEN_HEIGHT);
-                            fprintf(stdout,"Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",posX, posY, grid1->tokens[posX][posY].color, grid1->tokens[posX][posY].type,grid1->tokens[posX][posY].aligned);
-                        }
-                        break;
+                        dragAndDrop = grid1->tokens[dragStart.x][dragStart.y].type != NONE;
                     }
+                    break;
+
+                    // click droit pour afficher les stats du jeton
+                    case SDL_BUTTON_RIGHT:{
+
+                        int posX = (event.motion.x / TOKEN_WIDTH);
+                        int posY = (event.motion.y / TOKEN_HEIGHT);
+                        fprintf(stdout,"Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",posX, posY, grid1->tokens[posX][posY].color, grid1->tokens[posX][posY].type,grid1->tokens[posX][posY].aligned);
+                    }
+                    break;
                 }
-                break;
+            }
+            break;
 
-                case SDL_MOUSEBUTTONUP:{
+            case SDL_MOUSEBUTTONUP:{
 
-                    switch(event.button.button){
+                switch(event.button.button){
 
-                        case SDL_BUTTON_LEFT:{
+                    case SDL_BUTTON_LEFT:{
 
-                            if ( dragAndDrop == true ){
+                        //fprintf(stdout,"Bouton de la souris gauche relache.\n");
 
-                                dragEnd.x = (event.motion.x / TOKEN_WIDTH);
-                                dragEnd.y = (event.motion.y / TOKEN_HEIGHT);
+                        if ( dragAndDrop == true ){
 
-                                fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
+                            dragEnd.x = (event.motion.x / TOKEN_WIDTH);
+                            dragEnd.y = (event.motion.y / TOKEN_HEIGHT);
 
-                                int distX = sqrt( pow( dragEnd.x - dragStart.x, 2) );
-                                int distY = sqrt( pow( dragEnd.y - dragStart.y, 2) );
+                            fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
 
-                                if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
+                            int distX = sqrt( pow( dragEnd.x - dragStart.x, 2) );
+                            int distY = sqrt( pow( dragEnd.y - dragStart.y, 2) );
 
-                                    PermuteToken(grid1, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
+                            if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                                    if ( IsLigneOnGrid(grid1) == false ){
+                                 Colors colorTmp = grid1->tokens[dragEnd.x][dragEnd.y].color;
 
-                                        PermuteToken(grid1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
+                                //fprintf(stdout,"changement de couleur du jeton d'arrive ( %d, %d, %d", dragEnd.x, dragEnd.y, grid1->tokens[dragEnd.y][dragEnd.x].color );
+                                grid1->tokens[dragEnd.x][dragEnd.y].color = grid1->tokens[dragStart.x][dragStart.y].color;
+                                //fprintf(stdout," -> %d)\n", grid1->tokens[dragEnd.x][dragEnd.y].color );
+
+                                grid1->tokens[dragStart.x][dragStart.y].color = colorTmp;
+
+                                if ( IsLigneOnGrid(grid1) == false ){
+
+                                    grid1->tokens[dragStart.x][dragStart.y].color = grid1->tokens[dragEnd.x][dragEnd.y].color;
+                                    grid1->tokens[dragEnd.x][dragEnd.y].color = colorTmp;
+                                }
+                                else{
+
+                                    while( IsLigneOnGrid(grid1) == true){
+
+                                        // détruit les lignes et remplie les cases manquantes du tableau
+                                        fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
+
+                                        // regroupe tout les jetons
+                                        RegroupTokens(grid1, DOWN);
+
+                                        while( IsTokenOfType(grid1, NONE ) == true ){
+
+                                            // remplie les espaces vides
+                                            InjectLigne(grid1, UP);
+
+                                            // regroupe tout les jetons
+                                            RegroupTokens(grid1, DOWN);
+                                        }
                                     }
                                 }
-
-                                dragAndDrop = false;
                             }
+
+                            dragAndDrop = false;
                         }
-                        break;
                     }
+                    break;
                 }
-                break;
-
-                // mouvement de souris
-                case SDL_MOUSEMOTION:{
-
-                    position_CursorOver.x = TOKEN_WIDTH * (event.motion.x / TOKEN_WIDTH);
-                    position_CursorOver.y = TOKEN_HEIGHT * (event.motion.y / TOKEN_HEIGHT);
-                }
-                break;
             }
+            break;
+
+            // mouvement de souris
+            case SDL_MOUSEMOTION:{
+
+                //fprintf(stdout,"Coordonnees de la souris : ( %d , %d )\n", event.motion.x, event.motion.y);
+
+                position_CursorOver.x = TOKEN_WIDTH * (event.motion.x / TOKEN_WIDTH);
+                position_CursorOver.y = TOKEN_HEIGHT * (event.motion.y / TOKEN_HEIGHT);
+            }
+            break;
         }
 
         /* logique */
-        if ( IsTokenMoving(grid1) == false ){
-
-            if( IsLigneOnGrid(grid1) == true){
-
-                // détruit les lignes et remplie les cases manquantes du tableau
-                fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
-
-                // regroupe tout les jetons
-                RegroupTokens(grid1, DOWN);
-
-                while( IsTokenOfType(grid1, NONE ) == true ){
-
-                    // remplie les espaces vides
-                    InjectLigne(grid1, UP);
-
-                    // regroupe tout les jetons
-                    RegroupTokens(grid1, DOWN);
-                }
-            }
-        }
-
-        /* animations */
-        AnimTokens(grid1);
 
         /* affichage */
         SDL_RenderClear(pRenderer);                                                 // efface tout le contenu du renderer
@@ -176,13 +179,6 @@ int main(int argc, char* argv[]){
         DrawGrid(grid1,pRenderer,pSurface_Token);                                   // déssine la grille sur le renderer
 
         SDL_RenderPresent(pRenderer);                                               // déssine le renderer à l'écran
-
-        /* gestion de la fréquence d'affichage ( pour les animations )*/
-        int frameEnd = SDL_GetTicks();
-        if ( frameEnd - frameStart < 1000 / FRAME_PER_SECOND ){
-
-            SDL_Delay( (1000 / FRAME_PER_SECOND) - (frameEnd - frameStart) );
-        }
     }
 
     /* fin du programme */
