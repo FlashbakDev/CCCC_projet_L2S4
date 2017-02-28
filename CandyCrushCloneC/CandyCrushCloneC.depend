@@ -1,6 +1,7 @@
 # depslib dependency file v1.0
-1488242763 source:e:\c\cccc_projet_l2s4\candycrushclonec\main.c
+1488244028 source:e:\c\cccc_projet_l2s4\candycrushclonec\main.c
 	<stdio.h>
+	<math.h>
 	"constants.h"
 	"game.h"
 	"files.h"
@@ -340,7 +341,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1488239937 source:e:\c\cccc_projet_l2s4\candycrushclonec\game.c
+1488244116 source:e:\c\cccc_projet_l2s4\candycrushclonec\game.c
 	"game.h"
 	<stdlib.h>
 	<stdio.h>

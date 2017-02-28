@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 #include "constants.h"
 #include "game.h"
@@ -32,6 +33,9 @@ int main(int argc, char* argv[]){
     SDL_Texture *pTexture_CursorOver = SDL_CreateTextureFromSurface(pRenderer,pSurface_Cursor);
     SDL_Rect position_CursorOver;
     SDL_QueryTexture(pTexture_CursorOver, NULL, NULL, &position_CursorOver.w, &position_CursorOver.h);
+
+    SDL_Point dragStart, dragEnd;
+    bool dragAndDrop = false;
 
     // gestionnaire d'évènement
     SDL_Event event;
@@ -69,6 +73,11 @@ int main(int argc, char* argv[]){
                     case SDL_BUTTON_LEFT:{
 
                         fprintf(stdout,"Bouton de la souris gauche appuiye.\n");
+
+                        dragStart.x = (event.motion.x / TOKEN_WIDTH);
+                        dragStart.y = (event.motion.y / TOKEN_HEIGHT);
+
+                        dragAndDrop = true;
                     }
                     break;
                 }
@@ -82,6 +91,25 @@ int main(int argc, char* argv[]){
                     case SDL_BUTTON_LEFT:{
 
                         fprintf(stdout,"Bouton de la souris gauche relache.\n");
+
+                        dragEnd.x = (event.motion.x / TOKEN_WIDTH);
+                        dragEnd.y = (event.motion.y / TOKEN_HEIGHT);
+
+                        fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
+
+                        if ( sqrt( pow( dragEnd.x - dragStart.x, 2) ) >= 0 && sqrt( pow( dragEnd.x - dragStart.x, 2) ) <= 1 &&
+                             sqrt( pow( dragEnd.y - dragStart.y, 2) ) >= 0 && sqrt( pow( dragEnd.y - dragStart.y, 2) ) <= 1 ){
+
+                             Colors colorTmp = grid1->tokens[dragEnd.x][dragEnd.y].color;
+
+                            //fprintf(stdout,"changement de couleur du jeton d'arrive ( %d, %d, %d", dragEnd.x, dragEnd.y, grid1->tokens[dragEnd.y][dragEnd.x].color );
+                            grid1->tokens[dragEnd.x][dragEnd.y].color = grid1->tokens[dragStart.x][dragStart.y].color;
+                            //fprintf(stdout," -> %d)\n", grid1->tokens[dragEnd.x][dragEnd.y].color );
+
+                            grid1->tokens[dragStart.x][dragStart.y].color = colorTmp;
+                        }
+
+                        dragAndDrop = false;
                     }
                     break;
                 }
@@ -91,7 +119,7 @@ int main(int argc, char* argv[]){
             // mouvement de souris
             case SDL_MOUSEMOTION:{
 
-                fprintf(stdout,"Coordonnees de la souris : ( %d , %d )\n", event.motion.x, event.motion.y);
+                //fprintf(stdout,"Coordonnees de la souris : ( %d , %d )\n", event.motion.x, event.motion.y);
 
                 position_CursorOver.x = TOKEN_WIDTH * (event.motion.x / TOKEN_WIDTH);
                 position_CursorOver.y = TOKEN_HEIGHT * (event.motion.y / TOKEN_HEIGHT);

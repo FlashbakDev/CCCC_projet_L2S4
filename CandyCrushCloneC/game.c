@@ -76,21 +76,24 @@ void CheckGrid(Grid *pGrid){
 
             pGrid->tokens[i][j].aligned = false;
 
-            // vérification verticale
-            if ( i > 0 && i < pGrid->height - 1){
+            if ( pGrid->tokens[i][j].type == TOKEN ){
 
-                if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
+                // vérification verticale
+                if ( i > 0 && i < pGrid->height - 1){
 
-                    pGrid->tokens[i][j].aligned = true;
+                    if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
+
+                        pGrid->tokens[i][j].aligned = true;
+                    }
                 }
-            }
 
-            // vérification horizontale
-            if ( j > 0 && j < pGrid->width - 1){
+                // vérification horizontale
+                if ( j > 0 && j < pGrid->width - 1){
 
-                if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
+                    if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
 
-                    pGrid->tokens[i][j].aligned = true;
+                        pGrid->tokens[i][j].aligned = true;
+                    }
                 }
             }
         }
