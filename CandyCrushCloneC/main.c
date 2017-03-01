@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
     SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 0 ); // pour faire déssiner en blanc
 
     // curseur
-    SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver.png");
+    SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver_blue.png");
     SDL_Texture *pTexture_CursorOver = SDL_CreateTextureFromSurface(pRenderer,pSurface_Cursor);
     SDL_Rect position_CursorOver;
     SDL_QueryTexture(pTexture_CursorOver, NULL, NULL, &position_CursorOver.w, &position_CursorOver.h);
