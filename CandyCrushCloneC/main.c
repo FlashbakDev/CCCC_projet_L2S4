@@ -83,7 +83,7 @@ int main(int argc, char* argv[]){
                                 dragStart.x = (event.motion.x / TOKEN_WIDTH);
                                 dragStart.y = (event.motion.y / TOKEN_HEIGHT);
 
-                                dragAndDrop = grid1->tokens[dragStart.x][dragStart.y].type != NONE;
+                                dragAndDrop = grid1->tokens[dragStart.y][dragStart.x].type != NONE;
                             }
                         }
                         break;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]){
 
                             int posX = (event.motion.x / TOKEN_WIDTH);
                             int posY = (event.motion.y / TOKEN_HEIGHT);
-                            fprintf(stdout,"Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",posX, posY, grid1->tokens[posX][posY].color, grid1->tokens[posX][posY].type,grid1->tokens[posX][posY].aligned);
+                            fprintf(stdout,"Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",posX, posY, grid1->tokens[posY][posX].color, grid1->tokens[posY][posX].type,grid1->tokens[posY][posX].aligned);
                         }
                         break;
                     }
@@ -155,6 +155,8 @@ int main(int argc, char* argv[]){
                 // regroupe tout les jetons
                 RegroupTokens(grid1, DOWN);
 
+                fprintf(stdout,"Injections de jetons pour completer la grille...");
+
                 while( IsTokenOfType(grid1, NONE ) == true ){
 
                     // remplie les espaces vides
@@ -163,6 +165,8 @@ int main(int argc, char* argv[]){
                     // regroupe tout les jetons
                     RegroupTokens(grid1, DOWN);
                 }
+
+                fprintf(stdout,"Grille remplie !");
             }
         }
 

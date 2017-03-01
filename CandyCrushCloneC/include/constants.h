@@ -28,7 +28,7 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #define TOKEN_WIDTH         64
     #define TOKEN_HEIGHT        64
     #define FRAME_PER_SECOND    60
-    #define FALL_SPEED          5
+    #define FALL_SPEED          6
 
     typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
