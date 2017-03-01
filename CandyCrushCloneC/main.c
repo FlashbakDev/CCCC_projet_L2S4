@@ -78,7 +78,7 @@ int main(int argc, char* argv[]){
                         // bouton gauche
                         case SDL_BUTTON_LEFT:{
 
-                            if ( IsTokenMoving(grid1) == false ){
+                            if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false ){
 
                                 dragStart.x = (event.motion.x / TOKEN_WIDTH);
                                 dragStart.y = (event.motion.y / TOKEN_HEIGHT);
@@ -93,7 +93,10 @@ int main(int argc, char* argv[]){
 
                             int posX = (event.motion.x / TOKEN_WIDTH);
                             int posY = (event.motion.y / TOKEN_HEIGHT);
-                            fprintf(stdout,"Jeton en posisition (%d,%d) : Couleur = %d, type = %d, aligne = %d.\n",posX, posY, grid1->tokens[posY][posX].color, grid1->tokens[posY][posX].type,grid1->tokens[posY][posX].aligned);
+
+                            fprintf(stdout,"Jeton en posisition (%d,%d) : ",posX, posY);
+                            DebugToken(grid1->tokens[posY][posX]);
+                            fprintf(stdout,"\n");
                         }
                         break;
                     }
@@ -118,11 +121,11 @@ int main(int argc, char* argv[]){
 
                                 if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                                    PermuteToken(grid1, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
+                                    HardPermuteToken(grid1, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
 
                                     if ( IsLigneOnGrid(grid1) == false ){
 
-                                        PermuteToken(grid1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
+                                        HardPermuteToken(grid1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
                                     }
                                 }
 
@@ -139,39 +142,52 @@ int main(int argc, char* argv[]){
 
                     position_CursorOver.x = TOKEN_WIDTH * (event.motion.x / TOKEN_WIDTH);
                     position_CursorOver.y = TOKEN_HEIGHT * (event.motion.y / TOKEN_HEIGHT);
+
+                    if ( dragAndDrop == true ){
+
+                        int distX = sqrt( pow( position_CursorOver.x - dragStart.x, 2) );
+                        int distY = sqrt( pow( position_CursorOver.y - dragStart.y, 2) );
+
+                        if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
+
+                            /*Colors tmp = grid1->tokens[dragStart.y][dragStart.x].color;
+                            grid1->tokens[dragStart.y][dragStart.x].color = grid1->tokens[position_CursorOver.y][position_CursorOver.x].color;
+                            grid1->tokens[position_CursorOver.y][position_CursorOver.x].color = tmp;*/
+                        }
+                    }
                 }
                 break;
             }
         }
 
         /* logique */
-        if ( IsTokenMoving(grid1) == false ){
+        if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false){
 
-            if( IsLigneOnGrid(grid1) == true){
+            if( IsLigneOnGrid(grid1) == true ){
 
                 // détruit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
-
-                // regroupe tout les jetons
-                RegroupTokens(grid1, DOWN);
-
-                fprintf(stdout,"Injections de jetons pour completer la grille...");
+            }
+            else {
 
                 while( IsTokenOfType(grid1, NONE ) == true ){
 
-                    // remplie les espaces vides
-                    InjectLigne(grid1, UP);
-
                     // regroupe tout les jetons
                     RegroupTokens(grid1, DOWN);
-                }
 
-                fprintf(stdout,"Grille remplie !");
+                    // remplie les espaces vides
+                    InjectLigne(grid1, UP);
+                }
             }
+
+            //fprintf(stdout,"Grille remplie !");
         }
 
         /* animations */
-        AnimTokens(grid1);
+        if ( IsTokenDestructing(grid1) == false )
+            AnimMovingTokens(grid1);
+        else
+            AnimDestructingTokens(grid1);
 
         /* affichage */
         SDL_RenderClear(pRenderer);                                                 // efface tout le contenu du renderer

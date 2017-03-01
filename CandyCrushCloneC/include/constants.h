@@ -28,7 +28,8 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #define TOKEN_WIDTH         64
     #define TOKEN_HEIGHT        64
     #define FRAME_PER_SECOND    60
-    #define FALL_SPEED          6
+    #define FALL_SPEED          6       // en pixel par frame
+    #define DESTRUCT_SPEED      1200    // en ms ( pour aller de 100% à 0% de taille de texture )
 
     typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
@@ -44,10 +45,13 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
         Colors color;
         bool aligned;
 
-        //SDL_Texture texture;
-        SDL_Rect texturePosition;
+        SDL_Rect rect_texture;
+        int textureSize;
 
+        // animations
         bool isMoving;
+        bool isDestruct;
+        int startDestructAnim;
 
     }Token;
 

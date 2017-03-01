@@ -32,6 +32,9 @@ bool IsTokenOfType(Grid *pGrid, TokenTypes type);
 /* indique si une animation d'un jeton en train de se déplacer est en cours */
 bool IsTokenMoving(Grid *pGrid);
 
+/* indique si un jeton a une animation de destruction en cours */
+bool IsTokenDestructing(Grid *pGrid);
+
 /* renvoie le jeton le plus haut de la colonne donné ( pour les animations... ) */
 Token *GetColumnUpperToken(Grid *pGrid,int x);
 
@@ -50,10 +53,22 @@ void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[
 /* permute 2 jetons */
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 
+/* permute 2 jetons et place leurs texture au bon endroit */
+void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
+
 /* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
 void InitRandomToken(Token *token, int nbColor, int x, int y);
 
 /* anime les mouvements des jetons */
-void AnimTokens(Grid *pGrid);
+void AnimMovingTokens(Grid *pGrid);
+
+/* anime les déstructions des jetons */
+void AnimDestructingTokens(Grid *pGrid);
+
+/* affiche les informations d'un jeton donné en console */
+void DebugToken(Token token);
+
+/* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
+void CalculTokenRectTexure(Token *token, int x, int y);
 
 #endif // GAME_H_INCLUDED
