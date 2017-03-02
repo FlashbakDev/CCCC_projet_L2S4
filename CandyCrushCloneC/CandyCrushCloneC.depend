@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1488404517 source:e:\c\cccc_projet_l2s4\candycrushclonec\main.c
+1488488302 source:e:\c\cccc_projet_l2s4\candycrushclonec\main.c
 	"constants.h"
 	"game.h"
 
@@ -337,20 +337,21 @@
 	"begin_code.h"
 	"close_code.h"
 
-1488404784 source:e:\c\cccc_projet_l2s4\candycrushclonec\game.c
+1488486699 source:e:\c\cccc_projet_l2s4\candycrushclonec\game.c
 	"game.h"
 
-1488404835 e:\c\cccc_projet_l2s4\candycrushclonec\include\constants.h
+1488486871 e:\c\cccc_projet_l2s4\candycrushclonec\include\constants.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_mixer.h>
+	<SDL2/SDL_ttf.h>
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
 	<time.h>
 	"stdbool.h"
 
-1488404101 e:\c\cccc_projet_l2s4\candycrushclonec\include\game.h
+1488486699 e:\c\cccc_projet_l2s4\candycrushclonec\include\game.h
 	"constants.h"
 
 1487963562 source:e:\c\cccc_projet_l2s4\candycrushclonec\editor.c
@@ -360,4 +361,9 @@
 1487963562 e:\c\cccc_projet_l2s4\candycrushclonec\include\files.h
 
 1487963562 e:\c\cccc_projet_l2s4\candycrushclonec\include\editor.h
+
+1454362933 e:\c\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_ttf.h
+	"SDL.h"
+	"begin_code.h"
+	"close_code.h"
 

@@ -15,6 +15,7 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #include <SDL2/SDL.h>
     #include <SDL2/SDL_image.h>
     #include <SDL2/SDL_mixer.h>
+    #include <SDL2/SDL_ttf.h>
 
     #include <stdio.h>
     #include <math.h>

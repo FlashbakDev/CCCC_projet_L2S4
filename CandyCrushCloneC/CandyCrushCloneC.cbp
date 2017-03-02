@@ -40,6 +40,7 @@
 			<Add library="libSDL2.dll.a" />
 			<Add library="libSDL2_image.a" />
 			<Add library="libSDL2_mixer.a" />
+			<Add library="libSDL2_ttf.a" />
 			<Add directory="./lib" />
 		</Linker>
 		<Unit filename="editor.c">

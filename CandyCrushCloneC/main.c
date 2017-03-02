@@ -6,6 +6,7 @@ int main(int argc, char* argv[]){
     /* Initialisation */
 
     SDL_Init(SDL_INIT_VIDEO);
+    TTF_Init();
     SDL_Window* pWindow = NULL;
     pWindow = SDL_CreateWindow("Candy Crush Clone C",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,WINDOW_WIDTH,WINDOW_HEIGHT,SDL_WINDOW_SHOWN);
     // void SDL_SetWindowIcon(SDL_Window*  window , SDL_Surface* icon); //ajoute une icône à la fenêtre
@@ -15,6 +16,7 @@ int main(int argc, char* argv[]){
     int gridWidth = 10;
     int nbMove = 20;
     int nbColor = 5;
+    int score = 0;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
     SDL_SetWindowSize(pWindow,grid1->width * TOKEN_WIDTH, grid1->height * TOKEN_HEIGHT);
@@ -39,6 +41,11 @@ int main(int argc, char* argv[]){
     pSurface_Token[2] = IMG_Load("./data/Token_green.png");
     pSurface_Token[3] = IMG_Load("./data/Token_yellow.png");
     pSurface_Token[4] = IMG_Load("./data/Token_purple.png");
+
+    // texte, source -> http://gigi.nullneuron.net/gigilabs/displaying-text-in-sdl2-with-sdl_ttf/
+    TTF_Font *pFont = TTF_OpenFont("data/fonts/arial.ttf", 25);
+    SDL_Color color_texte = { 0, 0, 0 };
+    SDL_Surface *pSurface_texte = TTF_RenderText_Solid(pFont, "Score : 0", color_texte);
 
     // gestionnaire d'évènement
     SDL_Event event;
@@ -165,6 +172,15 @@ int main(int argc, char* argv[]){
 
             if( IsLigneOnGrid(grid1) == true ){
 
+                // score
+                score ++;
+
+                /* libération de l'encien texte et déclaration du nouveau */
+                SDL_FreeSurface(pSurface_texte);
+                char tmp[] = "";
+                sprintf(tmp,"Score : %d",score);
+                pSurface_texte = TTF_RenderText_Solid(pFont,tmp,color_texte);
+
                 // détruit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
             }
@@ -183,19 +199,24 @@ int main(int argc, char* argv[]){
             //fprintf(stdout,"Grille remplie !");
         }
 
-        /* animations */
+        /* animations - textes */
         if ( IsTokenDestructing(grid1) == false )
             AnimMovingTokens(grid1);
         else
             AnimDestructingTokens(grid1);
 
         /* affichage */
-        SDL_RenderClear(pRenderer);                                                 // efface tout le contenu du renderer
+        SDL_RenderClear(pRenderer);                                                             // efface tout le contenu du renderer
 
-        SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&position_CursorOver);    // pour le curseur de la souris
-        DrawGrid(grid1,pRenderer,pSurface_Token);                                   // déssine la grille sur le renderer
+        SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&position_CursorOver);                // pour le curseur de la souris
+        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // déssine la grille sur le renderer
 
-        SDL_RenderPresent(pRenderer);                                               // déssine le renderer à l'écran
+        SDL_Texture *pTexture_texte = SDL_CreateTextureFromSurface(pRenderer, pSurface_texte);  // crée une texture avec le texte
+        SDL_Rect rect_texte = {10,10,0,0};
+        SDL_QueryTexture(pTexture_texte,NULL,NULL,&rect_texte.w,&rect_texte.h);
+        SDL_RenderCopy(pRenderer, pTexture_texte, NULL, &rect_texte);                           // déssine le texte sur le renderer
+
+        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
         /* gestion de la fréquence d'affichage ( pour les animations )*/
         int frameEnd = SDL_GetTicks();
@@ -209,6 +230,8 @@ int main(int argc, char* argv[]){
 
     SDL_DestroyRenderer(pRenderer);
     SDL_DestroyWindow(pWindow);
+    TTF_CloseFont(pFont);
+    TTF_Quit();
     SDL_Quit();
 
     return 0;
