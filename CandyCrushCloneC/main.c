@@ -34,6 +34,8 @@ int main(int argc, char* argv[]){
     SDL_Point dragStart, dragEnd;
     bool dragAndDrop = false;
 
+    SDL_Point Pos_Cursor;
+
     // textures
     SDL_Surface *pSurface_Token[5];
     pSurface_Token[0] = IMG_Load("./data/Token_red.png");
@@ -73,6 +75,50 @@ int main(int argc, char* argv[]){
                             loop = false;
                         }
                         break;
+
+
+                        /*Commandes de modifications d'un token*/
+
+                        //Nombres de 1 à 5
+
+                        case SDLK_1 :
+                                if(nbColor >=1)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 0;
+                                break;
+
+                        case SDLK_2 :
+                                if(nbColor >=2)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 1;
+                                break;
+
+                        case SDLK_3 :
+                                if(nbColor >=3)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 2;
+                                break;
+
+                        case SDLK_4 :
+                                if(nbColor >=4)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 3;
+                                break;
+                         case SDLK_5 :
+                                if(nbColor >=5)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 4;
+                                break;
+
+                        //Augmentation de valeur, +/- clavier numerique
+
+                        case SDLK_KP_PLUS :
+                                if(grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color == nbColor-1)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 0;
+                                else grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color++;
+                                break;
+
+                        case SDLK_KP_MINUS :
+                                if(grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color == 0)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= nbColor-1;
+                                else grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color--;
+                                break;
+
                     }
                 }
                 break;
@@ -150,6 +196,8 @@ int main(int argc, char* argv[]){
                     position_CursorOver.x = TOKEN_WIDTH * (event.motion.x / TOKEN_WIDTH);
                     position_CursorOver.y = TOKEN_HEIGHT * (event.motion.y / TOKEN_HEIGHT);
 
+                      Pos_Cursor.x = position_CursorOver.x;
+                    Pos_Cursor.y=position_CursorOver.y;
                     if ( dragAndDrop == true ){
 
                         int distX = sqrt( pow( position_CursorOver.x - dragStart.x, 2) );
@@ -173,7 +221,7 @@ int main(int argc, char* argv[]){
             if( IsLigneOnGrid(grid1) == true ){
 
                 // score
-                score ++;
+                score += Calc_Score(grid1);
 
                 /* libération de l'encien texte et déclaration du nouveau */
                 SDL_FreeSurface(pSurface_texte);
