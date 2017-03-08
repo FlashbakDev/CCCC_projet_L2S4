@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
     int gridHeight = 10;
     int gridWidth = 10;
     int nbMove = 20;
-    int nbColor = 6;
+    int nbColor = 5;
     int score = 0;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
@@ -104,6 +104,11 @@ int main(int argc, char* argv[]){
                          case SDLK_5 :
                                 if(nbColor >=5)
                                     grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 4;
+                                break;
+
+                        case SDLK_6 :
+                                if(nbColor >=6)
+                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 5;
                                 break;
 
                         //Augmentation de valeur, +/- clavier numerique
