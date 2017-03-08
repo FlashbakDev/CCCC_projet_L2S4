@@ -71,4 +71,6 @@ void DebugToken(Token token);
 /* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
 void CalculTokenRectTexure(Token *token, int x, int y);
 
+
+int Calc_Score(Grid *pGrid );
 #endif // GAME_H_INCLUDED

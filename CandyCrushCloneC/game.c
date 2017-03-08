@@ -120,6 +120,102 @@ void CheckGrid(Grid *pGrid){
 
 // =========================================================
 
+int Calc_Score(Grid *pGrid ){
+
+    /* actualisation de la grille */
+    CheckGrid(pGrid);
+
+    int Score = 0;
+    int Nb_Align;
+    int Multi;
+    Colors SaveColor;
+    /* traitement au cas par cas */
+
+    //Verification des allignements horizontaux
+    for(int i = 0; i < pGrid->height; i++){
+        Nb_Align = 1;
+        SaveColor = pGrid->tokens[i][0].color;
+        for(int j = 1; j < pGrid->width; j++){
+
+            if(pGrid->tokens[i][j].color == SaveColor)
+            {
+                Nb_Align++;
+            }
+            else {
+
+                if(Nb_Align >= 3)
+                {
+
+                    Multi = 1;
+                    if(Nb_Align>=4)
+                    {
+                        Multi = 3;
+
+                        if(Nb_Align>=5)
+                        {
+                            Multi = 10;
+
+                        }
+                    }
+                    //Faire boucle en ajoutant les scores de jetons individuels
+                    //Puis multiplier par Multi
+                    Score += Multi * Score_Default * Nb_Align;
+
+                    printf("Score de la ligne : %d \n", Score);
+                }
+                Nb_Align = 1;
+                SaveColor = pGrid->tokens[i][j].color;
+            }
+
+
+
+        }
+
+    }
+    //Verification des allignements verticaux
+    for(int j = 0; j < pGrid->width; j++){
+        Nb_Align = 1;
+        SaveColor = pGrid->tokens[0][j].color;
+        for(int i = 1; i < pGrid->height; i++){
+
+            if(pGrid->tokens[i][j].color == SaveColor)
+            {
+                Nb_Align++;
+            }
+            else {
+
+                if(Nb_Align >= 3)
+                {
+
+                    Multi = 1;
+                    if(Nb_Align>=4)
+                    {
+                        Multi = 3;
+
+                        if(Nb_Align>=5)
+                        {
+                            Multi = 10;
+
+                        }
+                    }
+                    //Faire boucle en ajoutant les scores de jetons individuels
+                    //Puis multiplier par Multi
+                    Score += Multi * Score_Default * Nb_Align;
+
+                    printf("Score de la colonne : %d \n", Score);
+                }
+                Nb_Align = 1;
+                SaveColor = pGrid->tokens[i][j].color;
+            }
+        }
+    }
+    return Score;
+}
+
+
+
+//====================================================
+
 bool IsLigneOnGrid(Grid *pGrid){
 
     CheckGrid(pGrid);

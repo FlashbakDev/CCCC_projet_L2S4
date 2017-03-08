@@ -32,6 +32,7 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #define FALL_SPEED          6       // en pixel par frame
     #define DESTRUCT_SPEED      1200    // en ms ( pour aller de 100% à 0% de taille de texture )
 
+    #define Score_Default 10
     typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
     typedef enum TokenTypes { NONE, TOKEN }TokenTypes;
