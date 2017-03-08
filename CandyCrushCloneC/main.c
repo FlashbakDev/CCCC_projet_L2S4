@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
     int gridHeight = 10;
     int gridWidth = 10;
     int nbMove = 20;
-    int nbColor = 5;
+    int nbColor = 6;
     int score = 0;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
@@ -37,12 +37,13 @@ int main(int argc, char* argv[]){
     SDL_Point Pos_Cursor;
 
     // textures
-    SDL_Surface *pSurface_Token[5];
+    SDL_Surface *pSurface_Token[6];
     pSurface_Token[0] = IMG_Load("./data/Token_red.png");
     pSurface_Token[1] = IMG_Load("./data/Token_blue.png");
     pSurface_Token[2] = IMG_Load("./data/Token_green.png");
     pSurface_Token[3] = IMG_Load("./data/Token_yellow.png");
     pSurface_Token[4] = IMG_Load("./data/Token_purple.png");
+    pSurface_Token[5] = IMG_Load("./data/Token_orange.png");
 
     // texte, source -> http://gigi.nullneuron.net/gigilabs/displaying-text-in-sdl2-with-sdl_ttf/
     TTF_Font *pFont = TTF_OpenFont("data/fonts/arial.ttf", 25);

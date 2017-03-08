@@ -39,7 +39,7 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
 
     typedef enum GameStates { MENU, GAME, EDITOR }GameStates;
 
-    typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE }Colors;
+    typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE }Colors;
 
     typedef struct Token{
 
