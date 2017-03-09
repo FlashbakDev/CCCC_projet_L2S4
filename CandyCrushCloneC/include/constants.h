@@ -33,4 +33,6 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... )
     #define DESTRUCT_SPEED      1200    // en ms ( pour aller de 100% à 0% de taille de texture )
     #define TOKEN_SCORE         10      // score de base par jeton détruit
 
+    #define UI_MAX_TEXT         100     // longueur du texte maximal affiché à l'écran
+
 #endif // CONSTANTS_H_INCLUDED

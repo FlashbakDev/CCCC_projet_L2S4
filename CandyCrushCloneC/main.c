@@ -1,5 +1,6 @@
 #include "constants.h"
 #include "game.h"
+#include "menu.h"
 #include "editor.h"
 #include "files.h"
 

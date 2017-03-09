@@ -1,3 +1,14 @@
+/*
+
+core.h
+-----------
+
+Par Benjamin, pour le projet CCCC le 09/03/2017.
+
+Rôle : fonctions générales du jeu, aussi bien affichage que logique.
+
+*/
+
 #ifndef CORE_H_INCLUDED
 #define CORE_H_INCLUDED
 
