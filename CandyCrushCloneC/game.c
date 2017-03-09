@@ -42,6 +42,7 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
 // =========================================================
 
+//Vieille version
 /*void RandomizeGrid(Grid *pGrid){
 
     int cpt = 0;
@@ -61,7 +62,25 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
     fprintf(stdout, "grille trouve en %d fois.\n", cpt);
 }*/
+gridHeight = 10;
+    int gridWidth = 10;
+    int nbMove = 20;
+    int nbColor = 5;
 
+void Settings(int * gridHeight, int * gridWidth, int* nbMove, int* nbColor)
+{
+
+
+
+
+}
+
+void Menu()
+{
+
+
+
+}
 
 void RandomizeGrid(Grid *pGrid){
 
@@ -74,7 +93,6 @@ void RandomizeGrid(Grid *pGrid){
         printf("init \n");
         while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
 
-        printf("netoyage");
                 DestroyAlignedTokens(pGrid);
 
                    // regroupe tout les jetons
@@ -158,18 +176,23 @@ int Calc_Score(Grid *pGrid ){
     int Score = 0;
     int Nb_Align;
     int Multi;
+    int Val = 0;
     Colors SaveColor;
+
     /* traitement au cas par cas */
 
     //Verification des allignements horizontaux
     for(int i = 0; i < pGrid->height; i++){
         Nb_Align = 1;
         SaveColor = pGrid->tokens[i][0].color;
+        Val = pGrid->tokens[i][0].Score_Token;
         for(int j = 1; j < pGrid->width; j++){
 
             if(pGrid->tokens[i][j].color == SaveColor)
             {
                 Nb_Align++;
+                Val += pGrid->tokens[i][j].Score_Token;
+
             }
             else {
 
@@ -189,12 +212,13 @@ int Calc_Score(Grid *pGrid ){
                     }
                     //Faire boucle en ajoutant les scores de jetons individuels
                     //Puis multiplier par Multi
-                    Score += Multi * SCORE_DEFAULT * Nb_Align;
+                    Score += Multi * Val;
 
                     printf("Score de la ligne : %d \n", Score);
                 }
                 Nb_Align = 1;
                 SaveColor = pGrid->tokens[i][j].color;
+                Val = pGrid->tokens[i][j].Score_Token;
             }
 
 
@@ -206,11 +230,13 @@ int Calc_Score(Grid *pGrid ){
     for(int j = 0; j < pGrid->width; j++){
         Nb_Align = 1;
         SaveColor = pGrid->tokens[0][j].color;
+         Val = pGrid->tokens[0][j].Score_Token;
         for(int i = 1; i < pGrid->height; i++){
 
             if(pGrid->tokens[i][j].color == SaveColor)
             {
                 Nb_Align++;
+                Val += pGrid->tokens[i][j].Score_Token;
             }
             else {
 
@@ -228,14 +254,13 @@ int Calc_Score(Grid *pGrid ){
 
                         }
                     }
-                    //Faire boucle en ajoutant les scores de jetons individuels
-                    //Puis multiplier par Multi
-                    Score += Multi * SCORE_DEFAULT * Nb_Align;
 
+                    Score += Multi * Val;
                     printf("Score de la colonne : %d \n", Score);
                 }
                 Nb_Align = 1;
                 SaveColor = pGrid->tokens[i][j].color;
+                 Val = pGrid->tokens[i][j].Score_Token;
             }
         }
     }

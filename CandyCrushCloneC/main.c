@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
     int gridHeight = 10;
     int gridWidth = 10;
     int nbMove = 20;
-    int nbColor = 3;
+    int nbColor = 5;
     int score = 0;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]){
 
     /* boucle de jeu */
     bool loop = true;
-    while( loop ){
+    while( nbMove>0 ){
 
         int frameStart = SDL_GetTicks();
 
@@ -73,7 +73,8 @@ int main(int argc, char* argv[]){
                         case SDLK_ESCAPE: {
 
                             fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
-                            loop = false;
+                            //loop = false;
+                            nbMove =0;
                         }
                         break;
 
@@ -186,6 +187,7 @@ int main(int argc, char* argv[]){
 
                                         HardPermuteToken(grid1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
                                     }
+                                    else nbMove--;
                                 }
 
                                 dragAndDrop = false;
@@ -232,7 +234,7 @@ int main(int argc, char* argv[]){
                 /* libération de l'encien texte et déclaration du nouveau */
                 SDL_FreeSurface(pSurface_texte);
                 char tmp[] = "";
-                sprintf(tmp,"Score : %d",score);
+                sprintf(tmp,"Score : %d \n  NbCoups : %d",score, nbMove);
                 pSurface_texte = TTF_RenderText_Solid(pFont,tmp,color_texte);
 
                 // détruit les lignes et remplie les cases manquantes du tableau
@@ -267,6 +269,8 @@ int main(int argc, char* argv[]){
 
         SDL_Texture *pTexture_texte = SDL_CreateTextureFromSurface(pRenderer, pSurface_texte);  // crée une texture avec le texte
         SDL_Rect rect_texte = {10,10,0,0};
+
+
         SDL_QueryTexture(pTexture_texte,NULL,NULL,&rect_texte.w,&rect_texte.h);
         SDL_RenderCopy(pRenderer, pTexture_texte, NULL, &rect_texte);                           // déssine le texte sur le renderer
 
@@ -279,6 +283,10 @@ int main(int argc, char* argv[]){
             SDL_Delay( (1000 / FRAME_PER_SECOND) - (frameEnd - frameStart) );
         }
     }
+
+
+    printf("\n\n Score Total : %d", score);
+
 
     /* fin du programme */
 
