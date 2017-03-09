@@ -27,6 +27,7 @@ typedef struct Token{
     TokenTypes type;
     Colors color;
     bool aligned;
+    int score;
 
     SDL_Rect rect_texture;
     int textureSize;

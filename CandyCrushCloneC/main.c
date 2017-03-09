@@ -220,7 +220,7 @@ int main(int argc, char* argv[]){
                 /* libération de l'encien texte et déclaration du nouveau */
                 SDL_FreeSurface(pSurface_texte);
                 char tmp[] = "";
-                sprintf(tmp,"Score : %d \n  NbCoups : %d",score, nbMove);
+                sprintf(tmp,"Score : %d | NbCoups : %d",score, nbMove);
                 pSurface_texte = TTF_RenderText_Solid(pFont,tmp,color_texte);
 
                 // détruit les lignes et remplie les cases manquantes du tableau

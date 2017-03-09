@@ -24,8 +24,8 @@ typedef struct UI_Toggle{
     SDL_Rect rect;
     bool selected;
 
-    SDL_Texture texture_normal;
-    SDL_Texture texture_selected;
+    SDL_Texture *texture_normal;
+    SDL_Texture *texture_selected;
     SDL_Window *window;
 
 }UI_Toggle;
@@ -40,11 +40,11 @@ typedef struct UI_Button{
     bool active;
     bool highlight;
     SDL_Color color_text;
-    TTF_Font font;
+    TTF_Font *font;
 
-    SDL_Texture texture_normal;
-    SDL_Texture texture_active;
-    SDL_Texture texture_highlight;
+    SDL_Texture *texture_normal;
+    SDL_Texture *texture_active;
+    SDL_Texture *texture_highlight;
     SDL_Window *window;
 
 }UI_Button;
