@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
     int gridHeight = 10;
     int gridWidth = 10;
     int nbMove = 20;
-    int nbColor = 5;
+    int nbColor = 3;
     int score = 0;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);

@@ -42,7 +42,7 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
 // =========================================================
 
-void RandomizeGrid(Grid *pGrid){
+/*void RandomizeGrid(Grid *pGrid){
 
     int cpt = 0;
 
@@ -60,7 +60,35 @@ void RandomizeGrid(Grid *pGrid){
     }while(IsLigneOnGrid(pGrid) == true );
 
     fprintf(stdout, "grille trouve en %d fois.\n", cpt);
+}*/
+
+
+void RandomizeGrid(Grid *pGrid){
+
+ for(int i = 0; i < pGrid->height; i++){
+            for(int j = 0; j < pGrid->width; j++){
+
+                InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, j, i);
+            }
+        }
+        printf("init \n");
+        while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
+
+        printf("netoyage");
+                DestroyAlignedTokens(pGrid);
+
+                   // regroupe tout les jetons
+                RegroupTokens(pGrid, DOWN);
+
+                    // remplie les espaces vides
+                InjectLigne(pGrid, UP);
+
+        }
+
+
+
 }
+
 
 // =========================================================
 
@@ -74,6 +102,8 @@ void InitRandomToken(Token *token, int nbColor, int x, int y){
 
     token->textureSize = 100;
     CalculTokenRectTexure(token,x,y);
+
+    token->Score_Token = SCORE_DEFAULT;
 }
 
 // =========================================================
@@ -159,7 +189,7 @@ int Calc_Score(Grid *pGrid ){
                     }
                     //Faire boucle en ajoutant les scores de jetons individuels
                     //Puis multiplier par Multi
-                    Score += Multi * Score_Default * Nb_Align;
+                    Score += Multi * SCORE_DEFAULT * Nb_Align;
 
                     printf("Score de la ligne : %d \n", Score);
                 }
@@ -200,7 +230,7 @@ int Calc_Score(Grid *pGrid ){
                     }
                     //Faire boucle en ajoutant les scores de jetons individuels
                     //Puis multiplier par Multi
-                    Score += Multi * Score_Default * Nb_Align;
+                    Score += Multi * SCORE_DEFAULT * Nb_Align;
 
                     printf("Score de la colonne : %d \n", Score);
                 }
