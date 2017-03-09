@@ -1,21 +1,18 @@
 #include "constants.h"
 #include "game.h"
+#include "editor.h"
+#include "files.h"
 
 int main(int argc, char* argv[]){
 
     /* Initialisation */
-
-    SDL_Init(SDL_INIT_VIDEO);
-    TTF_Init();
-    SDL_Window* pWindow = NULL;
-    pWindow = SDL_CreateWindow("Candy Crush Clone C",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,WINDOW_WIDTH,WINDOW_HEIGHT,SDL_WINDOW_SHOWN);
-    // void SDL_SetWindowIcon(SDL_Window*  window , SDL_Surface* icon); //ajoute une icône à la fenêtre
+    SDL_Window *pWindow = InitSDL("Candy Crush Clone C");
 
     /* initialisation du jeu */
     int gridHeight = 10;
     int gridWidth = 10;
     int nbMove = 20;
-    int nbColor = 6;
+    int nbColor = 5;
     int score = 0;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
@@ -34,7 +31,7 @@ int main(int argc, char* argv[]){
     SDL_Point dragStart, dragEnd;
     bool dragAndDrop = false;
 
-    SDL_Point Pos_Cursor;
+    SDL_Point cursorTokenPosition;
 
     // textures
     SDL_Surface *pSurface_Token[6];
@@ -82,43 +79,43 @@ int main(int argc, char* argv[]){
 
                         //Nombres de 1 à 5
 
-                        case SDLK_1 :
+                        /*case SDLK_1 :
                                 if(nbColor >=1)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 0;
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 0;
                                 break;
 
                         case SDLK_2 :
                                 if(nbColor >=2)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 1;
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 1;
                                 break;
 
                         case SDLK_3 :
                                 if(nbColor >=3)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 2;
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 2;
                                 break;
 
                         case SDLK_4 :
                                 if(nbColor >=4)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 3;
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 3;
                                 break;
                          case SDLK_5 :
                                 if(nbColor >=5)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 4;
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 4;
                                 break;
 
                         //Augmentation de valeur, +/- clavier numerique
 
                         case SDLK_KP_PLUS :
-                                if(grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color == nbColor-1)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 0;
-                                else grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color++;
+                                if(grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color == nbColor-1)
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 0;
+                                else grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color++;
                                 break;
 
                         case SDLK_KP_MINUS :
-                                if(grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color == 0)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= nbColor-1;
-                                else grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color--;
-                                break;
+                                if(grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color == 0)
+                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= nbColor-1;
+                                else grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color--;
+                                break;*/
 
                     }
                 }
@@ -134,8 +131,8 @@ int main(int argc, char* argv[]){
 
                             if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false ){
 
-                                dragStart.x = (event.motion.x / TOKEN_WIDTH);
-                                dragStart.y = (event.motion.y / TOKEN_HEIGHT);
+                                dragStart.x = cursorTokenPosition.x;
+                                dragStart.y = cursorTokenPosition.y;
 
                                 dragAndDrop = grid1->tokens[dragStart.y][dragStart.x].type != NONE;
                             }
@@ -165,8 +162,8 @@ int main(int argc, char* argv[]){
 
                             if ( dragAndDrop == true ){
 
-                                dragEnd.x = (event.motion.x / TOKEN_WIDTH);
-                                dragEnd.y = (event.motion.y / TOKEN_HEIGHT);
+                                dragEnd.x = cursorTokenPosition.x;
+                                dragEnd.y = cursorTokenPosition.y;
 
                                 fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
 
@@ -194,23 +191,11 @@ int main(int argc, char* argv[]){
                 // mouvement de souris
                 case SDL_MOUSEMOTION:{
 
-                    position_CursorOver.x = TOKEN_WIDTH * (event.motion.x / TOKEN_WIDTH);
-                    position_CursorOver.y = TOKEN_HEIGHT * (event.motion.y / TOKEN_HEIGHT);
+                    cursorTokenPosition.x = (event.motion.x / TOKEN_WIDTH);
+                    cursorTokenPosition.y = (event.motion.y / TOKEN_HEIGHT);
 
-                      Pos_Cursor.x = position_CursorOver.x;
-                    Pos_Cursor.y=position_CursorOver.y;
-                    if ( dragAndDrop == true ){
-
-                        int distX = sqrt( pow( position_CursorOver.x - dragStart.x, 2) );
-                        int distY = sqrt( pow( position_CursorOver.y - dragStart.y, 2) );
-
-                        if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
-
-                            /*Colors tmp = grid1->tokens[dragStart.y][dragStart.x].color;
-                            grid1->tokens[dragStart.y][dragStart.x].color = grid1->tokens[position_CursorOver.y][position_CursorOver.x].color;
-                            grid1->tokens[position_CursorOver.y][position_CursorOver.x].color = tmp;*/
-                        }
-                    }
+                    position_CursorOver.x = cursorTokenPosition.x * TOKEN_WIDTH;
+                    position_CursorOver.y = cursorTokenPosition.y * TOKEN_HEIGHT;
                 }
                 break;
             }

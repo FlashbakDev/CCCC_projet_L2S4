@@ -12,6 +12,7 @@ Rôle : fonctions gérants une partie de CCCC.
 #ifndef GAME_H_INCLUDED
 #define GAME_H_INCLUDED
 
+#include "core.h"
 #include "constants.h"
 
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
@@ -47,14 +48,8 @@ void RegroupTokens(Grid *pGrid, Directions dir);
 /* insère de nouveaux jetons aléatoirement */
 void InjectLigne(Grid *pGrid, Directions dir);
 
-/* affiche la grille */
-void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[5]);
-
 /* permute 2 jetons */
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
-
-/* permute 2 jetons et place leurs texture au bon endroit */
-void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 
 /* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
 void InitRandomToken(Token *token, int nbColor, int x, int y);
@@ -64,13 +59,6 @@ void AnimMovingTokens(Grid *pGrid);
 
 /* anime les déstructions des jetons */
 void AnimDestructingTokens(Grid *pGrid);
-
-/* affiche les informations d'un jeton donné en console */
-void DebugToken(Token token);
-
-/* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
-void CalculTokenRectTexure(Token *token, int x, int y);
-
 
 int Calc_Score(Grid *pGrid );
 #endif // GAME_H_INCLUDED
