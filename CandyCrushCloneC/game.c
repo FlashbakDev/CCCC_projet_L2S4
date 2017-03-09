@@ -4,7 +4,7 @@
 
 Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
-    /* aléatoire */
+    /* alÃ©atoire */
     srand(time(NULL));
 
     Grid *pGrid = malloc(sizeof(Grid));
@@ -23,7 +23,7 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
         pGrid->tokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
 
-        /* désallocation de la mémoire en cas d'erreur */
+        /* dÃ©sallocation de la mÃ©moire en cas d'erreur */
         if ( pGrid->tokens[i] == NULL ){
 
             for(i=i-1 ; i >= 0 ; i--){
@@ -42,7 +42,8 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
 // =========================================================
 
-void RandomizeGrid(Grid *pGrid){
+//Vieille version
+/*void RandomizeGrid(Grid *pGrid){
 
     int cpt = 0;
 
@@ -60,7 +61,52 @@ void RandomizeGrid(Grid *pGrid){
     }while(IsLigneOnGrid(pGrid) == true );
 
     fprintf(stdout, "grille trouve en %d fois.\n", cpt);
+}*/
+gridHeight = 10;
+    int gridWidth = 10;
+    int nbMove = 20;
+    int nbColor = 5;
+
+void Settings(int * gridHeight, int * gridWidth, int* nbMove, int* nbColor)
+{
+
+
+
+
 }
+
+void Menu()
+{
+
+
+
+}
+
+void RandomizeGrid(Grid *pGrid){
+
+ for(int i = 0; i < pGrid->height; i++){
+            for(int j = 0; j < pGrid->width; j++){
+
+                InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, j, i);
+            }
+        }
+        printf("init \n");
+        while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
+
+                DestroyAlignedTokens(pGrid);
+
+                   // regroupe tout les jetons
+                RegroupTokens(pGrid, DOWN);
+
+                    // remplie les espaces vides
+                InjectLigne(pGrid, UP);
+
+        }
+
+
+
+}
+
 
 // =========================================================
 
@@ -74,6 +120,8 @@ void InitRandomToken(Token *token, int nbColor, int x, int y){
 
     token->textureSize = 100;
     CalculTokenRectTexure(token,x,y);
+
+    token->Score_Token = SCORE_DEFAULT;
 }
 
 // =========================================================
@@ -92,7 +140,7 @@ void CheckGrid(Grid *pGrid){
 
             if ( pGrid->tokens[i][j].type != NONE ){
 
-                // vérification verticale
+                // vÃ©rification verticale
                 if ( i > 0 && i < pGrid->height - 1){
 
                     if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
@@ -103,7 +151,7 @@ void CheckGrid(Grid *pGrid){
                     }
                 }
 
-                // vérification horizontale
+                // vÃ©rification horizontale
                 if ( j > 0 && j < pGrid->width - 1){
 
                     if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
@@ -128,18 +176,23 @@ int Calc_Score(Grid *pGrid ){
     int Score = 0;
     int Nb_Align;
     int Multi;
+    int Val = 0;
     Colors SaveColor;
+
     /* traitement au cas par cas */
 
     //Verification des allignements horizontaux
     for(int i = 0; i < pGrid->height; i++){
         Nb_Align = 1;
         SaveColor = pGrid->tokens[i][0].color;
+        Val = pGrid->tokens[i][0].Score_Token;
         for(int j = 1; j < pGrid->width; j++){
 
             if(pGrid->tokens[i][j].color == SaveColor)
             {
                 Nb_Align++;
+                Val += pGrid->tokens[i][j].Score_Token;
+
             }
             else {
 
@@ -159,12 +212,14 @@ int Calc_Score(Grid *pGrid ){
                     }
                     //Faire boucle en ajoutant les scores de jetons individuels
                     //Puis multiplier par Multi
-                    Score += Multi * TOKEN_SCORE * Nb_Align;
+
+                    Score += Multi * Val;
 
                     printf("Score de la ligne : %d \n", Score);
                 }
                 Nb_Align = 1;
                 SaveColor = pGrid->tokens[i][j].color;
+                Val = pGrid->tokens[i][j].Score_Token;
             }
 
 
@@ -176,11 +231,13 @@ int Calc_Score(Grid *pGrid ){
     for(int j = 0; j < pGrid->width; j++){
         Nb_Align = 1;
         SaveColor = pGrid->tokens[0][j].color;
+         Val = pGrid->tokens[0][j].Score_Token;
         for(int i = 1; i < pGrid->height; i++){
 
             if(pGrid->tokens[i][j].color == SaveColor)
             {
                 Nb_Align++;
+                Val += pGrid->tokens[i][j].Score_Token;
             }
             else {
 
@@ -198,14 +255,13 @@ int Calc_Score(Grid *pGrid ){
 
                         }
                     }
-                    //Faire boucle en ajoutant les scores de jetons individuels
-                    //Puis multiplier par Multi
-                    Score += Multi * TOKEN_SCORE * Nb_Align;
 
+                    Score += Multi * Val;
                     printf("Score de la colonne : %d \n", Score);
                 }
                 Nb_Align = 1;
                 SaveColor = pGrid->tokens[i][j].color;
+                 Val = pGrid->tokens[i][j].Score_Token;
             }
         }
     }
@@ -351,7 +407,7 @@ void InjectLigne(Grid *pGrid, Directions dir){
 
                     //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
 
-                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
+                    // temporairement, on hard code le fait que la ligne superieur doit Ãªtre hors champs
                     if (  ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 < 0 )
                         InitRandomToken( &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 );
                     else
