@@ -1,27 +1,53 @@
+#include "UI.h"
 #include "constants.h"
 #include "game.h"
 #include "menu.h"
 #include "editor.h"
-#include "files.h"
 
 int main(int argc, char* argv[]){
 
     /* Initialisation */
-    SDL_Window *pWindow = InitSDL("Candy Crush Clone C");
+    fprintf(stdout,"Initialisation begin : \n");
+
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
+    SDL_Event event;            // gestionnaire d'évènement
+    Array objects;
+    Window window;
+
+    UI_label label = {false};
+    UI_button button_quit = {false};
 
     /* initialisation du jeu */
     int gridHeight = 10;
     int gridWidth = 10;
-    int nbMove = 20;
-    int nbColor = 5;
-    int score = 0;
+    int nbMove = 5;
+    int nbColor = 6;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
-    SDL_SetWindowSize(pWindow,grid1->width * TOKEN_WIDTH, grid1->height * TOKEN_HEIGHT);
 
-    // renderer = canvas ( endroit où l'on va déssiner )
-    SDL_Renderer *pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 0 ); // pour faire déssiner en blanc
+    // création des zone de jeu et d'affichage
+    SDL_Rect rect_grid = { 0, 0, grid1->width * TOKEN_WIDTH, grid1->height * TOKEN_HEIGHT };
+    SDL_Rect rect_UI = { rect_grid.x + rect_grid.w, 0, 250, rect_grid.h };
+    SDL_Rect rect_screen = {0 ,
+                            0 ,
+                            (rect_grid.w + rect_grid.x > rect_UI.w + rect_UI.x ) ? rect_grid.w + rect_grid.x : rect_UI.w + rect_UI.x ,
+                            (rect_grid.h + rect_grid.y > rect_UI.h + rect_UI.y ) ? rect_grid.h + rect_grid.y : rect_UI.h + rect_UI.y } ;
+
+    Array_new(&objects);
+
+    pRenderer = InitGame("Candy Crush Clone C", &objects, rect_screen.w, rect_screen.h );
+    if ( !pRenderer )
+        return 1;
+
+    fprintf(stdout,"debug\n");
+
+    fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
+    sprintf(label.text,"Score : %d | NbCoups : %d",0, nbMove);
+    fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
+    window.visible = true;
+
+    fprintf(stdout,"Initialisation end.\n");
 
     // curseur
     SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver_blue.png");
@@ -36,24 +62,20 @@ int main(int argc, char* argv[]){
 
     // textures
     SDL_Surface *pSurface_Token[6];
-    pSurface_Token[0] = IMG_Load("./data/Token_red.png");
-    pSurface_Token[1] = IMG_Load("./data/Token_blue.png");
-    pSurface_Token[2] = IMG_Load("./data/Token_green.png");
-    pSurface_Token[3] = IMG_Load("./data/Token_yellow.png");
-    pSurface_Token[4] = IMG_Load("./data/Token_purple.png");
-    pSurface_Token[5] = IMG_Load("./data/Token_orange.png");
-
-    // texte, source -> http://gigi.nullneuron.net/gigilabs/displaying-text-in-sdl2-with-sdl_ttf/
-    TTF_Font *pFont = TTF_OpenFont("data/fonts/arial.ttf", 25);
-    SDL_Color color_texte = { 0, 0, 0 };
-    SDL_Surface *pSurface_texte = TTF_RenderText_Solid(pFont, "Score : 0", color_texte);
-
-    // gestionnaire d'évènement
-    SDL_Event event;
+    pSurface_Token[0] = IMG_Load("data/Tokens/Token_red.png");
+    pSurface_Token[1] = IMG_Load("data/Tokens/Token_blue.png");
+    pSurface_Token[2] = IMG_Load("data/Tokens/Token_green.png");
+    pSurface_Token[3] = IMG_Load("data/Tokens/Token_yellow.png");
+    pSurface_Token[4] = IMG_Load("data/Tokens/Token_purple.png");
+    pSurface_Token[5] = IMG_Load("data/Tokens/Token_orange.png");
 
     /* boucle de jeu */
+    int score = 0;
     bool loop = true;
-    while( nbMove>0 ){
+    bool draw = true; // placebo
+    bool quit = false;
+    bool cursorOnGrid = false;
+    while( loop && !quit ){
 
         int frameStart = SDL_GetTicks();
 
@@ -61,6 +83,12 @@ int main(int argc, char* argv[]){
         while( SDL_PollEvent( &event ) != 0 ){
 
             switch(event.type){
+
+                case SDL_QUIT:{
+
+                    quit = true;
+                }
+                break;
 
                 // appuie d'une touche du clavier
                 case SDL_KEYDOWN:{
@@ -75,55 +103,6 @@ int main(int argc, char* argv[]){
                             nbMove =0;
                         }
                         break;
-
-
-                        /*Commandes de modifications d'un token*/
-
-                        //Nombres de 1 à 5
-
-                        /*case SDLK_1 :
-                                if(nbColor >=1)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 0;
-                                break;
-
-                        case SDLK_2 :
-                                if(nbColor >=2)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 1;
-                                break;
-
-                        case SDLK_3 :
-                                if(nbColor >=3)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 2;
-                                break;
-
-                        case SDLK_4 :
-                                if(nbColor >=4)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 3;
-                                break;
-                         case SDLK_5 :
-                                if(nbColor >=5)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 4;
-                                break;
-
-                        case SDLK_6 :
-                                if(nbColor >=6)
-                                    grid1->tokens[Pos_Cursor.y/TOKEN_HEIGHT][Pos_Cursor.x/TOKEN_WIDTH].color= 5;
-                                break;
-
-                        //Augmentation de valeur, +/- clavier numerique
-
-                        case SDLK_KP_PLUS :
-                                if(grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color == nbColor-1)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= 0;
-                                else grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color++;
-                                break;
-
-                        case SDLK_KP_MINUS :
-                                if(grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color == 0)
-                                    grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color= nbColor-1;
-                                else grid1->tokens[cursorPosition.y/TOKEN_HEIGHT][cursorPosition.x/TOKEN_WIDTH].color--;
-                                break;*/
-
                     }
                 }
                 break;
@@ -136,7 +115,7 @@ int main(int argc, char* argv[]){
                         // bouton gauche
                         case SDL_BUTTON_LEFT:{
 
-                            if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false ){
+                            if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false && cursorOnGrid == true ){
 
                                 dragStart.x = cursorTokenPosition.x;
                                 dragStart.y = cursorTokenPosition.y;
@@ -149,12 +128,12 @@ int main(int argc, char* argv[]){
                         // click droit pour afficher les stats du jeton
                         case SDL_BUTTON_RIGHT:{
 
-                            int posX = (event.motion.x / TOKEN_WIDTH);
-                            int posY = (event.motion.y / TOKEN_HEIGHT);
+                            if ( cursorOnGrid == true ){
 
-                            fprintf(stdout,"Jeton en posisition (%d,%d) : ",posX, posY);
-                            DebugToken(grid1->tokens[posY][posX]);
-                            fprintf(stdout,"\n");
+                                fprintf(stdout,"Jeton en posisition (%d,%d) : ",cursorTokenPosition.x, cursorTokenPosition.y);
+                                DebugToken(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x]);
+                                fprintf(stdout,"\n");
+                            }
                         }
                         break;
                     }
@@ -185,7 +164,15 @@ int main(int argc, char* argv[]){
 
                                         HardPermuteToken(grid1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
                                     }
-                                    else nbMove--;
+                                    else {
+
+                                        nbMove --;
+
+                                        if ( nbMove <= 0 ){
+
+                                            loop = false;
+                                        }
+                                    }
                                 }
 
                                 dragAndDrop = false;
@@ -199,14 +186,30 @@ int main(int argc, char* argv[]){
                 // mouvement de souris
                 case SDL_MOUSEMOTION:{
 
-                    cursorTokenPosition.x = (event.motion.x / TOKEN_WIDTH);
-                    cursorTokenPosition.y = (event.motion.y / TOKEN_HEIGHT);
+                    cursorOnGrid = PointInRect(event.motion.x, event.motion.y, &rect_grid);
 
-                    position_CursorOver.x = cursorTokenPosition.x * TOKEN_WIDTH;
-                    position_CursorOver.y = cursorTokenPosition.y * TOKEN_HEIGHT;
+                    if ( cursorOnGrid == true ){
+
+                        cursorTokenPosition.x = (event.motion.x / TOKEN_WIDTH);
+                        cursorTokenPosition.y = (event.motion.y / TOKEN_HEIGHT);
+
+                        position_CursorOver.x = cursorTokenPosition.x * TOKEN_WIDTH;
+                        position_CursorOver.y = cursorTokenPosition.y * TOKEN_HEIGHT;
+                    }
+                    else{
+
+                        if ( dragAndDrop == true ){
+
+                            dragAndDrop = false;
+                        }
+                    }
                 }
                 break;
             }
+
+            // event UI
+            Window_event(&window, &event, &draw );
+            Button_quit_event(&button_quit, &event, &draw, &quit);
         }
 
         /* logique */
@@ -217,11 +220,7 @@ int main(int argc, char* argv[]){
                 // score
                 score += Calc_Score(grid1);
 
-                /* libération de l'encien texte et déclaration du nouveau */
-                SDL_FreeSurface(pSurface_texte);
-                char tmp[] = "";
-                sprintf(tmp,"Score : %d | NbCoups : %d",score, nbMove);
-                pSurface_texte = TTF_RenderText_Solid(pFont,tmp,color_texte);
+                sprintf(label.text,"Score : %d | NbCoups : %d",score, nbMove);
 
                 // détruit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
@@ -238,7 +237,7 @@ int main(int argc, char* argv[]){
                 }
             }
 
-            //fprintf(stdout,"Grille remplie !");
+            //fprintf(stdout,"Grille remplie !\n");
         }
 
         /* animations - textes */
@@ -250,37 +249,26 @@ int main(int argc, char* argv[]){
         /* affichage */
         SDL_RenderClear(pRenderer);                                                             // efface tout le contenu du renderer
 
-        SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&position_CursorOver);                // pour le curseur de la souris
+        Window_draw(&window, pRenderer);
+
+        if ( cursorOnGrid == true )
+            SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&position_CursorOver);            // pour le curseur de la souris
+
         DrawGrid(grid1,pRenderer,pSurface_Token);                                               // déssine la grille sur le renderer
 
-        SDL_Texture *pTexture_texte = SDL_CreateTextureFromSurface(pRenderer, pSurface_texte);  // crée une texture avec le texte
-        SDL_Rect rect_texte = {10,10,0,0};
-
-
-        SDL_QueryTexture(pTexture_texte,NULL,NULL,&rect_texte.w,&rect_texte.h);
-        SDL_RenderCopy(pRenderer, pTexture_texte, NULL, &rect_texte);                           // déssine le texte sur le renderer
+        UI_label_draw(&label,pRenderer);
+        UI_button_draw(&button_quit, pRenderer);
 
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
         /* gestion de la fréquence d'affichage ( pour les animations )*/
-        int frameEnd = SDL_GetTicks();
-        if ( frameEnd - frameStart < 1000 / FRAME_PER_SECOND ){
-
-            SDL_Delay( (1000 / FRAME_PER_SECOND) - (frameEnd - frameStart) );
-        }
+        WaitForNextFrame(frameStart);
     }
-
 
     printf("\n\n Score Total : %d", score);
 
-
     /* fin du programme */
-
-    SDL_DestroyRenderer(pRenderer);
-    SDL_DestroyWindow(pWindow);
-    TTF_CloseFont(pFont);
-    TTF_Quit();
-    SDL_Quit();
+    CleanGame(&objects);
 
     return 0;
 }
