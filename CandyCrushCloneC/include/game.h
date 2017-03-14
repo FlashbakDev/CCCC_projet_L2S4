@@ -9,11 +9,18 @@ Rôle : fonctions gérants une partie de CCCC.
 
 */
 
+// =========================================================
+
 #ifndef GAME_H_INCLUDED
 #define GAME_H_INCLUDED
 
+// =========================================================
+
 #include "core.h"
+#include "UI.h"
 #include "constants.h"
+
+// =========================================================
 
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
 Grid *NewGrid(int width, int height, int nbMove, int nbColor);
@@ -61,4 +68,11 @@ void AnimMovingTokens(Grid *pGrid);
 void AnimDestructingTokens(Grid *pGrid);
 
 int Calc_Score(Grid *pGrid );
+
+// =========================================================
+
+void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
+// =========================================================
+
 #endif // GAME_H_INCLUDED

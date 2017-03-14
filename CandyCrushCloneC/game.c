@@ -42,71 +42,27 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
 // =========================================================
 
-//Vieille version
-/*void RandomizeGrid(Grid *pGrid){
-
-    int cpt = 0;
-
-    do{
-
-        cpt++;
-
-        for(int i = 0; i < pGrid->height; i++){
-            for(int j = 0; j < pGrid->width; j++){
-
-                InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, j, i);
-            }
-        }
-
-    }while(IsLigneOnGrid(pGrid) == true );
-
-    fprintf(stdout, "grille trouve en %d fois.\n", cpt);
-}*/
-gridHeight = 10;
-    int gridWidth = 10;
-    int nbMove = 20;
-    int nbColor = 5;
-
-void Settings(int * gridHeight, int * gridWidth, int* nbMove, int* nbColor)
-{
-
-
-
-
-}
-
-void Menu()
-{
-
-
-
-}
-
 void RandomizeGrid(Grid *pGrid){
 
- for(int i = 0; i < pGrid->height; i++){
-            for(int j = 0; j < pGrid->width; j++){
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
 
-                InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, j, i);
-            }
+            InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, j, i);
         }
-        printf("init \n");
-        while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
+    }
 
-                DestroyAlignedTokens(pGrid);
+    while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
 
-                   // regroupe tout les jetons
-                RegroupTokens(pGrid, DOWN);
+            DestroyAlignedTokens(pGrid);
 
-                    // remplie les espaces vides
-                InjectLigne(pGrid, UP);
+               // regroupe tout les jetons
+            RegroupTokens(pGrid, DOWN);
 
-        }
+                // remplie les espaces vides
+            InjectLigne(pGrid, UP);
 
-
-
+    }
 }
-
 
 // =========================================================
 
@@ -121,7 +77,7 @@ void InitRandomToken(Token *token, int nbColor, int x, int y){
     token->textureSize = 100;
     CalculTokenRectTexure(token,x,y);
 
-    token->Score_Token = SCORE_DEFAULT;
+    token->score = TOKEN_SCORE;
 }
 
 // =========================================================
@@ -168,6 +124,88 @@ void CheckGrid(Grid *pGrid){
 
 // =========================================================
 
+void AnimMovingTokens(Grid *pGrid){
+
+    // anime les mouvement
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].rect_texture.x != ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2) ){
+
+                pGrid->tokens[i][j].isMoving = true;
+
+                if ( pGrid->tokens[i][j].rect_texture.x > ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2) )
+                    pGrid->tokens[i][j].rect_texture.x -= FALL_SPEED ;
+                else
+                    pGrid->tokens[i][j].rect_texture.x += FALL_SPEED ;
+
+                if ( sqrt( pow( pGrid->tokens[i][j].rect_texture.x - ( ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2)) ,2) ) < FALL_SPEED ){
+
+                    pGrid->tokens[i][j].rect_texture.x = ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2);
+                    pGrid->tokens[i][j].isMoving = false;
+                }
+            }
+
+            if ( pGrid->tokens[i][j].rect_texture.y != (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2)) ){
+
+                pGrid->tokens[i][j].isMoving = true;
+
+                if ( pGrid->tokens[i][j].rect_texture.y > (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2)) )
+                    pGrid->tokens[i][j].rect_texture.y -= FALL_SPEED ;
+                else
+                    pGrid->tokens[i][j].rect_texture.y += FALL_SPEED ;
+
+                if ( sqrt( pow( pGrid->tokens[i][j].rect_texture.y - (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2)) ,2) ) < FALL_SPEED ){
+
+                    pGrid->tokens[i][j].rect_texture.y = (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2));
+                    pGrid->tokens[i][j].isMoving = false;
+                }
+            }
+        }
+    }
+}
+
+// =========================================================
+
+void AnimDestructingTokens(Grid *pGrid){
+
+    // anime les destructions
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].isMoving == false && pGrid->tokens[i][j].isDestruct == true ){
+
+                if ( pGrid->tokens[i][j].startDestructAnim == -1 ){
+
+                    pGrid->tokens[i][j].startDestructAnim = SDL_GetTicks();
+
+                    //fprintf(stdout, "animation de destruction commence.\n");
+                }
+
+                // animationd de destruction
+                if (  SDL_GetTicks() - pGrid->tokens[i][j].startDestructAnim < DESTRUCT_SPEED ){
+
+                    //fprintf(stdout, "nombre de tick ecoule : %d / %d, textureSize = %d.\n", SDL_GetTicks() - pGrid->tokens[i][j].startDestructAnim, DESTRUCT_SPEED, pGrid->tokens[i][j].textureSize);
+
+                    // perte en une frame
+                    pGrid->tokens[i][j].textureSize = 100 - ( 100.0 / DESTRUCT_SPEED * ( SDL_GetTicks() - pGrid->tokens[i][j].startDestructAnim ) ) ;
+
+                    CalculTokenRectTexure(&pGrid->tokens[i][j], j, i);
+                }
+                else {
+
+                    pGrid->tokens[i][j].isDestruct = false;
+                    pGrid->tokens[i][j].startDestructAnim = -1;
+
+                    //fprintf(stdout, "animation de destruction termine a %d/100 de la texture.\n", pGrid->tokens[i][j].textureSize );
+                }
+            }
+        }
+    }
+}
+
+// =========================================================
+
 int Calc_Score(Grid *pGrid ){
 
     /* actualisation de la grille */
@@ -185,13 +223,13 @@ int Calc_Score(Grid *pGrid ){
     for(int i = 0; i < pGrid->height; i++){
         Nb_Align = 1;
         SaveColor = pGrid->tokens[i][0].color;
-        Val = pGrid->tokens[i][0].Score_Token;
+        Val = pGrid->tokens[i][0].score;
         for(int j = 1; j < pGrid->width; j++){
 
             if(pGrid->tokens[i][j].color == SaveColor)
             {
                 Nb_Align++;
-                Val += pGrid->tokens[i][j].Score_Token;
+                Val += pGrid->tokens[i][j].score;
 
             }
             else {
@@ -219,7 +257,7 @@ int Calc_Score(Grid *pGrid ){
                 }
                 Nb_Align = 1;
                 SaveColor = pGrid->tokens[i][j].color;
-                Val = pGrid->tokens[i][j].Score_Token;
+                Val = pGrid->tokens[i][j].score;
             }
 
 
@@ -231,13 +269,13 @@ int Calc_Score(Grid *pGrid ){
     for(int j = 0; j < pGrid->width; j++){
         Nb_Align = 1;
         SaveColor = pGrid->tokens[0][j].color;
-         Val = pGrid->tokens[0][j].Score_Token;
+         Val = pGrid->tokens[0][j].score;
         for(int i = 1; i < pGrid->height; i++){
 
             if(pGrid->tokens[i][j].color == SaveColor)
             {
                 Nb_Align++;
-                Val += pGrid->tokens[i][j].Score_Token;
+                Val += pGrid->tokens[i][j].score;
             }
             else {
 
@@ -261,7 +299,7 @@ int Calc_Score(Grid *pGrid ){
                 }
                 Nb_Align = 1;
                 SaveColor = pGrid->tokens[i][j].color;
-                 Val = pGrid->tokens[i][j].Score_Token;
+                 Val = pGrid->tokens[i][j].score;
             }
         }
     }
@@ -334,6 +372,8 @@ Token *GetColumnUpperToken(Grid *pGrid,int x){
 
         if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
     }
+
+    return NULL;
 }
 
 // =========================================================
@@ -416,6 +456,21 @@ void InjectLigne(Grid *pGrid, Directions dir){
             }
         }
         break;
+
+        case DOWN :{
+
+        }
+        break;
+
+        case LEFT :{
+
+        }
+        break;
+
+        case RIGHT :{
+
+        }
+        break;
     }
 }
 
@@ -429,7 +484,14 @@ void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 }
 
 // =========================================================
+// évenements
+// =========================================================
 
+void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) )
+        *pQuit = true;
+}
 
 
 
