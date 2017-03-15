@@ -59,7 +59,7 @@ void InjectLigne(Grid *pGrid, Directions dir);
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 
 /* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
-void InitRandomToken(Token *token, int nbColor, int x, int y);
+void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y);
 
 /* anime les mouvements des jetons */
 void AnimMovingTokens(Grid *pGrid);
@@ -72,6 +72,8 @@ int Calc_Score(Grid *pGrid );
 // =========================================================
 
 void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
+void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
 // =========================================================
 

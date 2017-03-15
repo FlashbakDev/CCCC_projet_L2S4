@@ -53,6 +53,10 @@ typedef struct Grid{
     int width, height;
     int nbColor;
 
+    bool is_cursorOnGrid;
+    SDL_Point cursorTokenPosition;
+    SDL_Rect rect;
+
 }Grid;
 
 typedef struct Array{
@@ -101,6 +105,10 @@ extern Font font_default;
 extern Image image_normal, image_prelight, image_active, image_selected, image_unselected;
 extern int screen_width, screen_height;
 
+extern bool dragAndDrop;
+extern SDL_Point dragStart;
+extern SDL_Rect rect_CursorOver;
+
 // ========================================================= Logique
 
 /* initailisation et chargement des ressources */
@@ -116,7 +124,7 @@ void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 void DebugToken(Token token);
 
 /* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
-void CalculTokenRectTexure(Token *token, int x, int y);
+void CalculTokenRectTexure(Grid *pGrid, Token *token, int x, int y);
 
 /* crée un rect avec les données fournis */
 void MakeRect(SDL_Rect *pRect, int x, int y, int w, int h);

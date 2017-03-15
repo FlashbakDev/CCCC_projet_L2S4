@@ -6,6 +6,10 @@ Font font_default;
 Image image_normal, image_prelight, image_active, image_selected, image_unselected;
 int screen_width, screen_height;
 
+bool dragAndDrop;
+SDL_Point dragStart;
+SDL_Rect rect_CursorOver;
+
 // =========================================================
 
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
@@ -186,8 +190,8 @@ void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
     pGrid->tokens[y1][x1] = pGrid->tokens[y2][x2];
     pGrid->tokens[y2][x2] = tmp;
 
-    CalculTokenRectTexure( &pGrid->tokens[y1][x1], x1, y1 );
-    CalculTokenRectTexure( &pGrid->tokens[y2][x2], x2, y2 );
+    CalculTokenRectTexure(pGrid, &pGrid->tokens[y1][x1], x1, y1 );
+    CalculTokenRectTexure(pGrid, &pGrid->tokens[y2][x2], x2, y2 );
 }
 
 // =========================================================
@@ -201,12 +205,12 @@ void DebugToken(Token token){
 
 // =========================================================
 
-void CalculTokenRectTexure(Token *token, int x, int y){
+void CalculTokenRectTexure(Grid *pGrid, Token *token, int x, int y){
 
     token->rect_texture.w = (float)(TOKEN_WIDTH / 100.0 * token->textureSize);
     token->rect_texture.h = (float)(TOKEN_HEIGHT / 100.0 * token->textureSize);
-    token->rect_texture.x = ((x * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (token->rect_texture.w / 2);
-    token->rect_texture.y = ((y * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (token->rect_texture.h / 2);
+    token->rect_texture.x = pGrid->rect.x + ((x * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (token->rect_texture.w / 2);
+    token->rect_texture.y = pGrid->rect.y + ((y * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (token->rect_texture.h / 2);
 }
 
 // =========================================================
