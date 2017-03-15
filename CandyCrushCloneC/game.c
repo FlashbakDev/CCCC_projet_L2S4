@@ -1,5 +1,5 @@
 #include "game.h"
-
+#include "core.h"
 // =========================================================
 
 Grid *NewGrid(int width, int height, int nbMove, int nbColor){
@@ -59,7 +59,7 @@ void RandomizeGrid(Grid *pGrid){
         }
     }
 
-    while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
+    while(IsLigneOnGrid(pGrid) == true || IsTokenOfType(pGrid, NONE ) == true){
 
             DestroyAlignedTokens(pGrid);
 

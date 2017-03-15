@@ -9,13 +9,15 @@ int main(int argc, char* argv[]){
     /* Initialisation */
     fprintf(stdout,"Initialisation begin : \n");
 
-    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
-    SDL_Event event;            // gestionnaire d'évènement
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit oÃ¹ l'on va dÃ©ssiner )
+    SDL_Event event;            // gestionnaire d'Ã©vÃ¨nement
     Array objects;
     Window window;
 
-    UI_label label = {false};
+    UI_label label_score = {false};
     UI_button button_quit = {false};
+    UI_label label_mouvements = {false};
+    UI_label label_nbMove = {false};
 
     /* initialisation du jeu */
     int gridHeight = 10;
@@ -25,7 +27,7 @@ int main(int argc, char* argv[]){
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
 
-    // création des zone de jeu et d'affichage
+    // crÃ©ation des zone de jeu et d'affichage
     SDL_Rect rect_UI = { grid1->rect.x + grid1->rect.w, 0, 250, grid1->rect.h };
     SDL_Rect rect_screen = {0 ,
                             0 ,
@@ -41,8 +43,14 @@ int main(int argc, char* argv[]){
     fprintf(stdout,"debug\n");
 
     fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
-    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
-    sprintf(label.text,"Score : %d | NbCoups : %d",0, nbMove);
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 40 , rect_UI.y + 40 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 60 , rect_UI.y + 60 ));
+
+    sprintf(label_score.text,"Score : %d ",0);
+    sprintf(label_nbMove.text,"NbCoups : %d", nbMove);
+    sprintf(label_mouvements.text,"Mouvement possible : %d",0);
+
     fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
     window.visible = true;
 
@@ -72,7 +80,7 @@ int main(int argc, char* argv[]){
 
         int frameStart = SDL_GetTicks();
 
-        /* évènements */
+        /* Ã©vÃ¨nements */
         while( SDL_PollEvent( &event ) != 0 ){
 
             if( event.type == SDL_QUIT){
@@ -84,8 +92,42 @@ int main(int argc, char* argv[]){
 
                 fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
             }
+            else{
+                  
+              switch(event.key.keysym.sym){
 
-            // entré lié au jeu
+                    case SDLK_KP_1 :
+                        nbMove +=3;
+                        break;
+
+
+                      case SDLK_KP_2 :
+                          if(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color < nbColor-1)
+                          grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color ++;
+                          else grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color = 0;
+
+                      break;
+
+                      case SDLK_KP_3 :
+                          if(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color >0)
+                          grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color --;
+                          else grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color = nbColor-1;
+
+
+                      break;
+
+                      case SDLK_KP_4 :
+                          printf("deplacement possible %d",MoveAvailable(grid1));
+                          break;
+
+                      case SDLK_KP_5 :
+                          RandomizeGrid(grid1);
+                          break;
+
+              }
+            }
+
+            // entrÃ© liÃ© au jeu
             GameEvent(grid1, &event, &quit);
 
             // event UI
@@ -94,6 +136,8 @@ int main(int argc, char* argv[]){
         }
 
         /* logique */
+        sprintf(label_nbMove.text," NbCoups : %d", nbMove);
+        sprintf(label_score.text,"Score : %d ",score);
         if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false){
 
             if( IsLigneOnGrid(grid1) == true ){
@@ -101,13 +145,15 @@ int main(int argc, char* argv[]){
                 // score
                 score += Calc_Score(grid1);
 
-                sprintf(label.text,"Score : %d | NbCoups : %d",score, nbMove);
 
-                // détruit les lignes et remplie les cases manquantes du tableau
+
+
+                // dÃ©truit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
             }
             else {
 
+                if(IsTokenOfType(grid1, NONE ) == true ){
                 while( IsTokenOfType(grid1, NONE ) == true ){
 
                     // regroupe tout les jetons
@@ -116,6 +162,16 @@ int main(int argc, char* argv[]){
                     // remplie les espaces vides
                     InjectLigne(grid1, UP);
                 }
+                }else {
+                    sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
+
+                 if(MoveAvailable(grid1) == 0)
+                 {
+                    RandomizeGrid(grid1);
+                 }
+
+                }
+
             }
 
             //fprintf(stdout,"Grille remplie !\n");
@@ -135,14 +191,16 @@ int main(int argc, char* argv[]){
         if ( grid1->is_cursorOnGrid == true )
             SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&rect_CursorOver);            // pour le curseur de la souris
 
-        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // déssine la grille sur le renderer
+        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // dÃ©ssine la grille sur le renderer
 
-        UI_label_draw(&label,pRenderer);
+        UI_label_draw(&label_score,pRenderer);
+        UI_label_draw(&label_nbMove,pRenderer);
+        UI_label_draw(&label_mouvements,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
 
-        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
+        SDL_RenderPresent(pRenderer);                                                           // dÃ©ssine le renderer Ã  l'Ã©cran
 
-        /* gestion de la fréquence d'affichage ( pour les animations )*/
+        /* gestion de la frÃ©quence d'affichage ( pour les animations )*/
         WaitForNextFrame(frameStart);
     }
 
