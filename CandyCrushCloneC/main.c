@@ -108,7 +108,7 @@ int main(int argc, char* argv[]){
 
                             fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
                             //loop = false;
-                            nbMove =0;
+                            quit = true;
                         }
                         break;
 
