@@ -49,6 +49,24 @@ int UI_button_new(UI_button *pButton, Window *pWindow, char *text, int x, int y)
 
 // =========================================================
 
+int UI_toggle_new(UI_toggle *pToggle, Window *pWindow, int x, int y){
+
+    if (!pToggle)
+        return -1;
+
+    pToggle->image_selected = image_selected;
+    pToggle->image_unselected = image_unselected;
+
+	MakeRect(&pToggle->rect, x, y, pToggle->image_selected.w, pToggle->image_selected.h);
+	pToggle->selected = false;
+	pToggle->focus = false;
+	pToggle->pWindow = pWindow;
+
+	return 0;
+}
+
+// =========================================================
+
 int UI_outline(SDL_Renderer *pRenderer, SDL_Rect *pRect, SDL_Color color, int edge){
 
     SDL_Rect rect_outline;
@@ -129,7 +147,30 @@ int UI_button_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw){
             return 1;
         }
     }
+
     return 0;
+}
+
+// =========================================================
+
+int UI_toggle_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw){
+
+	if (!pToggle || !pToggle->visible || !pEvent)
+        return 0;
+
+	if (pEvent->type == SDL_WINDOWEVENT && pEvent->window.event == SDL_WINDOWEVENT_EXPOSED)
+		*pDraw = true;
+
+	if (!pToggle->focus && (!pToggle->pWindow || (pToggle->pWindow && !pToggle->pWindow->focus)))
+		return 0;
+
+	if (pEvent->type == SDL_MOUSEBUTTONDOWN && PointInRect(pEvent->button.x, pEvent->button.y, &pToggle->rect)) {
+		pToggle->selected ^= true;
+		*pDraw = true;
+		return 1;
+	}
+
+	return 0;
 }
 
 // =========================================================
@@ -185,6 +226,24 @@ int UI_button_draw(UI_button *pButton, SDL_Renderer *pRenderer){
 		RenderImage(pRenderer, pButton->image_normal, pButton->rect.x, pButton->rect.y, NULL);
 
 	RenderText(pRenderer, pButton->text, pButton->position_text.x, pButton->position_text.y, pButton->font, pButton->color_text);
+
+	return 1;
+}
+
+// =========================================================
+
+int UI_toggle_draw(UI_toggle *pToggle, SDL_Renderer *pRenderer){
+
+	if (pToggle && pToggle->pWindow)
+		pToggle->visible = pToggle->pWindow->visible;
+
+	if (!pToggle || !pToggle->visible || !pRenderer)
+        return 0;
+
+	if (pToggle->selected)
+		RenderImage(pRenderer, pToggle->image_selected, pToggle->rect.x, pToggle->rect.y, NULL);
+	else
+		RenderImage(pRenderer, pToggle->image_unselected, pToggle->rect.x, pToggle->rect.y, NULL);
 
 	return 1;
 }

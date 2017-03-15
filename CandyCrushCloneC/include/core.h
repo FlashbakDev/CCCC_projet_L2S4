@@ -98,7 +98,7 @@ typedef struct Window {
 // =========================================================
 
 extern Font font_default;
-extern Image image_normal, image_prelight, image_active;
+extern Image image_normal, image_prelight, image_active, image_selected, image_unselected;
 extern int screen_width, screen_height;
 
 // ========================================================= Logique

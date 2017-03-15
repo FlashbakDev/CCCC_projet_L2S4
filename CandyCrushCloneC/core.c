@@ -3,7 +3,7 @@
 // =========================================================
 
 Font font_default;
-Image image_normal, image_prelight, image_active;
+Image image_normal, image_prelight, image_active, image_selected, image_unselected;
 int screen_width, screen_height;
 
 // =========================================================
@@ -17,8 +17,6 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GetDisplayBounds(0, &rect_bounds);
-
-        fprintf(stdout,"%d > %d || %d > %d \n", w, rect_bounds.w , h, rect_bounds.h);
 
     if ( !pArray || w > rect_bounds.w || h > rect_bounds.h ){
 
