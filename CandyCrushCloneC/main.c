@@ -92,40 +92,6 @@ int main(int argc, char* argv[]){
 
                 fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
             }
-            else{
-                  
-              switch(event.key.keysym.sym){
-
-                    case SDLK_KP_1 :
-                        nbMove +=3;
-                        break;
-
-
-                      case SDLK_KP_2 :
-                          if(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color < nbColor-1)
-                          grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color ++;
-                          else grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color = 0;
-
-                      break;
-
-                      case SDLK_KP_3 :
-                          if(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color >0)
-                          grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color --;
-                          else grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color = nbColor-1;
-
-
-                      break;
-
-                      case SDLK_KP_4 :
-                          printf("deplacement possible %d",MoveAvailable(grid1));
-                          break;
-
-                      case SDLK_KP_5 :
-                          RandomizeGrid(grid1);
-                          break;
-
-              }
-            }
 
             // entré lié au jeu
             GameEvent(grid1, &event, &quit);
@@ -136,17 +102,12 @@ int main(int argc, char* argv[]){
         }
 
         /* logique */
-        sprintf(label_nbMove.text," NbCoups : %d", nbMove);
-        sprintf(label_score.text,"Score : %d ",score);
         if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false){
 
             if( IsLigneOnGrid(grid1) == true ){
 
                 // score
                 score += Calc_Score(grid1);
-
-
-
 
                 // détruit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
@@ -163,19 +124,19 @@ int main(int argc, char* argv[]){
                     InjectLigne(grid1, UP);
                 }
                 }else {
-                    sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
 
-                 if(MoveAvailable(grid1) == 0)
-                 {
-                    RandomizeGrid(grid1);
-                 }
+                    if(MoveAvailable(grid1) == 0){
 
+                        RandomizeGrid(grid1);
+                    }
                 }
-
             }
-
-            //fprintf(stdout,"Grille remplie !\n");
         }
+
+        /* maj des mlabels */
+        sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
+        sprintf(label_score.text,"Score : %d ",score);
+        sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
 
         /* animations - textes */
         if ( IsTokenDestructing(grid1) == false )
