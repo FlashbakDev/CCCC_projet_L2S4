@@ -132,6 +132,8 @@ char *String_copy(char *dest, size_t size, char *str1, char *str2);
 
 int kiss_utf8fix(char *str);
 
+int MoveAvailable(Grid * pGrid);
+
 // ========================================================= Chargement de ressources
 
 /* créée une nouvelle fenêtre */
