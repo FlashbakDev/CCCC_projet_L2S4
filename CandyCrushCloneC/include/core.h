@@ -28,6 +28,8 @@ typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE }Colors;
 
 typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
 
+
+
 typedef struct Token{
 
     TokenTypes type;
@@ -56,6 +58,8 @@ typedef struct Grid{
     bool is_cursorOnGrid;
     SDL_Point cursorTokenPosition;
     SDL_Rect rect;
+
+    Directions direction_grille;
 
 }Grid;
 
@@ -108,6 +112,8 @@ extern int screen_width, screen_height;
 extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
+
+
 
 // ========================================================= Logique
 

@@ -14,6 +14,9 @@ SDL_Rect rect_CursorOver;
 
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
 
+    //Initialisation random
+    srand(time(NULL));
+
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     SDL_Rect rect_bounds;

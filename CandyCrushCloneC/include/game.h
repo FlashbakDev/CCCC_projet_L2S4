@@ -49,11 +49,18 @@ Token *GetColumnUpperToken(Grid *pGrid,int x);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
+/*Change la direction de la grille*/
+void ChangeDirectionRandom(Grid *pGrid);
+void ChangeDirection(Grid *pGrid, Directions dir);
+
+
 /* regroupe les jetons dans la direction donné */
-void RegroupTokens(Grid *pGrid, Directions dir);
+void RegroupTokens(Grid *pGrid);
 
 /* insère de nouveaux jetons aléatoirement */
-void InjectLigne(Grid *pGrid, Directions dir);
+void InjectLigne(Grid *pGrid);
+/*Inverse la direction*/
+Directions InversDir(Directions dir);
 
 /* permute 2 jetons */
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);

@@ -23,6 +23,8 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
 
+    pGrid->direction_grille = UP;
+
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
     if ( pGrid->tokens == NULL ){ return NULL; }
@@ -64,10 +66,10 @@ void RandomizeGrid(Grid *pGrid){
             DestroyAlignedTokens(pGrid);
 
                // regroupe tout les jetons
-            RegroupTokens(pGrid, DOWN);
+            RegroupTokens(pGrid);
 
                 // remplie les espaces vides
-            InjectLigne(pGrid, UP);
+            InjectLigne(pGrid);
 
     }
 }
@@ -427,6 +429,21 @@ Token *GetColumnUpperToken(Grid *pGrid,int x){
     return NULL;
 }
 
+
+/*Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
+{int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
+    int i,j = x;
+    i*= abs(DirectionsVectors[dir][0]);
+    j *= abs(DirectionsVectors[dir][1]);
+    while(pGrid->tokens[i][j] != NONE)
+    {
+        i += DirectionsVectors[dir][0];
+        j += DirectionsVectors[dir][1];
+
+    }
+
+}*/
+
 // =========================================================
 
 int DestroyAlignedTokens(Grid *pGrid){
@@ -454,10 +471,24 @@ int DestroyAlignedTokens(Grid *pGrid){
 
 // =========================================================
 
-void RegroupTokens(Grid *pGrid, Directions dir){
+void ChangeDirectionRandom(Grid *pGrid)
+{
+    pGrid->direction_grille = rand()%4;
 
-    int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
+}
 
+void ChangeDirection(Grid *pGrid, Directions dir)
+{
+   pGrid->direction_grille = dir;
+
+}
+
+//==========================================================
+void RegroupTokens(Grid *pGrid){
+
+int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
+    //Directions dir = pGrid->direction_grille;
+    Directions dir = DOWN;
     bool ok = false;
     while ( ok == false ){
 
@@ -484,10 +515,23 @@ void RegroupTokens(Grid *pGrid, Directions dir){
     }
 }
 
+Directions InversDir(Directions dir)
+{
+  switch(dir)
+  {
+      case UP : return DOWN;
+      case DOWN : return UP;
+      case RIGHT : return LEFT;
+      case LEFT : return RIGHT;
+  }
+return dir;
+}
 // =========================================================
 
-void InjectLigne(Grid *pGrid, Directions dir){
+void InjectLigne(Grid *pGrid){
 
+    //Directions dir = InversDir(pGrid->direction_grille);
+    Directions dir = UP;
     switch(dir){
 
         case UP :{
@@ -671,7 +715,7 @@ void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                 if ( pGrid->nbMove <= 0 ){
 
-                                    pQuit = true;
+                                    *pQuit = true;
                                 }
                             }
                         }

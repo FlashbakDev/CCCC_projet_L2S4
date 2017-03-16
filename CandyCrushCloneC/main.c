@@ -9,8 +9,8 @@ int main(int argc, char* argv[]){
     /* Initialisation */
     fprintf(stdout,"Initialisation begin : \n");
 
-    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit oÃ¹ l'on va dÃ©ssiner )
-    SDL_Event event;            // gestionnaire d'Ã©vÃ¨nement
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
+    SDL_Event event;            // gestionnaire d'évènement
     Array objects;
     Window window;
 
@@ -20,14 +20,16 @@ int main(int argc, char* argv[]){
     UI_label label_nbMove = {false};
 
     /* initialisation du jeu */
-    int gridHeight = 10;
-    int gridWidth = 10;
+    int gridHeight = 13;
+    int gridWidth = 15;
     int nbColor = 6;
     int nbMove = 5;
 
+    int Rand_dir = 0;
+
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
 
-    // crÃ©ation des zone de jeu et d'affichage
+    // création des zone de jeu et d'affichage
     SDL_Rect rect_UI = { grid1->rect.x + grid1->rect.w, 0, 250, grid1->rect.h };
     SDL_Rect rect_screen = {0 ,
                             0 ,
@@ -80,7 +82,7 @@ int main(int argc, char* argv[]){
 
         int frameStart = SDL_GetTicks();
 
-        /* Ã©vÃ¨nements */
+        /* évènements */
         while( SDL_PollEvent( &event ) != 0 ){
 
             if( event.type == SDL_QUIT){
@@ -94,7 +96,7 @@ int main(int argc, char* argv[]){
                 quit = true;
             }
 
-            // entrÃ© liÃ© au jeu
+            // entré lié au jeu
             GameEvent(grid1, &event, &quit);
 
             // event UI
@@ -110,7 +112,7 @@ int main(int argc, char* argv[]){
                 // score
                 score += Calc_Score(grid1);
 
-                // dÃ©truit les lignes et remplie les cases manquantes du tableau
+                // détruit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
             }
             else {
@@ -118,11 +120,13 @@ int main(int argc, char* argv[]){
                 if(IsTokenOfType(grid1, NONE ) == true ){
                 while( IsTokenOfType(grid1, NONE ) == true ){
 
+
+
                     // regroupe tout les jetons
-                    RegroupTokens(grid1, DOWN);
+                    RegroupTokens(grid1);
 
                     // remplie les espaces vides
-                    InjectLigne(grid1, UP);
+                    InjectLigne(grid1);
                 }
                 }else {
 
@@ -154,16 +158,16 @@ int main(int argc, char* argv[]){
         if ( grid1->is_cursorOnGrid == true )
             SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&rect_CursorOver);            // pour le curseur de la souris
 
-        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // dÃ©ssine la grille sur le renderer
+        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // déssine la grille sur le renderer
 
         UI_label_draw(&label_score,pRenderer);
         UI_label_draw(&label_nbMove,pRenderer);
         UI_label_draw(&label_mouvements,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
 
-        SDL_RenderPresent(pRenderer);                                                           // dÃ©ssine le renderer Ã  l'Ã©cran
+        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
-        /* gestion de la frÃ©quence d'affichage ( pour les animations )*/
+        /* gestion de la fréquence d'affichage ( pour les animations )*/
         WaitForNextFrame(frameStart);
     }
 
