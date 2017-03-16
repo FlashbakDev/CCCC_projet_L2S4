@@ -9,20 +9,21 @@ int main(int argc, char* argv[]){
     /* Initialisation */
     fprintf(stdout,"Initialisation begin : \n");
 
-    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
-    SDL_Event event;            // gestionnaire d'évènement
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit oÃ¹ l'on va dÃ©ssiner )
+    SDL_Event event;            // gestionnaire d'Ã©vÃ¨nement
     Array objects;
     Window window;
 
-    UI_label label = {false};
+    UI_label label_score = {false};
     UI_button button_quit = {false};
+    UI_label label_mouvements = {false};
+    UI_label label_nbMove = {false};
 
     /* initialisation du jeu */
     int gridHeight = 10;
     int gridWidth = 10;
     int nbColor = 6;
     int nbMove = 5;
-
 
     // création des zone de jeu et d'affichage
     SDL_Rect rect_grid = { 0,0,gridWidth, gridHeight };
@@ -43,26 +44,18 @@ int main(int argc, char* argv[]){
     fprintf(stdout,"debug\n");
 
     fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
-    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
-    sprintf(label.text,"Score : %d | NbCoups : %d",0, nbMove);
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 40 , rect_UI.y + 40 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 60 , rect_UI.y + 60 ));
+
+    sprintf(label_score.text,"Score : %d ",0);
+    sprintf(label_nbMove.text,"NbCoups : %d", nbMove);
+    sprintf(label_mouvements.text,"Mouvement possible : %d",0);
+
     fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
     window.visible = true;
 
     fprintf(stdout,"Initialisation end.\n");
-
-    // curseur
-    /*SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver_blue.png");
-    SDL_Texture *pTexture_CursorOver = SDL_CreateTextureFromSurface(pRenderer,pSurface_Cursor);
-    SDL_QueryTexture(pTexture_CursorOver, NULL, NULL, &rect_CursorOver.w, &rect_CursorOver.h);
-
-    // textures
-    SDL_Surface *pSurface_Token[6];
-    pSurface_Token[0] = IMG_Load("data/Tokens/Token_red.png");
-    pSurface_Token[1] = IMG_Load("data/Tokens/Token_blue.png");
-    pSurface_Token[2] = IMG_Load("data/Tokens/Token_green.png");
-    pSurface_Token[3] = IMG_Load("data/Tokens/Token_yellow.png");
-    pSurface_Token[4] = IMG_Load("data/Tokens/Token_purple.png");
-    pSurface_Token[5] = IMG_Load("data/Tokens/Token_orange.png");*/
 
     /* boucle de jeu */
 
@@ -74,7 +67,7 @@ int main(int argc, char* argv[]){
 
         int frameStart = SDL_GetTicks();
 
-        /* évènements */
+        /* Ã©vÃ¨nements */
         while( SDL_PollEvent( &event ) != 0 ){
 
             if( event.type == SDL_QUIT){
@@ -87,7 +80,7 @@ int main(int argc, char* argv[]){
                 fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
             }
 
-            // entré lié au jeu
+            // entrÃ© liÃ© au jeu
             GameEvent(grid1, &event, &quit);
 
             // event UI
@@ -103,25 +96,36 @@ int main(int argc, char* argv[]){
                 // score
                 score += Calc_Score(grid1);
 
-                sprintf(label.text,"Score : %d | NbCoups : %d",score, nbMove);
-
-                // détruit les lignes et remplie les cases manquantes du tableau
+                // dÃ©truit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
             }
             else {
 
-                while( IsTokenOfType(grid1, NONE ) == true ){
+                if(IsTokenOfType(grid1, NONE ) == true ){
 
-                    // regroupe tout les jetons
-                    RegroupTokens(grid1, DOWN);
+                    while( IsTokenOfType(grid1, NONE ) == true ){
 
-                    // remplie les espaces vides
-                    InjectLigne(grid1, UP);
+                        // regroupe tout les jetons
+                        RegroupTokens(grid1, DOWN);
+
+                        // remplie les espaces vides
+                        InjectLigne(grid1, UP);
+                    }
+
+                }else {
+
+                    /*if(MoveAvailable(grid1) == 0){
+
+                        RandomizeGrid(grid1);
+                    }*/
                 }
             }
-
-            //fprintf(stdout,"Grille remplie !\n");
         }
+
+        /* maj des mlabels */
+        sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
+        sprintf(label_score.text,"Score : %d ",score);
+        sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
 
         /* animations - textes */
         if ( IsTokenDestructing(grid1) == false )
@@ -134,15 +138,14 @@ int main(int argc, char* argv[]){
 
         Window_draw(&window, pRenderer);
 
-        //if ( grid1->is_cursorOnGrid == true )
-            //SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&rect_CursorOver);              // pour le curseur de la souris
-
         DrawGrid(grid1,pRenderer);                                                              // déssine la grille sur le renderer
 
-        UI_label_draw(&label,pRenderer);
+        UI_label_draw(&label_score,pRenderer);
+        UI_label_draw(&label_nbMove,pRenderer);
+        UI_label_draw(&label_mouvements,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
 
-        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
+        SDL_RenderPresent(pRenderer);                                                           // dÃ©ssine le renderer Ã  l'Ã©cran
 
         /* gestion de la fréquence d'affichage ( pour les animations )*/
         WaitForNextFrame(frameStart);

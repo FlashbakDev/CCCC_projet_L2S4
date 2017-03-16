@@ -1,5 +1,5 @@
 #include "game.h"
-
+#include "core.h"
 // =========================================================
 
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
@@ -57,7 +57,7 @@ void RandomizeGrid(Grid *pGrid){
         }
     }
 
-    while(IsLigneOnGrid(pGrid) == true ||IsTokenOfType(pGrid, NONE ) == true ){
+    while(IsLigneOnGrid(pGrid) == true || IsTokenOfType(pGrid, NONE ) == true){
 
             DestroyAlignedTokens(pGrid);
 
@@ -505,6 +505,64 @@ void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
     switch(pEvent->type){
 
+        case SDL_KEYDOWN :{
+
+
+            switch( pEvent->key.keysym.sym ){
+
+                case SDLK_d :{
+
+                    pGrid->nbMove ++;
+                }
+                break;
+
+                case SDLK_q :{
+
+                    pGrid->nbMove --;
+
+                    if ( pGrid->nbMove <= 0 ){
+
+                        pQuit = true;
+                    }
+                }
+                break;
+
+                case SDLK_z :{
+
+                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color < pGrid->nbColor-1){
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color ++;
+                    }
+                    else {
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = 0;
+                    }
+
+                }
+                break;
+
+                case SDLK_s :{
+
+                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color >0){
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
+                    }
+                    else{
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
+                    }
+
+                }
+                break;
+
+                case SDLK_e : {
+
+                    RandomizeGrid(pGrid);
+                }
+                break;
+            }
+        }
+
         // bouttons de souris appuié
         case SDL_MOUSEBUTTONDOWN:{
 
@@ -570,7 +628,7 @@ void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                 if ( pGrid->nbMove <= 0 ){
 
-                                    pQuit = false;
+                                    pQuit = true;
                                 }
                             }
                         }

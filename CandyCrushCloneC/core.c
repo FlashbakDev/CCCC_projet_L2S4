@@ -130,14 +130,14 @@ void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
         }
     }
 
-    if ( pGrid->is_cursorOnGrid && pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].type != NONE ){
+    /*if ( pGrid->is_cursorOnGrid && pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].type != NONE ){
 
         RenderImage(pRenderer,
                     pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].image,
                     pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].rect_image.x,
                     pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].rect_image.y,
                     NULL );
-    }
+    }*/
 }
 
 // =========================================================
@@ -325,7 +325,43 @@ int kiss_utf8fix(char *str){
     return 0;
 }
 
-// =========================================================
+// ========================================================
+
+int MoveAvailable(Grid * pGrid){
+
+    int i,j;
+    int nb = 0;
+
+    for(i=0; i< pGrid->height; i++){
+        for(j=0;j<pGrid->width; j++){
+
+            //Echange gauche droite
+            if(j < pGrid->width-1){
+
+                HardPermuteToken(pGrid,j,i,j+1,i);
+
+                if(IsLigneOnGrid(pGrid)==true)
+                    nb++;
+
+                HardPermuteToken(pGrid,j,i,j+1,i);
+            }
+
+            if(i < pGrid->height-1){
+
+                HardPermuteToken(pGrid,j,i,j,i+1);
+
+                 if(IsLigneOnGrid(pGrid)==true)
+                    nb++;
+
+                HardPermuteToken(pGrid,j,i,j,i+1);
+            }
+        }
+    }
+
+    return nb;
+}
+
+// ========================================================
 
 int Window_new(Window *pWindow, Window *pWindow_parent, bool outline, int x, int y, int w, int h){
 
@@ -589,4 +625,6 @@ int Array_free(Array *pArray){
 }
 
 // =========================================================
+
+
 
