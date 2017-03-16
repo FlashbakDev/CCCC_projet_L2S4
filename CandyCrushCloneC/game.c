@@ -220,7 +220,7 @@ void AnimDestructingTokens(Grid *pGrid){
                     // perte en une frame
                     pGrid->tokens[i][j].textureSize = 100 - ( 100.0 / DESTRUCT_SPEED * ( SDL_GetTicks() - pGrid->tokens[i][j].startDestructAnim ) ) ;
 
-                    //CalculTokenRectTexure(pGrid, &pGrid->tokens[i][j], j, i);
+                    CalculTokenRectTexure(pGrid, &pGrid->tokens[i][j], j, i);
                 }
                 else {
 

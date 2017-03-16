@@ -36,7 +36,7 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre..
 #define TOKEN_HEIGHT        64
 
 #define FRAME_PER_SECOND    60      // rafraichissement de l'écran
-#define FALL_SPEED          6      // en pixel par frame
+#define FALL_SPEED          6       // en pixel par frame
 #define DESTRUCT_SPEED      250     // en ms ( pour aller de 100% à 0% de taille de texture )
 #define TOKEN_SCORE         10      // score de base par jeton détruit
 
