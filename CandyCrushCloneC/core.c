@@ -118,7 +118,7 @@ void WaitForNextFrame(int frameStart){
 
 // =========================================================
 
-void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
+void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
 
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
@@ -130,14 +130,14 @@ void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer){
         }
     }
 
-    /*if ( pGrid->is_cursorOnGrid && pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].type != NONE ){
+    if ( pGrid->is_cursorOnGrid && pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].type != NONE ){
 
         RenderImage(pRenderer,
-                    pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].image,
-                    pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].rect_image.x,
-                    pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].rect_image.y,
+                    pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ].image,
+                    pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ].rect_image.x,
+                    pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ].rect_image.y,
                     NULL );
-    }*/
+    }
 }
 
 // =========================================================
@@ -209,6 +209,8 @@ int Window_draw(Window *pWindow, SDL_Renderer *pRenderer){
 
 void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 
+    //fprintf(stdout,"HardPermuteToken(Grid *pGrid,int x1 = %d,int y1 = %d,int x2 = %d,int y2 = %d)\n", x1, y1, x2, y2);
+
     Token tmp = pGrid->tokens[y1][x1];
     pGrid->tokens[y1][x1] = pGrid->tokens[y2][x2];
     pGrid->tokens[y2][x2] = tmp;
@@ -229,6 +231,8 @@ void DebugToken(Token token){
 // =========================================================
 
 void CalculTokenRectTexure(Grid *pGrid, Token *token, int x, int y){
+
+    //fprintf(stdout,"CalculTokenRectTexure(Grid *pGrid, Token *token, int x = %d, int y = %d)\n", x, y);
 
     token->rect_image.w = (float)(TOKEN_WIDTH / 100.0 * token->textureSize);
     token->rect_image.h = (float)(TOKEN_HEIGHT / 100.0 * token->textureSize);
@@ -299,14 +303,14 @@ char *String_copy(char *dest, size_t size, char *str1, char *str2){
 	p = dest;
 	strncpy(p + len, str2, size - len);
 	dest[size - 1] = 0;
-	kiss_utf8fix(dest);
+	Utf8Fix(dest);
 
 	return dest;
 }
 
 // =========================================================
 
-int kiss_utf8fix(char *str){
+int Utf8Fix(char *str){
 
     int len, i;
 
@@ -327,38 +331,37 @@ int kiss_utf8fix(char *str){
 
 // ========================================================
 
-int MoveAvailable(Grid * pGrid){
+void MoveAvailable(Grid * pGrid){
 
-    int i,j;
     int nb = 0;
 
-    for(i=0; i< pGrid->height; i++){
-        for(j=0;j<pGrid->width; j++){
+    for(int i=0; i< pGrid->height; i++){
+        for(int j=0;j<pGrid->width; j++){
 
             //Echange gauche droite
             if(j < pGrid->width-1){
 
-                HardPermuteToken(pGrid,j,i,j+1,i);
+                PermuteToken(pGrid,j,i,j+1,i);
 
                 if(IsLigneOnGrid(pGrid)==true)
                     nb++;
 
-                HardPermuteToken(pGrid,j,i,j+1,i);
+                PermuteToken(pGrid,j,i,j+1,i);
             }
 
             if(i < pGrid->height-1){
 
-                HardPermuteToken(pGrid,j,i,j,i+1);
+                PermuteToken(pGrid,j,i,j,i+1);
 
                  if(IsLigneOnGrid(pGrid)==true)
                     nb++;
 
-                HardPermuteToken(pGrid,j,i,j,i+1);
+                PermuteToken(pGrid,j,i,j,i+1);
             }
         }
     }
 
-    return nb;
+    pGrid->moveAvailable = nb;
 }
 
 // ========================================================

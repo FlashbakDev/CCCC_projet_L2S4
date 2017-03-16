@@ -68,6 +68,9 @@ typedef struct Grid{
     SDL_Point cursorTokenPosition;
     SDL_Rect rect;
 
+    int score;
+    int moveAvailable;
+
 }Grid;
 
 typedef struct Array{
@@ -142,9 +145,9 @@ bool PointInRect(int x, int y, SDL_Rect *pRect);
 /* copie une chaine de charactere */
 char *String_copy(char *dest, size_t size, char *str1, char *str2);
 
-int kiss_utf8fix(char *str);
+int Utf8Fix(char *str);
 
-int MoveAvailable(Grid * pGrid);
+void MoveAvailable(Grid * pGrid);
 
 // ========================================================= Chargement de ressources
 
@@ -167,7 +170,7 @@ int Window_event(Window *pWindow, SDL_Event *pEvent, bool *pDraw);
 void WaitForNextFrame(int frameStart);
 
 /* affiche la grille */
-void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer);
+void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer);
 
 /* affiche une image */
 int RenderImage(SDL_Renderer *pRenderer, Image image, int x, int y, SDL_Rect *pRect);

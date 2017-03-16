@@ -67,13 +67,19 @@ void AnimMovingTokens(Grid *pGrid);
 /* anime les déstructions des jetons */
 void AnimDestructingTokens(Grid *pGrid);
 
+/* anime la grille */
+void Grid_anim(Grid *pGrid);
+
+/* calcul le score */
 int Calc_Score(Grid *pGrid );
 
 // =========================================================
 
 void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 
-void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
+void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
+
+void Game_logic(Grid *pGrid);
 
 // =========================================================
 

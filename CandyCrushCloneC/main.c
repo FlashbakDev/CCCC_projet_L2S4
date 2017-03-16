@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
 
         int frameStart = SDL_GetTicks();
 
-        /* Ã©vÃ¨nements */
+        /* évènements */
         while( SDL_PollEvent( &event ) != 0 ){
 
             if( event.type == SDL_QUIT){
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]){
             }
 
             // entrÃ© liÃ© au jeu
-            GameEvent(grid1, &event, &quit);
+            Game_event(grid1, &event, &quit);
 
             // event UI
             Window_event(&window, &event, &draw );
@@ -89,57 +89,21 @@ int main(int argc, char* argv[]){
         }
 
         /* logique */
-        if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false){
-
-            if( IsLigneOnGrid(grid1) == true ){
-
-                // score
-                score += Calc_Score(grid1);
-
-                // dÃ©truit les lignes et remplie les cases manquantes du tableau
-                fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
-            }
-            else {
-
-                if(IsTokenOfType(grid1, NONE ) == true ){
-
-                    while( IsTokenOfType(grid1, NONE ) == true ){
-
-                        // regroupe tout les jetons
-                        RegroupTokens(grid1, DOWN);
-
-                        // remplie les espaces vides
-                        InjectLigne(grid1, UP);
-                    }
-
-                }else {
-
-                    /*if(MoveAvailable(grid1) == 0){
-
-                        RandomizeGrid(grid1);
-                    }*/
-                }
-            }
-        }
+        Game_logic(grid1);
 
         /* maj des mlabels */
         sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
-        sprintf(label_score.text,"Score : %d ",score);
-        sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
+        sprintf(label_score.text,"Score : %d ", grid1->score);
+        sprintf(label_mouvements.text,"Nombre de mouvement : %d",grid1->moveAvailable);
 
         /* animations - textes */
-        if ( IsTokenDestructing(grid1) == false )
-            AnimMovingTokens(grid1);
-        else
-            AnimDestructingTokens(grid1);
+        Grid_anim(grid1);
 
         /* affichage */
         SDL_RenderClear(pRenderer);                                                             // efface tout le contenu du renderer
 
         Window_draw(&window, pRenderer);
-
-        DrawGrid(grid1,pRenderer);                                                              // déssine la grille sur le renderer
-
+        Grid_draw(grid1,pRenderer);                                                              // déssine la grille sur le renderer
         UI_label_draw(&label_score,pRenderer);
         UI_label_draw(&label_nbMove,pRenderer);
         UI_label_draw(&label_mouvements,pRenderer);
