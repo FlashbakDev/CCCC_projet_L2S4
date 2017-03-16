@@ -9,8 +9,8 @@ int main(int argc, char* argv[]){
     /* Initialisation */
     fprintf(stdout,"Initialisation begin : \n");
 
-    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
-    SDL_Event event;            // gestionnaire d'évènement
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit oÃ¹ l'on va dÃ©ssiner )
+    SDL_Event event;            // gestionnaire d'Ã©vÃ¨nement
     Array objects;
     Window window;
 
@@ -22,18 +22,17 @@ int main(int argc, char* argv[]){
     /* initialisation du jeu */
     int gridHeight = 10;
     int gridWidth = 10;
-    int nbMove = 5;
     int nbColor = 6;
+    int nbMove = 5;
 
     Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
 
-    // création des zone de jeu et d'affichage
-    SDL_Rect rect_grid = { 0, 0, grid1->width * TOKEN_WIDTH, grid1->height * TOKEN_HEIGHT };
-    SDL_Rect rect_UI = { rect_grid.x + rect_grid.w, 0, 250, rect_grid.h };
+    // crÃ©ation des zone de jeu et d'affichage
+    SDL_Rect rect_UI = { grid1->rect.x + grid1->rect.w, 0, 250, grid1->rect.h };
     SDL_Rect rect_screen = {0 ,
                             0 ,
-                            (rect_grid.w + rect_grid.x > rect_UI.w + rect_UI.x ) ? rect_grid.w + rect_grid.x : rect_UI.w + rect_UI.x ,
-                            (rect_grid.h + rect_grid.y > rect_UI.h + rect_UI.y ) ? rect_grid.h + rect_grid.y : rect_UI.h + rect_UI.y } ;
+                            (grid1->rect.w + grid1->rect.x > rect_UI.w + rect_UI.x ) ? grid1->rect.w + grid1->rect.x : rect_UI.w + rect_UI.x ,
+                            (grid1->rect.h + grid1->rect.y > rect_UI.h + rect_UI.y ) ? grid1->rect.h + grid1->rect.y : rect_UI.h + rect_UI.y } ;
 
     Array_new(&objects);
 
@@ -60,13 +59,7 @@ int main(int argc, char* argv[]){
     // curseur
     SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver_blue.png");
     SDL_Texture *pTexture_CursorOver = SDL_CreateTextureFromSurface(pRenderer,pSurface_Cursor);
-    SDL_Rect position_CursorOver;
-    SDL_QueryTexture(pTexture_CursorOver, NULL, NULL, &position_CursorOver.w, &position_CursorOver.h);
-
-    SDL_Point dragStart, dragEnd;
-    bool dragAndDrop = false;
-
-    SDL_Point cursorTokenPosition;
+    SDL_QueryTexture(pTexture_CursorOver, NULL, NULL, &rect_CursorOver.w, &rect_CursorOver.h);
 
     // textures
     SDL_Surface *pSurface_Token[6];
@@ -78,172 +71,30 @@ int main(int argc, char* argv[]){
     pSurface_Token[5] = IMG_Load("data/Tokens/Token_orange.png");
 
     /* boucle de jeu */
+
     int score = 0;
-    bool loop = true;
     bool draw = true; // placebo
     bool quit = false;
-    bool cursorOnGrid = false;
-    while( loop && !quit ){
+
+    while( !quit ){
 
         int frameStart = SDL_GetTicks();
 
-        /* évènements */
+        /* Ã©vÃ¨nements */
         while( SDL_PollEvent( &event ) != 0 ){
 
-            switch(event.type){
+            if( event.type == SDL_QUIT){
 
-                case SDL_QUIT:{
-
-                    quit = true;
-                }
-                break;
-
-                // appuie d'une touche du clavier
-                case SDL_KEYDOWN:{
-
-                    switch(event.key.keysym.sym){
-
-                        // appuie sur echap
-                        case SDLK_ESCAPE: {
-
-                            fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
-                            //loop = false;
-                            quit = true;
-                        }
-                        break;
-
-
-                        case SDLK_KP_1 :
-                            nbMove +=3;
-                            break;
-
-
-                            case SDLK_KP_2 :
-                                if(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color < nbColor-1)
-                                grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color ++;
-                                else grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color = 0;
-
-                            break;
-
-                            case SDLK_KP_3 :
-                                if(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color >0)
-                                grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color --;
-                                else grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x].color = nbColor-1;
-
-
-                            break;
-
-                            case SDLK_KP_4 :
-                                printf("deplacement possible %d",MoveAvailable(grid1));
-                                break;
-
-                            case SDLK_KP_5 :
-                                RandomizeGrid(grid1);
-                                break;
-
-                    }
-                }
-                break;
-
-                // bouttons de souris appuié
-                case SDL_MOUSEBUTTONDOWN:{
-
-                    switch(event.button.button){
-
-                        // bouton gauche
-                        case SDL_BUTTON_LEFT:{
-
-                            if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false && cursorOnGrid == true ){
-
-                                dragStart.x = cursorTokenPosition.x;
-                                dragStart.y = cursorTokenPosition.y;
-
-                                dragAndDrop = grid1->tokens[dragStart.y][dragStart.x].type != NONE;
-                            }
-                        }
-                        break;
-
-                        // click droit pour afficher les stats du jeton
-                        case SDL_BUTTON_RIGHT:{
-
-                            if ( cursorOnGrid == true ){
-
-                                fprintf(stdout,"Jeton en posisition (%d,%d) : ",cursorTokenPosition.x, cursorTokenPosition.y);
-                                DebugToken(grid1->tokens[cursorTokenPosition.y][cursorTokenPosition.x]);
-                                fprintf(stdout,"\n");
-                            }
-                        }
-                        break;
-                    }
-                }
-                break;
-
-                case SDL_MOUSEBUTTONUP:{
-
-                    switch(event.button.button){
-
-                        case SDL_BUTTON_LEFT:{
-
-                            if ( dragAndDrop == true ){
-
-                                dragEnd.x = cursorTokenPosition.x;
-                                dragEnd.y = cursorTokenPosition.y;
-
-                                fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
-
-                                int distX = sqrt( pow( dragEnd.x - dragStart.x, 2) );
-                                int distY = sqrt( pow( dragEnd.y - dragStart.y, 2) );
-
-                                if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
-
-                                    HardPermuteToken(grid1, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
-
-                                    if ( IsLigneOnGrid(grid1) == false ){
-
-                                        HardPermuteToken(grid1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
-                                    }
-                                    else {
-
-                                        nbMove --;
-
-                                        if ( nbMove <= 0 ){
-
-                                            loop = false;
-                                        }
-                                    }
-                                }
-
-                                dragAndDrop = false;
-                            }
-                        }
-                        break;
-                    }
-                }
-                break;
-
-                // mouvement de souris
-                case SDL_MOUSEMOTION:{
-
-                    cursorOnGrid = PointInRect(event.motion.x, event.motion.y, &rect_grid);
-
-                    if ( cursorOnGrid == true ){
-
-                        cursorTokenPosition.x = (event.motion.x / TOKEN_WIDTH);
-                        cursorTokenPosition.y = (event.motion.y / TOKEN_HEIGHT);
-
-                        position_CursorOver.x = cursorTokenPosition.x * TOKEN_WIDTH;
-                        position_CursorOver.y = cursorTokenPosition.y * TOKEN_HEIGHT;
-                    }
-                    else{
-
-                        if ( dragAndDrop == true ){
-
-                            dragAndDrop = false;
-                        }
-                    }
-                }
-                break;
+                quit = true;
             }
+
+            if ( event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE ){
+
+                fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
+            }
+
+            // entrÃ© liÃ© au jeu
+            GameEvent(grid1, &event, &quit);
 
             // event UI
             Window_event(&window, &event, &draw );
@@ -251,8 +102,6 @@ int main(int argc, char* argv[]){
         }
 
         /* logique */
-        sprintf(label_nbMove.text," NbCoups : %d", nbMove);
-        sprintf(label_score.text,"Score : %d ",score);
         if ( IsTokenMoving(grid1) == false && IsTokenDestructing(grid1) == false){
 
             if( IsLigneOnGrid(grid1) == true ){
@@ -260,10 +109,7 @@ int main(int argc, char* argv[]){
                 // score
                 score += Calc_Score(grid1);
 
-
-
-
-                // détruit les lignes et remplie les cases manquantes du tableau
+                // dÃ©truit les lignes et remplie les cases manquantes du tableau
                 fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(grid1) );
             }
             else {
@@ -278,19 +124,19 @@ int main(int argc, char* argv[]){
                     InjectLigne(grid1, UP);
                 }
                 }else {
-                    sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
 
-                 if(MoveAvailable(grid1) == 0)
-                 {
-                    RandomizeGrid(grid1);
-                 }
+                    if(MoveAvailable(grid1) == 0){
 
+                        RandomizeGrid(grid1);
+                    }
                 }
-
             }
-
-            //fprintf(stdout,"Grille remplie !\n");
         }
+
+        /* maj des mlabels */
+        sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
+        sprintf(label_score.text,"Score : %d ",score);
+        sprintf(label_mouvements.text,"Nombre de mouvement : %d",MoveAvailable(grid1));
 
         /* animations - textes */
         if ( IsTokenDestructing(grid1) == false )
@@ -303,19 +149,19 @@ int main(int argc, char* argv[]){
 
         Window_draw(&window, pRenderer);
 
-        if ( cursorOnGrid == true )
-            SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&position_CursorOver);            // pour le curseur de la souris
+        if ( grid1->is_cursorOnGrid == true )
+            SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&rect_CursorOver);            // pour le curseur de la souris
 
-        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // déssine la grille sur le renderer
+        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // dÃ©ssine la grille sur le renderer
 
         UI_label_draw(&label_score,pRenderer);
         UI_label_draw(&label_nbMove,pRenderer);
         UI_label_draw(&label_mouvements,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
 
-        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
+        SDL_RenderPresent(pRenderer);                                                           // dÃ©ssine le renderer Ã  l'Ã©cran
 
-        /* gestion de la fréquence d'affichage ( pour les animations )*/
+        /* gestion de la frÃ©quence d'affichage ( pour les animations )*/
         WaitForNextFrame(frameStart);
     }
 

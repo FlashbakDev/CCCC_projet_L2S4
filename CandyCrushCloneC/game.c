@@ -4,7 +4,7 @@
 
 Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
-    /* alÃ©atoire */
+    /* aléatoire */
     srand(time(NULL));
 
     Grid *pGrid = malloc(sizeof(Grid));
@@ -15,6 +15,14 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
 
+    pGrid->rect.x = 0;
+    pGrid->rect.y = 0;
+    pGrid->rect.w = pGrid->width * TOKEN_WIDTH;
+    pGrid->rect.h = pGrid->height * TOKEN_HEIGHT;
+    pGrid->is_cursorOnGrid = false;
+    pGrid->cursorTokenPosition.x = 0;
+    pGrid->cursorTokenPosition.y = 0;
+
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
     if ( pGrid->tokens == NULL ){ return NULL; }
@@ -23,7 +31,7 @@ Grid *NewGrid(int width, int height, int nbMove, int nbColor){
 
         pGrid->tokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
 
-        /* dÃ©sallocation de la mÃ©moire en cas d'erreur */
+        /* désallocation de la mémoire en cas d'erreur */
         if ( pGrid->tokens[i] == NULL ){
 
             for(i=i-1 ; i >= 0 ; i--){
@@ -47,7 +55,7 @@ void RandomizeGrid(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            InitRandomToken(&pGrid->tokens[i][j], pGrid->nbColor, j, i);
+            InitRandomToken(pGrid, &pGrid->tokens[i][j], pGrid->nbColor, j, i);
         }
     }
 
@@ -66,7 +74,7 @@ void RandomizeGrid(Grid *pGrid){
 
 // =========================================================
 
-void InitRandomToken(Token *token, int nbColor, int x, int y){
+void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y){
 
     token->type = TOKEN;
     token->color = (Colors)(rand() % nbColor);
@@ -75,7 +83,7 @@ void InitRandomToken(Token *token, int nbColor, int x, int y){
     token->startDestructAnim = -1;
 
     token->textureSize = 100;
-    CalculTokenRectTexure(token,x,y);
+    CalculTokenRectTexure(pGrid, token,x,y);
 
     token->score = TOKEN_SCORE;
 }
@@ -96,7 +104,7 @@ void CheckGrid(Grid *pGrid){
 
             if ( pGrid->tokens[i][j].type != NONE ){
 
-                // vÃ©rification verticale
+                // vérification verticale
                 if ( i > 0 && i < pGrid->height - 1){
 
                     if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
@@ -107,7 +115,7 @@ void CheckGrid(Grid *pGrid){
                     }
                 }
 
-                // vÃ©rification horizontale
+                // vérification horizontale
                 if ( j > 0 && j < pGrid->width - 1){
 
                     if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
@@ -190,7 +198,7 @@ void AnimDestructingTokens(Grid *pGrid){
                     // perte en une frame
                     pGrid->tokens[i][j].textureSize = 100 - ( 100.0 / DESTRUCT_SPEED * ( SDL_GetTicks() - pGrid->tokens[i][j].startDestructAnim ) ) ;
 
-                    CalculTokenRectTexure(&pGrid->tokens[i][j], j, i);
+                    CalculTokenRectTexure(pGrid, &pGrid->tokens[i][j], j, i);
                 }
                 else {
 
@@ -447,11 +455,11 @@ void InjectLigne(Grid *pGrid, Directions dir){
 
                     //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
 
-                    // temporairement, on hard code le fait que la ligne superieur doit Ãªtre hors champs
+                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
                     if (  ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 < 0 )
-                        InitRandomToken( &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 );
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 );
                     else
-                        InitRandomToken( &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
                 }
             }
         }
@@ -484,13 +492,178 @@ void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 }
 
 // =========================================================
-// Ã©venements
+// évenements
 // =========================================================
 
 void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) )
         *pQuit = true;
+}
+
+void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
+
+    switch(pEvent->type){
+
+        case SDL_KEYDOWN :{
+
+
+            switch( pEvent->key.keysym.sym ){
+
+                case SDLK_d :{
+
+                    pGrid->nbMove ++;
+                }
+                break;
+
+                case SDLK_q :{
+
+                    pGrid->nbMove --;
+
+                    if ( pGrid->nbMove <= 0 ){
+
+                        pQuit = true;
+                    }
+                }
+                break;
+
+                case SDLK_z :{
+
+                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color < pGrid->nbColor-1){
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color ++;
+                    }
+                    else {
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = 0;
+                    }
+
+                }
+                break;
+
+                case SDLK_s :{
+
+                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color >0){
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
+                    }
+                    else{
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
+                    }
+
+                }
+                break;
+
+                case SDLK_e : {
+
+                    RandomizeGrid(pGrid);
+                }
+                break;
+            }
+        }
+
+        // bouttons de souris appuié
+        case SDL_MOUSEBUTTONDOWN:{
+
+            switch(pEvent->button.button){
+
+                // bouton gauche
+                case SDL_BUTTON_LEFT:{
+
+                    if ( IsTokenMoving(pGrid) == false && IsTokenDestructing(pGrid) == false && pGrid->is_cursorOnGrid == true ){
+
+                        dragStart.x = pGrid->cursorTokenPosition.x;
+                        dragStart.y = pGrid->cursorTokenPosition.y;
+
+                        dragAndDrop = pGrid->tokens[dragStart.y][dragStart.x].type != NONE;
+                    }
+                }
+                break;
+
+                // click droit pour afficher les stats du jeton
+                case SDL_BUTTON_RIGHT:{
+
+                    if ( pGrid->is_cursorOnGrid == true ){
+
+                        fprintf(stdout,"Jeton en posisition (%d,%d) : ",pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                        DebugToken(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x]);
+                        fprintf(stdout,"\n");
+                    }
+                }
+                break;
+            }
+        }
+        break;
+
+        case SDL_MOUSEBUTTONUP:{
+
+            switch(pEvent->button.button){
+
+                case SDL_BUTTON_LEFT:{
+
+                    if ( dragAndDrop == true ){
+
+                        SDL_Point dragEnd;
+
+                        dragEnd.x = pGrid->cursorTokenPosition.x;
+                        dragEnd.y = pGrid->cursorTokenPosition.y;
+
+                        fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
+
+                        int distX = sqrt( pow( dragEnd.x - dragStart.x, 2) );
+                        int distY = sqrt( pow( dragEnd.y - dragStart.y, 2) );
+
+                        if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
+
+                            HardPermuteToken(pGrid, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
+
+                            if ( IsLigneOnGrid(pGrid) == false ){
+
+                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
+                            }
+                            else {
+
+                                pGrid->nbMove --;
+
+                                if ( pGrid->nbMove <= 0 ){
+
+                                    pQuit = true;
+                                }
+                            }
+                        }
+
+                        dragAndDrop = false;
+                    }
+                }
+                break;
+            }
+        }
+        break;
+
+        // mouvement de souris
+        case SDL_MOUSEMOTION:{
+
+            pGrid->is_cursorOnGrid = PointInRect(pEvent->motion.x, pEvent->motion.y, &pGrid->rect);
+
+            if ( pGrid->is_cursorOnGrid == true ){
+
+                pGrid->cursorTokenPosition.x = (pEvent->motion.x / TOKEN_WIDTH);
+                pGrid->cursorTokenPosition.y = (pEvent->motion.y / TOKEN_HEIGHT);
+
+                rect_CursorOver.x = pGrid->cursorTokenPosition.x * TOKEN_WIDTH;
+                rect_CursorOver.y = pGrid->cursorTokenPosition.y * TOKEN_HEIGHT;
+            }
+            else{
+
+                if ( dragAndDrop == true ){
+
+                    dragAndDrop = false;
+                }
+            }
+        }
+        break;
+    }
 }
 
 
