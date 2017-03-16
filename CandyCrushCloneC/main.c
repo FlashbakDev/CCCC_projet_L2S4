@@ -23,20 +23,22 @@ int main(int argc, char* argv[]){
     int nbColor = 6;
     int nbMove = 5;
 
-    Grid *grid1 = NewGrid(gridWidth,gridHeight,nbMove,nbColor);
 
     // création des zone de jeu et d'affichage
-    SDL_Rect rect_UI = { grid1->rect.x + grid1->rect.w, 0, 250, grid1->rect.h };
+    SDL_Rect rect_grid = { 0,0,gridWidth, gridHeight };
+    SDL_Rect rect_UI = { rect_grid.x * TOKEN_WIDTH + rect_grid.w * TOKEN_WIDTH, 0, 250, rect_grid.h * TOKEN_HEIGHT };
     SDL_Rect rect_screen = {0 ,
                             0 ,
-                            (grid1->rect.w + grid1->rect.x > rect_UI.w + rect_UI.x ) ? grid1->rect.w + grid1->rect.x : rect_UI.w + rect_UI.x ,
-                            (grid1->rect.h + grid1->rect.y > rect_UI.h + rect_UI.y ) ? grid1->rect.h + grid1->rect.y : rect_UI.h + rect_UI.y } ;
+                            (rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH > rect_UI.w + rect_UI.x ) ? rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH : rect_UI.w + rect_UI.x ,
+                            (rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT > rect_UI.h + rect_UI.y ) ? rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT : rect_UI.h + rect_UI.y } ;
 
     Array_new(&objects);
 
     pRenderer = InitGame("Candy Crush Clone C", &objects, rect_screen.w, rect_screen.h );
     if ( !pRenderer )
         return 1;
+
+    Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor);
 
     fprintf(stdout,"debug\n");
 
@@ -49,7 +51,7 @@ int main(int argc, char* argv[]){
     fprintf(stdout,"Initialisation end.\n");
 
     // curseur
-    SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver_blue.png");
+    /*SDL_Surface *pSurface_Cursor = IMG_Load("./data/MouseOver_blue.png");
     SDL_Texture *pTexture_CursorOver = SDL_CreateTextureFromSurface(pRenderer,pSurface_Cursor);
     SDL_QueryTexture(pTexture_CursorOver, NULL, NULL, &rect_CursorOver.w, &rect_CursorOver.h);
 
@@ -60,7 +62,7 @@ int main(int argc, char* argv[]){
     pSurface_Token[2] = IMG_Load("data/Tokens/Token_green.png");
     pSurface_Token[3] = IMG_Load("data/Tokens/Token_yellow.png");
     pSurface_Token[4] = IMG_Load("data/Tokens/Token_purple.png");
-    pSurface_Token[5] = IMG_Load("data/Tokens/Token_orange.png");
+    pSurface_Token[5] = IMG_Load("data/Tokens/Token_orange.png");*/
 
     /* boucle de jeu */
 
@@ -132,10 +134,10 @@ int main(int argc, char* argv[]){
 
         Window_draw(&window, pRenderer);
 
-        if ( grid1->is_cursorOnGrid == true )
-            SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&rect_CursorOver);            // pour le curseur de la souris
+        //if ( grid1->is_cursorOnGrid == true )
+            //SDL_RenderCopy(pRenderer,pTexture_CursorOver,NULL,&rect_CursorOver);              // pour le curseur de la souris
 
-        DrawGrid(grid1,pRenderer,pSurface_Token);                                               // déssine la grille sur le renderer
+        DrawGrid(grid1,pRenderer);                                                              // déssine la grille sur le renderer
 
         UI_label_draw(&label,pRenderer);
         UI_button_draw(&button_quit, pRenderer);

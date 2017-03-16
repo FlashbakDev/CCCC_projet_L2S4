@@ -2,23 +2,21 @@
 
 // =========================================================
 
-Grid *NewGrid(int width, int height, int nbMove, int nbColor){
+Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
 
     /* aléatoire */
     srand(time(NULL));
 
     Grid *pGrid = malloc(sizeof(Grid));
 
-    pGrid->width = width;
-    pGrid->height = height;
+    pGrid->width = rect.w;
+    pGrid->height = rect.h;
     pGrid->nbMove = nbMove;
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
 
-    pGrid->rect.x = 0;
-    pGrid->rect.y = 0;
-    pGrid->rect.w = pGrid->width * TOKEN_WIDTH;
-    pGrid->rect.h = pGrid->height * TOKEN_HEIGHT;
+    MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
+
     pGrid->is_cursorOnGrid = false;
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
@@ -78,6 +76,8 @@ void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y){
 
     token->type = TOKEN;
     token->color = (Colors)(rand() % nbColor);
+    token->image = image_tokens[token->color];
+    token->image_background = image_cursorBlue;
     token->isMoving = false;
     token->isDestruct = false;
     token->startDestructAnim = -1;
@@ -138,34 +138,34 @@ void AnimMovingTokens(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].rect_texture.x != ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2) ){
+            if ( pGrid->tokens[i][j].rect_image.x != ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_image.w / 2) ){
 
                 pGrid->tokens[i][j].isMoving = true;
 
-                if ( pGrid->tokens[i][j].rect_texture.x > ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2) )
-                    pGrid->tokens[i][j].rect_texture.x -= FALL_SPEED ;
+                if ( pGrid->tokens[i][j].rect_image.x > ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_image.w / 2) )
+                    pGrid->tokens[i][j].rect_image.x -= FALL_SPEED ;
                 else
-                    pGrid->tokens[i][j].rect_texture.x += FALL_SPEED ;
+                    pGrid->tokens[i][j].rect_image.x += FALL_SPEED ;
 
-                if ( sqrt( pow( pGrid->tokens[i][j].rect_texture.x - ( ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2)) ,2) ) < FALL_SPEED ){
+                if ( sqrt( pow( pGrid->tokens[i][j].rect_image.x - ( ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_image.w / 2)) ,2) ) < FALL_SPEED ){
 
-                    pGrid->tokens[i][j].rect_texture.x = ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_texture.w / 2);
+                    pGrid->tokens[i][j].rect_image.x = ((j * TOKEN_WIDTH) + (TOKEN_WIDTH/2)) - (pGrid->tokens[i][j].rect_image.w / 2);
                     pGrid->tokens[i][j].isMoving = false;
                 }
             }
 
-            if ( pGrid->tokens[i][j].rect_texture.y != (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2)) ){
+            if ( pGrid->tokens[i][j].rect_image.y != (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_image.h / 2)) ){
 
                 pGrid->tokens[i][j].isMoving = true;
 
-                if ( pGrid->tokens[i][j].rect_texture.y > (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2)) )
-                    pGrid->tokens[i][j].rect_texture.y -= FALL_SPEED ;
+                if ( pGrid->tokens[i][j].rect_image.y > (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_image.h / 2)) )
+                    pGrid->tokens[i][j].rect_image.y -= FALL_SPEED ;
                 else
-                    pGrid->tokens[i][j].rect_texture.y += FALL_SPEED ;
+                    pGrid->tokens[i][j].rect_image.y += FALL_SPEED ;
 
-                if ( sqrt( pow( pGrid->tokens[i][j].rect_texture.y - (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2)) ,2) ) < FALL_SPEED ){
+                if ( sqrt( pow( pGrid->tokens[i][j].rect_image.y - (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_image.h / 2)) ,2) ) < FALL_SPEED ){
 
-                    pGrid->tokens[i][j].rect_texture.y = (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_texture.h / 2));
+                    pGrid->tokens[i][j].rect_image.y = (((i * TOKEN_HEIGHT) + (TOKEN_HEIGHT/2)) - (pGrid->tokens[i][j].rect_image.h / 2));
                     pGrid->tokens[i][j].isMoving = false;
                 }
             }
@@ -456,8 +456,8 @@ void InjectLigne(Grid *pGrid, Directions dir){
                     //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
 
                     // temporairement, on hard code le fait que la ligne superieur doit être hors champs
-                    if (  ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 < 0 )
-                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_texture.y / TOKEN_HEIGHT ) - 1 );
+                    if (  ( GetColumnUpperToken(pGrid,j)->rect_image.y / TOKEN_HEIGHT ) - 1 < 0 )
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_image.y / TOKEN_HEIGHT ) - 1 );
                     else
                         InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
                 }

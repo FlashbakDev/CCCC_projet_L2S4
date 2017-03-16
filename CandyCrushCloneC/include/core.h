@@ -28,6 +28,14 @@ typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE }Colors;
 
 typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
 
+typedef struct Image{
+
+    SDL_Texture *pTexture;
+    int w;
+    int h;
+
+}Image;
+
 typedef struct Token{
 
     TokenTypes type;
@@ -35,8 +43,11 @@ typedef struct Token{
     bool aligned;
     int score;
 
-    SDL_Rect rect_texture;
+    Image image;
+    SDL_Rect rect_image;
     int textureSize;
+
+    Image image_background;
 
     // animations
     bool isMoving;
@@ -69,14 +80,6 @@ typedef struct Array{
 
 }Array;
 
-typedef struct Image{
-
-    SDL_Texture *pTexture;
-    int w;
-    int h;
-
-}Image;
-
 typedef struct Font{
 
     TTF_Font *pFont;
@@ -102,7 +105,8 @@ typedef struct Window {
 // =========================================================
 
 extern Font font_default;
-extern Image image_normal, image_prelight, image_active, image_selected, image_unselected;
+extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[6];
 extern int screen_width, screen_height;
 
 extern bool dragAndDrop;
@@ -161,7 +165,7 @@ int Window_event(Window *pWindow, SDL_Event *pEvent, bool *pDraw);
 void WaitForNextFrame(int frameStart);
 
 /* affiche la grille */
-void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[5]);
+void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer);
 
 /* affiche une image */
 int RenderImage(SDL_Renderer *pRenderer, Image image, int x, int y, SDL_Rect *pRect);

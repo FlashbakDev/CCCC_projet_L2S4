@@ -23,7 +23,7 @@ Rôle : fonctions gérants une partie de CCCC.
 // =========================================================
 
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
-Grid *NewGrid(int width, int height, int nbMove, int nbColor);
+Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor);
 
 /* remplie la grille aléatoirement */
 void RandomizeGrid(Grid *pGrid);
