@@ -44,8 +44,8 @@ int main(int argc, char* argv[]){
 
     fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
-    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 40 , rect_UI.y + 40 ));
-    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 60 , rect_UI.y + 60 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
 
     sprintf(label_score.text,"Score : %d ",0);
     sprintf(label_nbMove.text,"NbCoups : %d", nbMove);
@@ -91,6 +91,7 @@ int main(int argc, char* argv[]){
             if ( event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE ){
 
                 fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
+                quit = true;
             }
 
             // entré lié au jeu
@@ -126,8 +127,9 @@ int main(int argc, char* argv[]){
                 }else {
 
                     if(MoveAvailable(grid1) == 0){
-
+                        SDL_Delay(1000);
                         RandomizeGrid(grid1);
+
                     }
                 }
             }

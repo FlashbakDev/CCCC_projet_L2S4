@@ -272,6 +272,28 @@ int Calc_Score(Grid *pGrid ){
 
         }
 
+        if(Nb_Align >= 3)
+                {
+
+                    Multi = 1;
+                    if(Nb_Align>=4)
+                    {
+                        Multi = 3;
+
+                        if(Nb_Align>=5)
+                        {
+                            Multi = 10;
+
+                        }
+                    }
+                    //Faire boucle en ajoutant les scores de jetons individuels
+                    //Puis multiplier par Multi
+
+                    Score += Multi * Val;
+
+                    printf("Score de la ligne : %d \n", Score);
+                }
+
     }
     //Verification des allignements verticaux
     for(int j = 0; j < pGrid->width; j++){
@@ -310,6 +332,27 @@ int Calc_Score(Grid *pGrid ){
                  Val = pGrid->tokens[i][j].score;
             }
         }
+        if(Nb_Align >= 3)
+                {
+
+                    Multi = 1;
+                    if(Nb_Align>=4)
+                    {
+                        Multi = 3;
+
+                        if(Nb_Align>=5)
+                        {
+                            Multi = 10;
+
+                        }
+                    }
+                    //Faire boucle en ajoutant les scores de jetons individuels
+                    //Puis multiplier par Multi
+
+                    Score += Multi * Val;
+
+                    printf("Score de la ligne : %d \n", Score);
+                }
     }
     return Score;
 }
@@ -522,7 +565,7 @@ void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                     if ( pGrid->nbMove <= 0 ){
 
-                        pQuit = true;
+                        *pQuit = true;
                     }
                 }
                 break;
