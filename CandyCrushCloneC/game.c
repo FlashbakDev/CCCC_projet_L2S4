@@ -430,19 +430,41 @@ Token *GetColumnUpperToken(Grid *pGrid,int x){
 }
 
 
-/*Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
-{int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
+Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
+{
+    int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
     int i,j = x;
-    i*= abs(DirectionsVectors[dir][0]);
-    j *= abs(DirectionsVectors[dir][1]);
-    while(pGrid->tokens[i][j] != NONE)
+
+    switch(dir)
     {
-        i += DirectionsVectors[dir][0];
-        j += DirectionsVectors[dir][1];
+        case UP:
+            for(int i = 0; i < pGrid->height; i ++ ){
+
+            if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
+            }
+        break;
+        case DOWN:
+          for(int i = pGrid->height; i >=0; i -- ){
+
+            if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
+            }
+            break;
+        case LEFT:
+            for(int i = 0; i < pGrid->width; i ++ ){
+
+            if ( pGrid->tokens[x][i].type != NONE ){ return &pGrid->tokens[x][i]; }
+            }
+        break;
+        case RIGHT:
+            for(int i = pGrid->width; i >=0 ; i -- ){
+
+            if ( pGrid->tokens[x][i].type != NONE ){ return &pGrid->tokens[x][i]; }
+            }
+        break;
 
     }
 
-}*/
+}
 
 // =========================================================
 
@@ -487,8 +509,8 @@ void ChangeDirection(Grid *pGrid, Directions dir)
 void RegroupTokens(Grid *pGrid){
 
 int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
-    //Directions dir = pGrid->direction_grille;
-    Directions dir = DOWN;
+    Directions dir = pGrid->direction_grille;
+    //Directions dir = DOWN;
     bool ok = false;
     while ( ok == false ){
 
@@ -528,7 +550,7 @@ return dir;
 }
 // =========================================================
 
-void InjectLigne(Grid *pGrid){
+/*void InjectLigne(Grid *pGrid){
 
     //Directions dir = InversDir(pGrid->direction_grille);
     Directions dir = UP;
@@ -567,8 +589,61 @@ void InjectLigne(Grid *pGrid){
         }
         break;
     }
-}
+}*/
 
+
+void InjectLigne(Grid *pGrid){
+
+    Directions dir = InversDir(pGrid->direction_grille);
+    //Directions dir = UP;
+    switch(dir){
+
+        case UP :{
+
+            for(int j = 0; j < pGrid->width; j++){
+
+                if ( pGrid->tokens[0][j].type != TOKEN ){
+
+                    //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
+printf("direction : %d", dir);
+                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
+                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) - 1 < 0 )
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) - 1 );
+                    else
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
+                }
+            }
+        }
+        break;
+
+        case DOWN :{
+             for(int j = 0; j < pGrid->width; j++){
+
+                if ( pGrid->tokens[0][j].type != TOKEN ){
+
+                    //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
+
+                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
+                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) + 1 >pGrid->height-1 )
+                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) +1 );
+                    else
+                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, pGrid->height );
+                }
+            }
+        }
+        break;
+
+        case LEFT :{
+
+        }
+        break;
+
+        case RIGHT :{
+
+        }
+        break;
+    }
+}
 // =========================================================
 
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){

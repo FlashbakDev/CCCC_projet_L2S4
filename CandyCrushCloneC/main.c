@@ -20,8 +20,8 @@ int main(int argc, char* argv[]){
     UI_label label_nbMove = {false};
 
     /* initialisation du jeu */
-    int gridHeight = 13;
-    int gridWidth = 15;
+    int gridHeight = 10;
+    int gridWidth = 10;
     int nbColor = 6;
     int nbMove = 5;
 
