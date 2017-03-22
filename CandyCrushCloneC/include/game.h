@@ -53,7 +53,6 @@ int DestroyAlignedTokens(Grid *pGrid);
 void ChangeDirectionRandom(Grid *pGrid);
 void ChangeDirection(Grid *pGrid, Directions dir);
 
-
 /* regroupe les jetons dans la direction donné */
 void RegroupTokens(Grid *pGrid);
 

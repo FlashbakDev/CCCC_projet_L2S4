@@ -336,35 +336,43 @@ int Utf8Fix(char *str){
 
 void MoveAvailable(Grid * pGrid){
 
-    int nb = 0;
+    fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
-    for(int i=0; i< pGrid->height; i++){
-        for(int j=0;j<pGrid->width; j++){
+    pGrid->moveAvailable = 0;
 
-            //Echange gauche droite
-            if(j < pGrid->width-1){
+    for(int i=0; i< pGrid->height-1; i++){
 
-                PermuteToken(pGrid,j,i,j+1,i);
+        //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d\n",pGrid->moveAvailable, i);
 
-                if(IsLigneOnGrid(pGrid)==true)
-                    nb++;
+        for(int j=0;j < pGrid->width-1; j++){
 
-                PermuteToken(pGrid,j,i,j+1,i);
+            //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d, j = %d\n",pGrid->moveAvailable, i, j);
+
+            PermuteToken(pGrid,j,i,j+1,i);
+
+            if(IsLigneOnGrid(pGrid)==true){
+
+                pGrid->moveAvailable++;
+
+                fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d, j = %d\n",pGrid->moveAvailable, i, j);
             }
 
-            if(i < pGrid->height-1){
+            PermuteToken(pGrid,j,i,j+1,i);
 
-                PermuteToken(pGrid,j,i,j,i+1);
+            PermuteToken(pGrid,j,i,j,i+1);
 
-                 if(IsLigneOnGrid(pGrid)==true)
-                    nb++;
+             if(IsLigneOnGrid(pGrid)==true){
 
-                PermuteToken(pGrid,j,i,j,i+1);
+                pGrid->moveAvailable++;
+
+                fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d, j = %d\n",pGrid->moveAvailable, i, j);
             }
+
+            PermuteToken(pGrid,j,i,j,i+1);
         }
     }
 
-    pGrid->moveAvailable = nb;
+    //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d\n",pGrid->moveAvailable);
 }
 
 // ========================================================
