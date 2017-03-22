@@ -5,7 +5,7 @@ constants.h
 
 Par Benjamin, pour le projet CCCC le 24/02/2017.
 
-Rôle : définit des constantes pour tout le programme ( taille de la fenêtre... ).
+RÃ´le : dÃ©finit des constantes pour tout le programme ( taille de la fenÃªtre... ).
 
 */
 
@@ -35,12 +35,13 @@ Rôle : définit des constantes pour tout le programme ( taille de la fenêtre..
 #define TOKEN_WIDTH         64
 #define TOKEN_HEIGHT        64
 
-#define FRAME_PER_SECOND    30      // rafraichissement de l'écran
-#define FALL_SPEED          6      // en pixel par frame
-#define DESTRUCT_SPEED      250    // en ms ( pour aller de 100% à 0% de taille de texture )
-#define TOKEN_SCORE         10      // score de base par jeton détruit
+#define FRAME_PER_SECOND    60      // rafraichissement de l'Ã©cran
+#define FALL_SPEED          6       // en pixel par frame
+#define DESTRUCT_SPEED      250     // en ms ( pour aller de 100% Ã  0% de taille de texture )
 
-#define UI_MAX_TEXT         100     // longueur du texte maximal affich� � l'�cran
+#define TOKEN_SCORE         10      // score de base par jeton dÃ©truit
+
+#define UI_MAX_TEXT         100     // longueur du texte maximal affiché à l'écran
 
 #define UI_MAX_LENGTH       200
 #define UI_MIN_LENGTH       10

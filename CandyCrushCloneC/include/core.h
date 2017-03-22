@@ -5,7 +5,7 @@ core.h
 
 Par Benjamin, pour le projet CCCC le 09/03/2017.
 
-Rôle : fonctions générales du jeu, aussi bien affichage que logique.
+RÃ´le : fonctions gÃ©nÃ©rales du jeu, aussi bien affichage que logique.
 
 */
 
@@ -28,7 +28,13 @@ typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE }Colors;
 
 typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
 
+typedef struct Image{
 
+    SDL_Texture *pTexture;
+    int w;
+    int h;
+
+}Image;
 
 typedef struct Token{
 
@@ -37,8 +43,11 @@ typedef struct Token{
     bool aligned;
     int score;
 
-    SDL_Rect rect_texture;
+    Image image;
+    SDL_Rect rect_image;
     int textureSize;
+
+    Image image_background;
 
     // animations
     bool isMoving;
@@ -60,6 +69,8 @@ typedef struct Grid{
     SDL_Rect rect;
 
     Directions direction_grille;
+    int score;
+    int moveAvailable;
 
 }Grid;
 
@@ -72,14 +83,6 @@ typedef struct Array{
     int ref;
 
 }Array;
-
-typedef struct Image{
-
-    SDL_Texture *pTexture;
-    int w;
-    int h;
-
-}Image;
 
 typedef struct Font{
 
@@ -106,7 +109,8 @@ typedef struct Window {
 // =========================================================
 
 extern Font font_default;
-extern Image image_normal, image_prelight, image_active, image_selected, image_unselected;
+extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[6];
 extern int screen_width, screen_height;
 
 extern bool dragAndDrop;
@@ -120,19 +124,19 @@ extern SDL_Rect rect_CursorOver;
 /* initailisation et chargement des ressources */
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
 
-/* fermeture du jeu / déchargement */
+/* fermeture du jeu / dÃ©chargement */
 int CleanGame(Array *pArray);
 
 /* permute 2 jetons et place leurs texture au bon endroit */
 void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 
-/* affiche les informations d'un jeton donné en console */
+/* affiche les informations d'un jeton donnÃ© en console */
 void DebugToken(Token token);
 
-/* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
+/* Calcul le rect_texture du jeton par raport Ã  textureSize et Ã  une position donnÃ© */
 void CalculTokenRectTexure(Grid *pGrid, Token *token, int x, int y);
 
-/* crée un rect avec les données fournis */
+/* crÃ©e un rect avec les donnÃ©es fournis */
 void MakeRect(SDL_Rect *pRect, int x, int y, int w, int h);
 
 /* */
@@ -144,19 +148,19 @@ bool PointInRect(int x, int y, SDL_Rect *pRect);
 /* copie une chaine de charactere */
 char *String_copy(char *dest, size_t size, char *str1, char *str2);
 
-int kiss_utf8fix(char *str);
+int Utf8Fix(char *str);
 
-int MoveAvailable(Grid * pGrid);
+void MoveAvailable(Grid * pGrid);
 
 // ========================================================= Chargement de ressources
 
-/* créée une nouvelle fenêtre */
+/* crÃ©Ã©e une nouvelle fenÃªtre */
 int Window_new(Window *pWindow, Window *pWindow_parent, bool outline, int x, int y, int w, int h);
 
-/* crée une nouvelle image */
+/* crÃ©e une nouvelle image */
 int Image_new(Image *pImage, char *pChar_name, Array *pArray, SDL_Renderer* pRenderer);
 
-/* crée une nouvelle police de texte */
+/* crÃ©e une nouvelle police de texte */
 int Font_new(Font *pFont, char *pChar_name, Array *pArray, int size);
 
 // ========================================================= Evenements
@@ -169,7 +173,7 @@ int Window_event(Window *pWindow, SDL_Event *pEvent, bool *pDraw);
 void WaitForNextFrame(int frameStart);
 
 /* affiche la grille */
-void DrawGrid(Grid *pGrid, SDL_Renderer *pRenderer, SDL_Surface *pSurface_Token[5]);
+void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer);
 
 /* affiche une image */
 int RenderImage(SDL_Renderer *pRenderer, Image image, int x, int y, SDL_Rect *pRect);
@@ -184,10 +188,10 @@ int Window_draw(Window *pWindow, SDL_Renderer *pRenderer);
 
 /* systeme de liste avec id */
 
-/* créé une nouvelle liste */
+/* crÃ©Ã© une nouvelle liste */
 int Array_new(Array *pArray);
 
-/* acesseur GET sur les données */
+/* acesseur GET sur les donnÃ©es */
 void *Array_GET_data(Array *pArray, int index);
 
 /* acesseur GET sur les id */
@@ -196,13 +200,13 @@ int Array_GET_id(Array *pArray, int index);
 /* accesseur SET sur les champs */
 int Array_SET(Array *pArray, int index, int id, void *pData);
 
-/* ajoute un item à la liste */
+/* ajoute un item Ã  la liste */
 int Array_append(Array *pArray, int id, void *pData);
 
-/* Insertion d'un élément dans le champ */
+/* Insertion d'un Ã©lÃ©ment dans le champ */
 int Array_insert(Array *pArray, int index, int id, void *pData);
 
-/* suppression d'un élément du champs */
+/* suppression d'un Ã©lÃ©ment du champs */
 int Array_remove(Array *pArray, int index);
 
 /* suppression du champs */

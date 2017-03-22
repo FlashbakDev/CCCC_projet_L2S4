@@ -22,8 +22,8 @@ Rôle : fonctions gérants une partie de CCCC.
 
 // =========================================================
 
-/* Crée une grille de largeur X hauteur Y remplie aléatoirement */
-Grid *NewGrid(int width, int height, int nbMove, int nbColor);
+/* Crée une grille de largeur X hauteur remplie aléatoirement */
+Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor);
 
 /* remplie la grille aléatoirement */
 void RandomizeGrid(Grid *pGrid);
@@ -74,13 +74,19 @@ void AnimMovingTokens(Grid *pGrid);
 /* anime les déstructions des jetons */
 void AnimDestructingTokens(Grid *pGrid);
 
+/* anime la grille */
+void Grid_anim(Grid *pGrid);
+
+/* calcul le score */
 int Calc_Score(Grid *pGrid );
 
 // =========================================================
 
 void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 
-void GameEvent(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
+void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
+
+void Game_logic(Grid *pGrid);
 
 // =========================================================
 
