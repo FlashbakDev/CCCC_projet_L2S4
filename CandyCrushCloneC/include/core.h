@@ -5,7 +5,7 @@ core.h
 
 Par Benjamin, pour le projet CCCC le 09/03/2017.
 
-Rôle : fonctions générales du jeu, aussi bien affichage que logique.
+RÃ´le : fonctions gÃ©nÃ©rales du jeu, aussi bien affichage que logique.
 
 */
 
@@ -68,6 +68,7 @@ typedef struct Grid{
     SDL_Point cursorTokenPosition;
     SDL_Rect rect;
 
+    Directions direction_grille;
     int score;
     int moveAvailable;
 
@@ -116,24 +117,26 @@ extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
 
+
+
 // ========================================================= Logique
 
 /* initailisation et chargement des ressources */
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
 
-/* fermeture du jeu / déchargement */
+/* fermeture du jeu / dÃ©chargement */
 int CleanGame(Array *pArray);
 
 /* permute 2 jetons et place leurs texture au bon endroit */
 void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 
-/* affiche les informations d'un jeton donné en console */
+/* affiche les informations d'un jeton donnÃ© en console */
 void DebugToken(Token token);
 
-/* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
+/* Calcul le rect_texture du jeton par raport Ã  textureSize et Ã  une position donnÃ© */
 void CalculTokenRectTexure(Grid *pGrid, Token *token, int x, int y);
 
-/* crée un rect avec les données fournis */
+/* crÃ©e un rect avec les donnÃ©es fournis */
 void MakeRect(SDL_Rect *pRect, int x, int y, int w, int h);
 
 /* */
@@ -151,13 +154,13 @@ void MoveAvailable(Grid * pGrid);
 
 // ========================================================= Chargement de ressources
 
-/* créée une nouvelle fenêtre */
+/* crÃ©Ã©e une nouvelle fenÃªtre */
 int Window_new(Window *pWindow, Window *pWindow_parent, bool outline, int x, int y, int w, int h);
 
-/* crée une nouvelle image */
+/* crÃ©e une nouvelle image */
 int Image_new(Image *pImage, char *pChar_name, Array *pArray, SDL_Renderer* pRenderer);
 
-/* crée une nouvelle police de texte */
+/* crÃ©e une nouvelle police de texte */
 int Font_new(Font *pFont, char *pChar_name, Array *pArray, int size);
 
 // ========================================================= Evenements
@@ -185,10 +188,10 @@ int Window_draw(Window *pWindow, SDL_Renderer *pRenderer);
 
 /* systeme de liste avec id */
 
-/* créé une nouvelle liste */
+/* crÃ©Ã© une nouvelle liste */
 int Array_new(Array *pArray);
 
-/* acesseur GET sur les données */
+/* acesseur GET sur les donnÃ©es */
 void *Array_GET_data(Array *pArray, int index);
 
 /* acesseur GET sur les id */
@@ -197,13 +200,13 @@ int Array_GET_id(Array *pArray, int index);
 /* accesseur SET sur les champs */
 int Array_SET(Array *pArray, int index, int id, void *pData);
 
-/* ajoute un item à la liste */
+/* ajoute un item Ã  la liste */
 int Array_append(Array *pArray, int id, void *pData);
 
-/* Insertion d'un élément dans le champ */
+/* Insertion d'un Ã©lÃ©ment dans le champ */
 int Array_insert(Array *pArray, int index, int id, void *pData);
 
-/* suppression d'un élément du champs */
+/* suppression d'un Ã©lÃ©ment du champs */
 int Array_remove(Array *pArray, int index);
 
 /* suppression du champs */

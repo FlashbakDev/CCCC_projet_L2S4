@@ -4,7 +4,7 @@
 
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
 
-    /* aléatoire */
+    /* alÃ©atoire */
     srand(time(NULL));
 
     Grid *pGrid = malloc(sizeof(Grid));
@@ -21,6 +21,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
 
+    pGrid->direction_grille = UP;
     pGrid->score = 0;
     pGrid->moveAvailable = 0;
 
@@ -32,7 +33,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
 
         pGrid->tokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
 
-        /* désallocation de la mémoire en cas d'erreur */
+        /* dÃ©sallocation de la mÃ©moire en cas d'erreur */
         if ( pGrid->tokens[i] == NULL ){
 
             for(i=i-1 ; i >= 0 ; i--){
@@ -64,7 +65,7 @@ void RandomizeGrid(Grid *pGrid){
 
         if( IsLigneOnGrid(pGrid) == true ){
 
-            // détruit les lignes et remplie les cases manquantes du tableau
+            // dÃ©truit les lignes et remplie les cases manquantes du tableau
             DestroyAlignedTokens(pGrid);
         }
         else {
@@ -72,10 +73,10 @@ void RandomizeGrid(Grid *pGrid){
             while( IsTokenOfType(pGrid, NONE ) == true ){
 
                 // regroupe tout les jetons
-                RegroupTokens(pGrid, DOWN);
+                RegroupTokens(pGrid);
 
                 // remplie les espaces vides
-                InjectLigne(pGrid, UP);
+                InjectLigne(pGrid);
 
                 // recalcul les mouvements possibles
                 MoveAvailable(pGrid);
@@ -118,7 +119,7 @@ void CheckGrid(Grid *pGrid){
 
             if ( pGrid->tokens[i][j].type != NONE ){
 
-                // vérification verticale
+                // vÃ©rification verticale
                 if ( i > 0 && i < pGrid->height - 1){
 
                     if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
@@ -129,7 +130,7 @@ void CheckGrid(Grid *pGrid){
                     }
                 }
 
-                // vérification horizontale
+                // vÃ©rification horizontale
                 if ( j > 0 && j < pGrid->width - 1){
 
                     if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
@@ -304,6 +305,27 @@ int Calc_Score(Grid *pGrid ){
                 val = pGrid->tokens[i][j].score;
             }
         }
+
+        if(Nb_Align >= 3){
+
+            Multi = 1;
+            if(Nb_Align>=4)
+            {
+                Multi = 3;
+
+                if(Nb_Align>=5)
+                {
+                    Multi = 10;
+
+                }
+            }
+            //Faire boucle en ajoutant les scores de jetons individuels
+            //Puis multiplier par Multi
+
+            Score += Multi * Val;
+
+            printf("Score de la ligne : %d \n", Score);
+        }
     }
     //Verification des allignements verticaux
     for(int j = 0; j < pGrid->width; j++){
@@ -342,6 +364,27 @@ int Calc_Score(Grid *pGrid ){
                 val = pGrid->tokens[i][j].score;
             }
         }
+        if(Nb_Align >= 3)
+                {
+
+                    Multi = 1;
+                    if(Nb_Align>=4)
+                    {
+                        Multi = 3;
+
+                        if(Nb_Align>=5)
+                        {
+                            Multi = 10;
+
+                        }
+                    }
+                    //Faire boucle en ajoutant les scores de jetons individuels
+                    //Puis multiplier par Multi
+
+                    Score += Multi * Val;
+
+                    printf("Score de la ligne : %d \n", Score);
+                }
     }
 
     pGrid->score += score;
@@ -419,6 +462,43 @@ Token *GetColumnUpperToken(Grid *pGrid,int x){
     return NULL;
 }
 
+
+Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
+{
+    int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
+    int i,j = x;
+
+    switch(dir)
+    {
+        case UP:
+            for(int i = 0; i < pGrid->height; i ++ ){
+
+            if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
+            }
+        break;
+        case DOWN:
+          for(int i = pGrid->height; i >=0; i -- ){
+
+            if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
+            }
+            break;
+        case LEFT:
+            for(int i = 0; i < pGrid->width; i ++ ){
+
+            if ( pGrid->tokens[x][i].type != NONE ){ return &pGrid->tokens[x][i]; }
+            }
+        break;
+        case RIGHT:
+            for(int i = pGrid->width; i >=0 ; i -- ){
+
+            if ( pGrid->tokens[x][i].type != NONE ){ return &pGrid->tokens[x][i]; }
+            }
+        break;
+
+    }
+
+}
+
 // =========================================================
 
 int DestroyAlignedTokens(Grid *pGrid){
@@ -446,10 +526,24 @@ int DestroyAlignedTokens(Grid *pGrid){
 
 // =========================================================
 
-void RegroupTokens(Grid *pGrid, Directions dir){
+void ChangeDirectionRandom(Grid *pGrid)
+{
+    pGrid->direction_grille = rand()%4;
+
+}
+
+void ChangeDirection(Grid *pGrid, Directions dir)
+{
+   pGrid->direction_grille = dir;
+
+}
+
+//==========================================================
+void RegroupTokens(Grid *pGrid){
 
     int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
-
+    Directions dir = pGrid->direction_grille;
+    //Directions dir = DOWN;
     bool ok = false;
     while ( ok == false ){
 
@@ -476,10 +570,23 @@ void RegroupTokens(Grid *pGrid, Directions dir){
     }
 }
 
+Directions InversDir(Directions dir)
+{
+  switch(dir)
+  {
+      case UP : return DOWN;
+      case DOWN : return UP;
+      case RIGHT : return LEFT;
+      case LEFT : return RIGHT;
+  }
+return dir;
+}
 // =========================================================
 
-void InjectLigne(Grid *pGrid, Directions dir){
+void InjectLigne(Grid *pGrid){
 
+    Directions dir = InversDir(pGrid->direction_grille);
+    //Directions dir = UP;
     switch(dir){
 
         case UP :{
@@ -489,10 +596,10 @@ void InjectLigne(Grid *pGrid, Directions dir){
                 if ( pGrid->tokens[0][j].type != TOKEN ){
 
                     //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
-
-                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
-                    if (  ( GetColumnUpperToken(pGrid,j)->rect_image.y / TOKEN_HEIGHT ) - 1 < 0 )
-                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_image.y / TOKEN_HEIGHT ) - 1 );
+printf("direction : %d", dir);
+                    // temporairement, on hard code le fait que la ligne superieur doit Ãªtre hors champs
+                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) - 1 < 0 )
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) - 1 );
                     else
                         InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
                 }
@@ -501,7 +608,19 @@ void InjectLigne(Grid *pGrid, Directions dir){
         break;
 
         case DOWN :{
+             for(int j = 0; j < pGrid->width; j++){
 
+                if ( pGrid->tokens[0][j].type != TOKEN ){
+
+                    //fprintf(stdout,"GetColumnUpperToken(%d) return (%d, %d).\n",j,GetColumnUpperToken(pGrid,j)->texturePosition.x / TOKEN_WIDTH, GetColumnUpperToken(pGrid,j)->texturePosition.y / TOKEN_HEIGHT);
+
+                    // temporairement, on hard code le fait que la ligne superieur doit Ãªtre hors champs
+                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) + 1 >pGrid->height-1 )
+                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_texture.y / TOKEN_HEIGHT ) +1 );
+                    else
+                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, pGrid->height );
+                }
+            }
         }
         break;
 
@@ -516,7 +635,6 @@ void InjectLigne(Grid *pGrid, Directions dir){
         break;
     }
 }
-
 // =========================================================
 
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
@@ -559,7 +677,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                     if ( pGrid->nbMove <= 0 ){
 
-                        pQuit = true;
+                        *pQuit = true;
                     }
                 }
                 break;
@@ -600,7 +718,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
             }
         }
 
-        // bouttons de souris appuié
+        // bouttons de souris appuiÃ©
         case SDL_MOUSEBUTTONDOWN:{
 
             switch(pEvent->button.button){
@@ -665,7 +783,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                 if ( pGrid->nbMove <= 0 ){
 
-                                    pQuit = true;
+                                    *pQuit = true;
                                 }
                             }
                         }
@@ -716,7 +834,7 @@ void Game_logic(Grid *pGrid){
             // score
             Calc_Score(pGrid);
 
-            // détruit les lignes et remplie les cases manquantes du tableau
+            // dÃ©truit les lignes et remplie les cases manquantes du tableau
             fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(pGrid) );
         }
         else {
