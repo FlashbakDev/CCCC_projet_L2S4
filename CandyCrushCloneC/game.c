@@ -1,5 +1,6 @@
 #include "game.h"
 #include "core.h"
+
 // =========================================================
 
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
@@ -14,16 +15,14 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
     pGrid->nbMove = nbMove;
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
+    pGrid->direction = DOWN;
+    pGrid->score = 0;
 
     MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
 
     pGrid->is_cursorOnGrid = false;
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
-
-    pGrid->direction = DOWN;
-    pGrid->score = 0;
-    //pGrid->moveAvailable = 0;
 
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
@@ -80,11 +79,11 @@ void RandomizeGrid(Grid *pGrid){
                 // remplie les espaces vides
                 InjectLigne(pGrid);
             }
-
-            // recalcul les mouvements possibles
-            MoveAvailable(pGrid);
         }
     }
+
+    // recalcul les mouvements possibles
+    MoveAvailable(pGrid);
 }
 
 // =========================================================
@@ -457,58 +456,67 @@ bool IsTokenOfType(Grid *pGrid, TokenTypes type){
 
 // =========================================================
 
-Token *GetColumnUpperToken(Grid *pGrid,int x){
-
-    for(int i = 0; i < pGrid->height; i ++ ){
-
-        if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
-    }
-
-    return NULL;
-}
-
-
 Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 {
     int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
-    int i,j = x;
 
-    switch(dir)
-    {
-        case UP:
+    switch(dir){
+
+        case UP:{
+
             for(int i = 0; i < pGrid->height; i ++ ){
 
-            if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
-            }
-        break;
-        case DOWN:
-          for(int i = pGrid->height; i >=0; i -- ){
+                if ( pGrid->tokens[i][x].type != NONE ){
 
-            if ( pGrid->tokens[i][x].type != NONE ){ return &pGrid->tokens[i][x]; }
+                    return &pGrid->tokens[i][x];
+                }
             }
-            break;
-        case LEFT:
+        }
+        break;
+
+        case DOWN:{
+
+            for(int i = pGrid->height; i >=0; i -- ){
+
+                if ( pGrid->tokens[i][x].type != NONE ){
+
+                        return &pGrid->tokens[i][x];
+                }
+            }
+        }
+        break;
+
+        case LEFT:{
+
             for(int i = 0; i < pGrid->width; i ++ ){
 
-            if ( pGrid->tokens[x][i].type != NONE ){ return &pGrid->tokens[x][i]; }
+                if ( pGrid->tokens[x][i].type != NONE ){
+
+                        return &pGrid->tokens[x][i];
+                }
             }
+        }
         break;
-        case RIGHT:
+
+        case RIGHT:{
+
             for(int i = pGrid->width; i >=0 ; i -- ){
 
-            if ( pGrid->tokens[x][i].type != NONE ){ return &pGrid->tokens[x][i]; }
+                if ( pGrid->tokens[x][i].type != NONE ){
+
+                        return &pGrid->tokens[x][i];
+                }
             }
+        }
         break;
-
     }
-
 }
 
 // =========================================================
 
 int DestroyAlignedTokens(Grid *pGrid){
 
-    fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
+    //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
 
     CheckGrid(pGrid);
 
@@ -533,32 +541,36 @@ int DestroyAlignedTokens(Grid *pGrid){
 
 // =========================================================
 
-void ChangeDirectionRandom(Grid *pGrid)
-{
-    fprintf(stdout,"game.c : ChangeDirectionRandom(Grid *pGrid)\n");
+void ChangeDirectionRandom(Grid *pGrid){
+
+    //fprintf(stdout,"game.c : ChangeDirectionRandom(Grid *pGrid)\n");
     pGrid->direction = rand()%4;
 
 }
 
-void ChangeDirection(Grid *pGrid, Directions dir)
-{
-    fprintf(stdout,"game.c : ChangeDirection(Grid *pGrid, Directions dir = %d)\n", dir);
+// =========================================================
+
+void ChangeDirection(Grid *pGrid, Directions dir){
+
+    //fprintf(stdout,"game.c : ChangeDirection(Grid *pGrid, Directions dir = %d)\n", dir);
     pGrid->direction = dir;
 
 }
 
 //==========================================================
+
 void RegroupTokens(Grid *pGrid){
 
-    fprintf(stdout,"game.c : RegroupTokens(Grid *pGrid)\n");
+    //fprintf(stdout,"game.c : RegroupTokens(Grid *pGrid)\n");
 
     int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
-    Directions dir = pGrid->direction;
-    //Directions dir = DOWN;
-    bool ok = false;
-    while ( ok == false ){
 
-        ok = true;
+    Directions dir = pGrid->direction;
+
+    bool flag = false;
+    while ( flag == false ){
+
+        flag = true;
 
         for(int i = 0; i < pGrid->height; i++){
             for(int j = 0; j < pGrid->width; j++){
@@ -572,7 +584,7 @@ void RegroupTokens(Grid *pGrid){
 
                             PermuteToken(pGrid, j + DirectionsVectors[dir][0], i + DirectionsVectors[dir][1], j, i );
 
-                            ok = false;
+                            flag = false;
                         }
                     }
                 }
@@ -581,7 +593,9 @@ void RegroupTokens(Grid *pGrid){
     }
 }
 
-Directions InversDir(Directions dir){
+//==========================================================
+
+Directions ReverseDirection(Directions dir){
 
     switch(dir){
 
@@ -590,16 +604,18 @@ Directions InversDir(Directions dir){
         case RIGHT : return LEFT;
         case LEFT : return RIGHT;
     }
+
     return dir;
 }
+
 // =========================================================
 
 void InjectLigne(Grid *pGrid){
 
-    fprintf(stdout,"game.c : InjectLigne(Grid *pGrid)\n");
+    //fprintf(stdout,"game.c : InjectLigne(Grid *pGrid)\n");
 
-    Directions dir = InversDir(pGrid->direction);
-    //Directions dir = UP;
+    Directions dir = ReverseDirection(pGrid->direction);
+
     switch(dir){
 
         case UP :{
@@ -608,9 +624,8 @@ void InjectLigne(Grid *pGrid){
 
                 if ( pGrid->tokens[0][j].type != TOKEN ){
 
-                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
-                    if (  ( GetColumnUpperToken(pGrid,j)->rect_image.y / TOKEN_HEIGHT ) - 1 < 0 )
-                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetColumnUpperToken(pGrid,j)->rect_image.y / TOKEN_HEIGHT ) - 1 );
+                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 < 0 )
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 );
                     else
                         InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
                 }
@@ -623,7 +638,6 @@ void InjectLigne(Grid *pGrid){
 
                 if ( pGrid->tokens[0][j].type != TOKEN ){
 
-                    // temporairement, on hard code le fait que la ligne superieur doit être hors champs
                     if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) + 1 >pGrid->height-1 )
                         InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) +1 );
                     else
@@ -644,6 +658,7 @@ void InjectLigne(Grid *pGrid){
         break;
     }
 }
+
 // =========================================================
 
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
@@ -671,7 +686,6 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
         case SDL_KEYDOWN :{
 
-
             switch( pEvent->key.keysym.sym ){
 
                 case SDLK_d :{
@@ -684,10 +698,9 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                     pGrid->nbMove --;
 
-                    if ( pGrid->nbMove <= 0 ){
-
+                    if ( pGrid->nbMove <= 0 )
                         *pQuit = true;
-                    }
+
                 }
                 break;
 
@@ -866,10 +879,10 @@ void Game_logic(Grid *pGrid){
 
             }else {
 
-                /*if(pGrid->moveAvailable == 0){
+                if(pGrid->moveAvailable == 0){
 
                     RandomizeGrid(pGrid);
-                }*/
+                }
             }
         }
     }

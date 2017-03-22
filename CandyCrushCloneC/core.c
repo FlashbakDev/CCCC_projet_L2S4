@@ -214,9 +214,7 @@ void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 
     //fprintf(stdout,"HardPermuteToken(Grid *pGrid,int x1 = %d,int y1 = %d,int x2 = %d,int y2 = %d)\n", x1, y1, x2, y2);
 
-    Token tmp = pGrid->tokens[y1][x1];
-    pGrid->tokens[y1][x1] = pGrid->tokens[y2][x2];
-    pGrid->tokens[y2][x2] = tmp;
+    PermuteToken(pGrid, x1, y1, x2, y2);
 
     CalculTokenRectTexure(pGrid, &pGrid->tokens[y1][x1], x1, y1 );
     CalculTokenRectTexure(pGrid, &pGrid->tokens[y2][x2], x2, y2 );
@@ -336,43 +334,29 @@ int Utf8Fix(char *str){
 
 void MoveAvailable(Grid * pGrid){
 
-    fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
+    //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
     pGrid->moveAvailable = 0;
 
     for(int i=0; i< pGrid->height-1; i++){
 
-        //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d\n",pGrid->moveAvailable, i);
-
         for(int j=0;j < pGrid->width-1; j++){
 
-            //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d, j = %d\n",pGrid->moveAvailable, i, j);
+            // vers la droite
+            PermuteToken(pGrid,j,i,j+1,i);
+
+            pGrid->moveAvailable += IsLigneOnGrid(pGrid);
 
             PermuteToken(pGrid,j,i,j+1,i);
 
-            if(IsLigneOnGrid(pGrid)==true){
-
-                pGrid->moveAvailable++;
-
-                fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d, j = %d\n",pGrid->moveAvailable, i, j);
-            }
-
-            PermuteToken(pGrid,j,i,j+1,i);
-
+            // vers le bas
             PermuteToken(pGrid,j,i,j,i+1);
 
-             if(IsLigneOnGrid(pGrid)==true){
-
-                pGrid->moveAvailable++;
-
-                fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d, i = %d, j = %d\n",pGrid->moveAvailable, i, j);
-            }
+            pGrid->moveAvailable += IsLigneOnGrid(pGrid);
 
             PermuteToken(pGrid,j,i,j,i+1);
         }
     }
-
-    //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d\n",pGrid->moveAvailable);
 }
 
 // ========================================================
