@@ -9,8 +9,8 @@ int main(int argc, char* argv[]){
     /* Initialisation */
     fprintf(stdout,"Initialisation begin : \n");
 
-    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit o� l'on va d廥siner )
-    SDL_Event event;            // gestionnaire d'憝鋝ement
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
+    SDL_Event event;            // gestionnaire d'évènements
     Array objects;
     Window window;
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
     int nbColor = 6;
     int nbMove = 5;
 
-    // cr嶧tion des zone de jeu et d'affichage
+    // création des zone de jeu et d'affichage
     SDL_Rect rect_grid = { 0,0,gridWidth, gridHeight };
     SDL_Rect rect_UI = { rect_grid.x * TOKEN_WIDTH + rect_grid.w * TOKEN_WIDTH, 0, 250, rect_grid.h * TOKEN_HEIGHT };
 
@@ -41,8 +41,6 @@ int main(int argc, char* argv[]){
         return 1;
 
     Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor);
-
-    fprintf(stdout,"debug\n");
 
     fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
@@ -60,29 +58,20 @@ int main(int argc, char* argv[]){
 
     /* boucle de jeu */
 
-    int score = 0;
-    bool draw = true; // placebo
+    bool draw = true; // non utilisé
     bool quit = false;
 
     while( !quit ){
 
         int frameStart = SDL_GetTicks();
 
-        /* 憝鋝ements */
+        /* évènements */
         while( SDL_PollEvent( &event ) != 0 ){
 
-            if( event.type == SDL_QUIT){
-
+            if( event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE))
                 quit = true;
-            }
 
-            if ( event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE ){
-
-                fprintf(stdout,"Appuie sur echap, fin de la boucle de jeu");
-                quit = true;
-            }
-
-            // entr矇 li矇 au jeu
+            // entré lié au jeu
             Game_event(grid1, &event, &quit);
 
             // event UI
@@ -106,20 +95,20 @@ int main(int argc, char* argv[]){
 
         Window_draw(&window, pRenderer);
 
-        Grid_draw(grid1,pRenderer);                                                              // d廥sine la grille sur le renderer
+        Grid_draw(grid1,pRenderer);                                                              // désine la grille sur le renderer
 
         UI_label_draw(&label_score,pRenderer);
         UI_label_draw(&label_nbMove,pRenderer);
         UI_label_draw(&label_mouvements,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
 
-        SDL_RenderPresent(pRenderer);                                                           // d廥sine le renderer � l'嶰ran
+        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
-        /* gestion de la fr廦uence d'affichage ( pour les animations )*/
+        /* gestion de la fréquence d'affichage ( pour les animations )*/
         WaitForNextFrame(frameStart);
     }
 
-    printf("\n\n Score Total : %d", score);
+    printf("\n\n Score Total : %d", grid1->score);
 
     /* fin du programme */
     CleanGame(&objects);

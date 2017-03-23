@@ -53,14 +53,13 @@ int DestroyAlignedTokens(Grid *pGrid);
 void ChangeDirectionRandom(Grid *pGrid);
 void ChangeDirection(Grid *pGrid, Directions dir);
 
-
 /* regroupe les jetons dans la direction donné */
 void RegroupTokens(Grid *pGrid);
 
 /* insère de nouveaux jetons aléatoirement */
 void InjectLigne(Grid *pGrid);
 /*Inverse la direction*/
-Directions InversDir(Directions dir);
+Directions ReverseDirection(Directions dir);
 
 /* permute 2 jetons */
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);

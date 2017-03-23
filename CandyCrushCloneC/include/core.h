@@ -68,7 +68,7 @@ typedef struct Grid{
     SDL_Point cursorTokenPosition;
     SDL_Rect rect;
 
-    Directions direction_grille;
+    Directions direction;
     int score;
     int moveAvailable;
 
@@ -116,8 +116,6 @@ extern int screen_width, screen_height;
 extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
-
-
 
 // ========================================================= Logique
 
