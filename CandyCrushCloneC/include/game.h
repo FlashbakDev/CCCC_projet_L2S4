@@ -82,6 +82,7 @@ int Calc_Score(Grid *pGrid );
 // =========================================================
 
 void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
 void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 

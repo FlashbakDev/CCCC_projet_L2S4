@@ -15,7 +15,8 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
     pGrid->nbMove = nbMove;
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
-    pGrid->direction = DOWN;
+    pGrid->direction =DOWN;
+    pGrid->isdir_random = false;
     pGrid->score = 0;
 
     MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
@@ -77,7 +78,7 @@ void RandomizeGrid(Grid *pGrid){
                 RegroupTokens(pGrid);
 
                 // remplie les espaces vides
-                InjectLigne(pGrid);
+               InjectLigne(pGrid);
             }
         }
     }
@@ -476,13 +477,14 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 
         case DOWN:{
 
-            for(int i = pGrid->height; i >=0; i -- ){
+            for(int i = pGrid->height-1; i >=0; i -- ){
 
                 if ( pGrid->tokens[i][x].type != NONE ){
 
                         return &pGrid->tokens[i][x];
                 }
             }
+
         }
         break;
 
@@ -500,7 +502,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 
         case RIGHT:{
 
-            for(int i = pGrid->width; i >=0 ; i -- ){
+            for(int i = pGrid->width-1; i >=0 ; i -- ){
 
                 if ( pGrid->tokens[x][i].type != NONE ){
 
@@ -566,7 +568,7 @@ void RegroupTokens(Grid *pGrid){
     int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
 
     Directions dir = pGrid->direction;
-
+    //Directions dir = DOWN;
     bool flag = false;
     while ( flag == false ){
 
@@ -622,23 +624,25 @@ void InjectLigne(Grid *pGrid){
 
             for(int j = 0; j < pGrid->width; j++){
 
-                if ( pGrid->tokens[0][j].type != TOKEN ){
-
+                if ( pGrid->tokens[0][j].type == NONE ){
+                    //printf("token == Null\n");
                     if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 < 0 )
                         InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 );
                     else
                         InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
+
                 }
             }
         }
         break;
 
         case DOWN :{
+           // printf("inject bas \n");
              for(int j = 0; j < pGrid->width; j++){
 
-                if ( pGrid->tokens[0][j].type != TOKEN ){
-
-                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) + 1 >pGrid->height-1 )
+                if ( pGrid->tokens[pGrid->height-1][j].type == NONE ){
+                    printf("token == Null\n");
+                    if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) + 1 > pGrid->height-1 )
                         InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) +1 );
                     else
                         InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, pGrid->height );
@@ -648,12 +652,35 @@ void InjectLigne(Grid *pGrid){
         break;
 
         case LEFT :{
+            for(int i =0; i<pGrid->height; i++){
+
+                if(pGrid->tokens[i][0].type==NONE)
+                {
+                    if( (GetFirstDirToken(pGrid,i,dir)->rect_image.x /TOKEN_WIDTH) -1 < 0)
+                        InitRandomToken(pGrid, &pGrid->tokens[i][0], pGrid->nbColor, ( GetFirstDirToken(pGrid,i,dir)->rect_image.x / TOKEN_WIDTH ) -1, i );
+                    else
+                        InitRandomToken(pGrid, &pGrid->tokens[i][0], pGrid->nbColor, -1, i );
+
+                }
+
+            }
 
         }
         break;
 
         case RIGHT :{
+            for(int i =0; i<pGrid->height; i++){
 
+                if(pGrid->tokens[i][pGrid->width-1].type==NONE)
+                {
+                    if( (GetFirstDirToken(pGrid,i,dir)->rect_image.x /TOKEN_WIDTH) +1 > pGrid->width-1)
+                        InitRandomToken(pGrid, &pGrid->tokens[i][pGrid->width-1], pGrid->nbColor, ( GetFirstDirToken(pGrid,i,dir)->rect_image.x / TOKEN_WIDTH ) +1, i );
+                    else
+                        InitRandomToken(pGrid, &pGrid->tokens[i][pGrid->width-1], pGrid->nbColor, pGrid->width-1, i );
+
+                }
+
+            }
         }
         break;
     }
@@ -676,6 +703,14 @@ void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool 
 
     if ( UI_button_event(pButton, pEvent, pDraw) )
         *pQuit = true;
+}
+
+void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,Grid *pGrid ){
+    if ( UI_button_event(pButton, pEvent, pDraw) )
+    {
+        pGrid->isdir_random = !pGrid->isdir_random;
+
+    }
 }
 
 // =========================================================
@@ -735,6 +770,12 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 case SDLK_e : {
 
                     RandomizeGrid(pGrid);
+                }
+                break;
+
+                  case SDLK_a : {
+
+                    pGrid->direction = UP;
                 }
                 break;
             }
@@ -803,10 +844,16 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                 pGrid->nbMove --;
 
+
                                 if ( pGrid->nbMove <= 0 ){
 
                                     *pQuit = true;
                                 }
+                                if(pGrid->isdir_random == true)
+                                    {
+                                    ChangeDirectionRandom(pGrid);
+
+                                    }
                             }
                         }
 
@@ -871,8 +918,10 @@ void Game_logic(Grid *pGrid){
                     RegroupTokens(pGrid);
 
                     // remplie les espaces vides
-                    InjectLigne(pGrid);
+                   InjectLigne(pGrid);
                 }
+
+
 
                 // recalcul les mouvements possibles
                 MoveAvailable(pGrid);
