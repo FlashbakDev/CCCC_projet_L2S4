@@ -16,7 +16,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
     pGrid->direction =DOWN;
-    pGrid->isdir_random = false;
+    pGrid->isdir_random = true;
     pGrid->score = 0;
 
     MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
@@ -708,8 +708,8 @@ void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool 
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,Grid *pGrid ){
     if ( UI_button_event(pButton, pEvent, pDraw) )
     {
-        pGrid->isdir_random = !pGrid->isdir_random;
-
+        if(pGrid->isdir_random==true)pGrid->isdir_random = false; else pGrid->isdir_random =true;
+        printf("direction  : %d\n",pGrid->isdir_random );
     }
 }
 
@@ -849,11 +849,12 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                     *pQuit = true;
                                 }
+                                printf("direction  : %d\n",pGrid->isdir_random );
                                 if(pGrid->isdir_random == true)
-                                    {
+                                {
                                     ChangeDirectionRandom(pGrid);
-
-                                    }
+                                    printf("changement direction\n");
+                                }
                             }
                         }
 

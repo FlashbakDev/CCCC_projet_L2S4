@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
         return 1;
 
     Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor);
-
+printf("direction  : %d\n",grid1->isdir_random );
     fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]){
             // event UI
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
-            Button_direction_event(&button_quit, &event, &draw, &grid1);
+            Button_direction_event(&button_direction, &event, &draw, &grid1);
         }
 
         /* logique */
