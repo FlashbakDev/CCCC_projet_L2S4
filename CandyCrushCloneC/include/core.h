@@ -48,6 +48,7 @@ typedef struct Token{
     int textureSize;
 
     Image image_background;
+    bool drawBackground;
 
     // animations
     bool isMoving;
@@ -132,7 +133,10 @@ void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 void DebugToken(Token token);
 
 /* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
-void CalculTokenRectTexure(Grid *pGrid, Token *token, int x, int y);
+void CalculTokenImages(Grid *pGrid, Token *token, int x, int y);
+
+/* remet les bonnes images aux bon jetons */
+void ResetTokenImages(Grid *pGrid);
 
 /* crée un rect avec les données fournis */
 void MakeRect(SDL_Rect *pRect, int x, int y, int w, int h);
