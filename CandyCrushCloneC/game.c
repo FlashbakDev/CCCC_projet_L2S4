@@ -16,7 +16,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
     pGrid->direction =DOWN;
-    pGrid->isdir_random = true;
+    pGrid->isdir_random = false;
     pGrid->score = 0;
 
     MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
@@ -735,18 +735,65 @@ void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool 
 }
 
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,Grid *pGrid ){
-    if ( UI_button_event(pButton, pEvent, pDraw) )
-    {
-        if(pGrid->isdir_random==true)pGrid->isdir_random = false; else {pGrid->isdir_random =true;ChangeDirectionRandom(pGrid);}
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        if(pGrid->isdir_random==true){
+
+            pGrid->isdir_random = false;
+        }
+        else {
+
+            pGrid->isdir_random =true;
+            ChangeDirectionRandom(pGrid);
+        }
+
         printf("direction  : %d\n",pGrid->isdir_random );
-
-
     }
 }
 
 // =========================================================
 
-void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
+GameSession* Game_init(Array *pArray,Window *pWindow,bool multiplayer, int width, int height, int nbMove, int nbColor){
+
+    fprintf(stdout,"game.c -> GameSession_init(bool multiplayer = %d) : start \n", multiplayer);
+
+    GameSession *pGameSession;
+
+    // création des zone de jeu et d'affichage
+    MakeRect(&pGameSession->rect_grid, 0,0,width, height );
+    fprintf(stdout,"bug ? \n");
+    MakeRect(&pGameSession->rect_UI, pGameSession->rect_grid.x * TOKEN_WIDTH + pGameSession->rect_grid.w * TOKEN_WIDTH, 0, 250, pGameSession->rect_grid.h * TOKEN_HEIGHT );
+fprintf(stdout,"bug ? \n");
+    MakeRect(&pGameSession->rect_screen,
+             0 ,
+             0 ,
+             (pGameSession->rect_grid.w * TOKEN_WIDTH + pGameSession->rect_grid.x * TOKEN_WIDTH > pGameSession->rect_UI.w + pGameSession->rect_UI.x ) ? pGameSession->rect_grid.w * TOKEN_WIDTH + pGameSession->rect_grid.x * TOKEN_WIDTH : pGameSession->rect_UI.w + pGameSession->rect_UI.x ,
+             (pGameSession->rect_grid.h * TOKEN_HEIGHT + pGameSession->rect_grid.y * TOKEN_HEIGHT > pGameSession->rect_UI.h + pGameSession->rect_UI.y ) ? pGameSession->rect_grid.h * TOKEN_HEIGHT + pGameSession->rect_grid.y * TOKEN_HEIGHT : pGameSession->rect_UI.h + pGameSession->rect_UI.y ) ;
+
+    fprintf(stdout,"bug ? \n");
+
+    pGameSession->pWindow = pWindow;
+    pGameSession->is_multiplayer = multiplayer;
+    pGameSession->pGrid_J1 = NewGrid(pGameSession->rect_grid,nbMove,nbColor);
+
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&pGameSession->label_score, pGameSession->pWindow, "Test", pGameSession->rect_UI.x + 20 , pGameSession->rect_UI.y + 20 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&pGameSession->label_nbMove, pGameSession->pWindow, "Test", pGameSession->rect_UI.x + 20 , pGameSession->rect_UI.y + 40 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&pGameSession->label_mouvements, pGameSession->pWindow, "Test", pGameSession->rect_UI.x + 20 , pGameSession->rect_UI.y + 60 ));
+
+    sprintf(pGameSession->label_score.text,"Score : %d ",0);
+    sprintf(pGameSession->label_nbMove.text,"NbCoups : %d", pGameSession->pGrid_J1->nbMove);
+    sprintf(pGameSession->label_mouvements.text,"Mouvement possible : %d",0);
+
+    fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&pGameSession->button_quit, pGameSession->pWindow, "Quitter", pGameSession->rect_UI.x + ( pGameSession->rect_UI.w / 2 ) - image_normal.w / 2 , pGameSession->rect_UI.h - 50 ));
+    fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&pGameSession->button_direction, pGameSession->pWindow, "Direction", pGameSession->rect_UI.x + ( pGameSession->rect_UI.w / 2 ) - image_normal.w / 2 , pGameSession->rect_UI.h - 80 ));
+
+    fprintf(stdout,"game.c -> GameSession_init(bool multiplayer = %d) : end\n", multiplayer);
+}
+
+// =========================================================
+
+void Game_event(GameSession *pGameSession, SDL_Event *pEvent,bool *pDraw ,bool *pQuit){
 
     switch(pEvent->type){
 
@@ -756,15 +803,15 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                 case SDLK_d :{
 
-                    pGrid->nbMove ++;
+                    pGameSession->pGrid_J1->nbMove ++;
                 }
                 break;
 
                 case SDLK_q :{
 
-                    pGrid->nbMove --;
+                    pGameSession->pGrid_J1->nbMove --;
 
-                    if ( pGrid->nbMove <= 0 )
+                    if ( pGameSession->pGrid_J1->nbMove <= 0 )
                         *pQuit = true;
 
                 }
@@ -772,13 +819,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                 case SDLK_z :{
 
-                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color < pGrid->nbColor-1){
+                    if(pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].color < pGameSession->pGrid_J1->nbColor-1){
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color ++;
+                        pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].color ++;
                     }
                     else {
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = 0;
+                        pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].color = 0;
                     }
 
                 }
@@ -786,13 +833,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                 case SDLK_s :{
 
-                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color >0){
+                    if(pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].color >0){
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
+                        pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].color --;
                     }
                     else{
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
+                        pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].color = pGameSession->pGrid_J1->nbColor-1;
                     }
 
                 }
@@ -800,13 +847,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                 case SDLK_e : {
 
-                    RandomizeGrid(pGrid);
+                    RandomizeGrid(pGameSession->pGrid_J1);
                 }
                 break;
 
                   case SDLK_a : {
 
-                    pGrid->direction = UP;
+                    pGameSession->pGrid_J1->direction = UP;
                 }
                 break;
             }
@@ -820,12 +867,12 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 // bouton gauche
                 case SDL_BUTTON_LEFT:{
 
-                    if ( IsTokenMoving(pGrid) == false && IsTokenDestructing(pGrid) == false && pGrid->is_cursorOnGrid == true ){
+                    if ( IsTokenMoving(pGameSession->pGrid_J1) == false && IsTokenDestructing(pGameSession->pGrid_J1) == false && pGameSession->pGrid_J1->is_cursorOnGrid == true ){
 
-                        dragStart.x = pGrid->cursorTokenPosition.x;
-                        dragStart.y = pGrid->cursorTokenPosition.y;
+                        dragStart.x = pGameSession->pGrid_J1->cursorTokenPosition.x;
+                        dragStart.y = pGameSession->pGrid_J1->cursorTokenPosition.y;
 
-                        dragAndDrop = pGrid->tokens[dragStart.y][dragStart.x].type != NONE;
+                        dragAndDrop = pGameSession->pGrid_J1->tokens[dragStart.y][dragStart.x].type != NONE;
                     }
                 }
                 break;
@@ -833,10 +880,10 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 // click droit pour afficher les stats du jeton
                 case SDL_BUTTON_RIGHT:{
 
-                    if ( pGrid->is_cursorOnGrid == true ){
+                    if ( pGameSession->pGrid_J1->is_cursorOnGrid == true ){
 
-                        fprintf(stdout,"Jeton en posisition (%d,%d) : ",pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
-                        DebugToken(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x]);
+                        fprintf(stdout,"Jeton en posisition (%d,%d) : ",pGameSession->pGrid_J1->cursorTokenPosition.x, pGameSession->pGrid_J1->cursorTokenPosition.y);
+                        DebugToken(pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x]);
                         fprintf(stdout,"\n");
                     }
                 }
@@ -855,8 +902,8 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                         SDL_Point dragEnd;
 
-                        dragEnd.x = pGrid->cursorTokenPosition.x;
-                        dragEnd.y = pGrid->cursorTokenPosition.y;
+                        dragEnd.x = pGameSession->pGrid_J1->cursorTokenPosition.x;
+                        dragEnd.y = pGameSession->pGrid_J1->cursorTokenPosition.y;
 
                         fprintf(stdout,"Distance du drag : %d, %d.\n",dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
 
@@ -865,26 +912,26 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                         if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                            HardPermuteToken(pGrid, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
+                            HardPermuteToken(pGameSession->pGrid_J1, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
 
-                            if ( IsLineOnGrid(pGrid) == false ){
+                            if ( IsLineOnGrid(pGameSession->pGrid_J1) == false ){
 
-                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
+                                HardPermuteToken(pGameSession->pGrid_J1, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
                             }
                             else {
 
-                                pGrid->nbMove --;
+                                pGameSession->pGrid_J1->nbMove --;
 
 
-                                if ( pGrid->nbMove <= 0 ){
+                                if ( pGameSession->pGrid_J1->nbMove <= 0 ){
 
                                     *pQuit = true;
                                 }
-                                //printf("direction  : %d\n",pGrid->isdir_random );
-                                if(pGrid->isdir_random == true)
+                                //printf("direction  : %d\n",pGameSession->pGrid_J1->isdir_random );
+                                if(pGameSession->pGrid_J1->isdir_random == true)
                                 {
-                                    ChangeDirectionRandom(pGrid);
-                                    printf("changement direction: direction = %d ", pGrid->direction);
+                                    ChangeDirectionRandom(pGameSession->pGrid_J1);
+                                    printf("changement direction: direction = %d ", pGameSession->pGrid_J1->direction);
                                 }
                             }
                         }
@@ -900,44 +947,44 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
         // mouvement de souris
         case SDL_MOUSEMOTION:{
 
-            pGrid->is_cursorOnGrid = PointInRect(pEvent->motion.x, pEvent->motion.y, &pGrid->rect);
+            pGameSession->pGrid_J1->is_cursorOnGrid = PointInRect(pEvent->motion.x, pEvent->motion.y, &pGameSession->pGrid_J1->rect);
 
-            if ( pGrid->is_cursorOnGrid == true ){
+            if ( pGameSession->pGrid_J1->is_cursorOnGrid == true ){
 
                 SDL_Point cursorTokenPositionTemp;
-                cursorTokenPositionTemp.x = pGrid->cursorTokenPosition.x;
-                cursorTokenPositionTemp.y = pGrid->cursorTokenPosition.y;
+                cursorTokenPositionTemp.x = pGameSession->pGrid_J1->cursorTokenPosition.x;
+                cursorTokenPositionTemp.y = pGameSession->pGrid_J1->cursorTokenPosition.y;
 
-                pGrid->cursorTokenPosition.x = (pEvent->motion.x / TOKEN_WIDTH);
-                pGrid->cursorTokenPosition.y = (pEvent->motion.y / TOKEN_HEIGHT);
+                pGameSession->pGrid_J1->cursorTokenPosition.x = (pEvent->motion.x / TOKEN_WIDTH);
+                pGameSession->pGrid_J1->cursorTokenPosition.y = (pEvent->motion.y / TOKEN_HEIGHT);
 
                 // si drag and drop et changement de case
-                if ( dragAndDrop && ( cursorTokenPositionTemp.x != pGrid->cursorTokenPosition.x || cursorTokenPositionTemp.y != pGrid->cursorTokenPosition.y ) ){
+                if ( dragAndDrop && ( cursorTokenPositionTemp.x != pGameSession->pGrid_J1->cursorTokenPosition.x || cursorTokenPositionTemp.y != pGameSession->pGrid_J1->cursorTokenPosition.y ) ){
 
-                    int distX = sqrt( pow( pGrid->cursorTokenPosition.x - dragStart.x, 2) );
-                    int distY = sqrt( pow( pGrid->cursorTokenPosition.y - dragStart.y, 2) );
+                    int distX = sqrt( pow( pGameSession->pGrid_J1->cursorTokenPosition.x - dragStart.x, 2) );
+                    int distY = sqrt( pow( pGameSession->pGrid_J1->cursorTokenPosition.y - dragStart.y, 2) );
 
                     if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                        PermuteToken(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                        PermuteToken(pGameSession->pGrid_J1, dragStart.x, dragStart.y, pGameSession->pGrid_J1->cursorTokenPosition.x, pGameSession->pGrid_J1->cursorTokenPosition.y);
 
-                        if ( IsLineOnGrid(pGrid) == false ){
+                        if ( IsLineOnGrid(pGameSession->pGrid_J1) == false ){
 
-                            //fprintf(stdout,"game.c -> Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit) -> switch(pEvent->type) -> case SDL_MOUSEMOTION -> !IsLineOnGrid(pGrid) ");
-                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].image_background = image_cursorRed;
-                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                            //fprintf(stdout,"game.c -> Game_event(Grid *pGameSession->pGrid_J1, SDL_Event *pEvent, bool *pQuit) -> switch(pEvent->type) -> case SDL_MOUSEMOTION -> !IsLineOnGrid(pGrid) ");
+                            pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].image_background = image_cursorRed;
+                            pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].drawBackground = true;
                         }
 
-                        ChangeAlignedTokenBackgroundImage(pGrid, image_cursorGreen);
+                        ChangeAlignedTokenBackgroundImage(pGameSession->pGrid_J1, image_cursorGreen);
 
-                        PermuteToken(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                        PermuteToken(pGameSession->pGrid_J1, dragStart.x, dragStart.y, pGameSession->pGrid_J1->cursorTokenPosition.x, pGameSession->pGrid_J1->cursorTokenPosition.y);
 
-                        PermuteTokenImage(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                        PermuteTokenImage(pGameSession->pGrid_J1, dragStart.x, dragStart.y, pGameSession->pGrid_J1->cursorTokenPosition.x, pGameSession->pGrid_J1->cursorTokenPosition.y);
                     }
                     else{
 
-                        ResetTokenImages(pGrid);
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                        ResetTokenImages(pGameSession->pGrid_J1);
+                        pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].drawBackground = true;
 
                         if  ( !( distX == 1 && distY == 0 ) && !( distX == 0 && distY == 1 ) && !( distX == 0 && distY == 0 ) )
                             dragAndDrop = false;
@@ -945,13 +992,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 }
                 else if ( dragAndDrop == false ){
 
-                    for(int i = 0; i < pGrid->height; i++){
-                        for(int j = 0; j < pGrid->width; j++){
+                    for(int i = 0; i < pGameSession->pGrid_J1->height; i++){
+                        for(int j = 0; j < pGameSession->pGrid_J1->width; j++){
 
-                            pGrid->tokens[i][j].drawBackground = false;
+                            pGameSession->pGrid_J1->tokens[i][j].drawBackground = false;
                         }
                     }
-                    pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                    pGameSession->pGrid_J1->tokens[pGameSession->pGrid_J1->cursorTokenPosition.y][pGameSession->pGrid_J1->cursorTokenPosition.x].drawBackground = true;
                 }
             }
             else{
@@ -964,54 +1011,82 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
         }
         break;
     }
+
+    // boutons :
+
+    Button_quit_event(&pGameSession->button_quit, pEvent, pDraw, pQuit);
+    Button_direction_event(&pGameSession->button_direction, pEvent, pDraw, pGameSession->pGrid_J1);
 }
 
 // =========================================================
 // Logiques
 // =========================================================
 
-void Game_logic(Grid *pGrid){
+void Game_logic(GameSession *pGameSession){
 
-    //fprintf(stdout,"game.c : Game_logic(Grid *pGrid)\n");
+    //fprintf(stdout,"game.c : Game_logic(Grid *pGameSession->pGrid_J1)\n");
 
-    if ( IsTokenMoving(pGrid) == false && IsTokenDestructing(pGrid) == false){
+    if ( IsTokenMoving(pGameSession->pGrid_J1) == false && IsTokenDestructing(pGameSession->pGrid_J1) == false){
 
-        if( IsLineOnGrid(pGrid) == true ){
+        if( IsLineOnGrid(pGameSession->pGrid_J1) == true ){
 
             // score
-            Calc_Score(pGrid);
+            Calc_Score(pGameSession->pGrid_J1);
 
             // détruit les lignes et remplie les cases manquantes du tableau
-            fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(pGrid) );
+            fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(pGameSession->pGrid_J1) );
         }
         else {
 
-            if(IsTokenOfType(pGrid, NONE ) == true ){
+            if(IsTokenOfType(pGameSession->pGrid_J1, NONE ) == true ){
 
-                while( IsTokenOfType(pGrid, NONE ) == true ){
+                while( IsTokenOfType(pGameSession->pGrid_J1, NONE ) == true ){
 
                     // regroupe tout les jetons
-                    RegroupTokens(pGrid);
+                    RegroupTokens(pGameSession->pGrid_J1);
 
                     // remplie les espaces vides
-                   InjectLigne(pGrid);
+                   InjectLigne(pGameSession->pGrid_J1);
                 }
 
 
 
                 // recalcul les mouvements possibles
-                MoveAvailable(pGrid);
+                MoveAvailable(pGameSession->pGrid_J1);
 
             }else {
 
-                if(pGrid->moveAvailable == 0){
+                if(pGameSession->pGrid_J1->moveAvailable == 0){
 
-                    RandomizeGrid(pGrid);
+                    RandomizeGrid(pGameSession->pGrid_J1);
                 }
             }
         }
     }
+
+    /* maj des mlabels */
+    sprintf(pGameSession->label_nbMove.text," NbCoups : %d", pGameSession->pGrid_J1->nbMove);
+    sprintf(pGameSession->label_score.text,"Score : %d ", pGameSession->pGrid_J1->score);
+    sprintf(pGameSession->label_mouvements.text,"Nombre de mouvement : %d",pGameSession->pGrid_J1->moveAvailable);
+
+    /* animations */
+    Grid_anim(pGameSession->pGrid_J1);
 }
+
+// =========================================================
+
+void Game_draw(GameSession *pGameSession, SDL_Renderer *pRenderer){
+
+    Grid_draw(pGameSession->pGrid_J1,pRenderer);     // désine la grille sur le renderer
+
+    UI_label_draw(&pGameSession->label_score,pRenderer);
+    UI_label_draw(&pGameSession->label_nbMove,pRenderer);
+    UI_label_draw(&pGameSession->label_mouvements,pRenderer);
+    UI_button_draw(&pGameSession->button_quit, pRenderer);
+    UI_button_draw(&pGameSession->button_direction, pRenderer);
+}
+
+// =========================================================
 
 
 

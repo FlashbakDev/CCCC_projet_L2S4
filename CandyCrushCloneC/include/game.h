@@ -22,6 +22,23 @@ Rôle : fonctions gérants une partie de CCCC.
 
 // =========================================================
 
+typedef struct GameSession{
+
+    Grid *pGrid_J1, *pGrid_J2;
+
+    bool is_multiplayer;
+
+    UI_label label_score, label_mouvements, label_nbMove;
+    UI_button button_quit, button_direction;
+
+    Window *pWindow;
+
+    SDL_Rect rect_screen, rect_UI, rect_grid;
+
+}GameSession;
+
+// =========================================================
+
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor);
 
@@ -89,11 +106,16 @@ void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image);
 // =========================================================
 
 void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
+GameSession* Game_init(Array *pArray,Window *pWindow,bool multiplayer, int width, int height, int nbMove, int nbColor);
 
-void Game_logic(Grid *pGrid);
+void Game_event(GameSession *pGameSession, SDL_Event *pEvent,bool *pDraw, bool *pQuit);
+
+void Game_logic(GameSession *pGameSession);
+
+void Game_draw(GameSession *pGameSession, SDL_Renderer *pRenderer);
 
 // =========================================================
 
