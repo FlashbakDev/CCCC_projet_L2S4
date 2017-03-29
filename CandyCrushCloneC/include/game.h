@@ -32,7 +32,7 @@ void RandomizeGrid(Grid *pGrid);
 void CheckGrid(Grid *pGrid);
 
 /* vérifie s'il y a des lignes complete sur la grille */
-bool IsLigneOnGrid(Grid *pGrid);
+bool IsLineOnGrid(Grid *pGrid);
 
 /* vérifie s'il y a un token du type donné */
 bool IsTokenOfType(Grid *pGrid, TokenTypes type);
@@ -58,11 +58,15 @@ void RegroupTokens(Grid *pGrid);
 
 /* insère de nouveaux jetons aléatoirement */
 void InjectLigne(Grid *pGrid);
+
 /*Inverse la direction*/
 Directions ReverseDirection(Directions dir);
 
 /* permute 2 jetons */
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
+
+/* permute les textures de 2 jetons ( prévisualisation ) */
+void PermuteTokenImage(Grid *pGrid,int x1,int y1,int x2,int y2);
 
 /* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
 void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y);
@@ -78,6 +82,9 @@ void Grid_anim(Grid *pGrid);
 
 /* calcul le score */
 int Calc_Score(Grid *pGrid );
+
+/* change la couleur de fond des jetons alignés */
+void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image);
 
 // =========================================================
 

@@ -63,9 +63,9 @@ void RandomizeGrid(Grid *pGrid){
         }
     }
 
-    while( IsLigneOnGrid(pGrid) == true || IsTokenOfType(pGrid, NONE ) == true ){
+    while( IsLineOnGrid(pGrid) == true || IsTokenOfType(pGrid, NONE ) == true ){
 
-        if( IsLigneOnGrid(pGrid) == true ){
+        if( IsLineOnGrid(pGrid) == true ){
 
             // détruit les lignes et remplie les cases manquantes du tableau
             DestroyAlignedTokens(pGrid);
@@ -93,14 +93,12 @@ void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y){
 
     token->type = TOKEN;
     token->color = (Colors)(rand() % nbColor);
-    token->image = image_tokens[token->color];
-    token->image_background = image_cursorBlue;
     token->isMoving = false;
     token->isDestruct = false;
     token->startDestructAnim = -1;
 
     token->textureSize = 100;
-    CalculTokenRectTexure(pGrid, token, x, y);
+    CalculTokenImages(pGrid, token, x, y);
 
     token->score = TOKEN_SCORE;
 }
@@ -223,7 +221,7 @@ void AnimDestructingTokens(Grid *pGrid){
                     // perte en une frame
                     pGrid->tokens[i][j].textureSize = 100 - ( 100.0 / DESTRUCT_SPEED * ( SDL_GetTicks() - pGrid->tokens[i][j].startDestructAnim ) ) ;
 
-                    CalculTokenRectTexure(pGrid, &pGrid->tokens[i][j], j, i);
+                    CalculTokenImages(pGrid, &pGrid->tokens[i][j], j, i);
                 }
                 else {
 
@@ -397,7 +395,23 @@ int Calc_Score(Grid *pGrid ){
 
 //====================================================
 
-bool IsLigneOnGrid(Grid *pGrid){
+void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image){
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].aligned == true ){
+
+                pGrid->tokens[i][j].image_background = image;
+                pGrid->tokens[i][j].drawBackground = true;
+            }
+        }
+    }
+}
+
+//====================================================
+
+bool IsLineOnGrid(Grid *pGrid){
 
     //fprintf(stdout,"game.c : IsLigneOnGrid(Grid * pGrid)\n");
 
@@ -696,6 +710,21 @@ void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 }
 
 // =========================================================
+
+void PermuteTokenImage(Grid *pGrid,int x1,int y1,int x2,int y2){
+
+    Token tmp = pGrid->tokens[y1][x1];
+
+    pGrid->tokens[y1][x1].image = pGrid->tokens[y2][x2].image;
+    pGrid->tokens[y1][x1].image_background = pGrid->tokens[y2][x2].image_background;
+    pGrid->tokens[y1][x1].drawBackground = pGrid->tokens[y2][x2].drawBackground;
+
+    pGrid->tokens[y2][x2].image = tmp.image;
+    pGrid->tokens[y2][x2].image_background = tmp.image_background;
+    pGrid->tokens[y2][x2].drawBackground = tmp.drawBackground;
+}
+
+// =========================================================
 // Evenements
 // =========================================================
 
@@ -838,7 +867,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                             HardPermuteToken(pGrid, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
 
-                            if ( IsLigneOnGrid(pGrid) == false ){
+                            if ( IsLineOnGrid(pGrid) == false ){
 
                                 HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
                             }
@@ -875,11 +904,55 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
             if ( pGrid->is_cursorOnGrid == true ){
 
+                SDL_Point cursorTokenPositionTemp;
+                cursorTokenPositionTemp.x = pGrid->cursorTokenPosition.x;
+                cursorTokenPositionTemp.y = pGrid->cursorTokenPosition.y;
+
                 pGrid->cursorTokenPosition.x = (pEvent->motion.x / TOKEN_WIDTH);
                 pGrid->cursorTokenPosition.y = (pEvent->motion.y / TOKEN_HEIGHT);
 
-                rect_CursorOver.x = pGrid->cursorTokenPosition.x * TOKEN_WIDTH;
-                rect_CursorOver.y = pGrid->cursorTokenPosition.y * TOKEN_HEIGHT;
+                // si drag and drop et changement de case
+                if ( dragAndDrop && ( cursorTokenPositionTemp.x != pGrid->cursorTokenPosition.x || cursorTokenPositionTemp.y != pGrid->cursorTokenPosition.y ) ){
+
+                    int distX = sqrt( pow( pGrid->cursorTokenPosition.x - dragStart.x, 2) );
+                    int distY = sqrt( pow( pGrid->cursorTokenPosition.y - dragStart.y, 2) );
+
+                    if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
+
+                        PermuteToken(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+
+                        if ( IsLineOnGrid(pGrid) == false ){
+
+                            //fprintf(stdout,"game.c -> Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit) -> switch(pEvent->type) -> case SDL_MOUSEMOTION -> !IsLineOnGrid(pGrid) ");
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].image_background = image_cursorRed;
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                        }
+
+                        ChangeAlignedTokenBackgroundImage(pGrid, image_cursorGreen);
+
+                        PermuteToken(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+
+                        PermuteTokenImage(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                    }
+                    else{
+
+                        ResetTokenImages(pGrid);
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+
+                        if  ( !( distX == 1 && distY == 0 ) && !( distX == 0 && distY == 1 ) && !( distX == 0 && distY == 0 ) )
+                            dragAndDrop = false;
+                    }
+                }
+                else if ( dragAndDrop == false ){
+
+                    for(int i = 0; i < pGrid->height; i++){
+                        for(int j = 0; j < pGrid->width; j++){
+
+                            pGrid->tokens[i][j].drawBackground = false;
+                        }
+                    }
+                    pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                }
             }
             else{
 
@@ -903,7 +976,7 @@ void Game_logic(Grid *pGrid){
 
     if ( IsTokenMoving(pGrid) == false && IsTokenDestructing(pGrid) == false){
 
-        if( IsLigneOnGrid(pGrid) == true ){
+        if( IsLineOnGrid(pGrid) == true ){
 
             // score
             Calc_Score(pGrid);
