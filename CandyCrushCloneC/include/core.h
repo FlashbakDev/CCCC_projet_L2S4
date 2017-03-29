@@ -70,6 +70,7 @@ typedef struct Grid{
     SDL_Rect rect;
 
     Directions direction;
+    bool isdir_random;
     int score;
     int moveAvailable;
 

@@ -16,6 +16,7 @@ int main(int argc, char* argv[]){
 
     UI_label label_score = {false};
     UI_button button_quit = {false};
+    UI_button button_direction = {false};
     UI_label label_mouvements = {false};
     UI_label label_nbMove = {false};
 
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]){
         return 1;
 
     Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor);
-
+printf("direction  : %d\n",grid1->isdir_random );
     fprintf(stdout,"Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
@@ -52,6 +53,8 @@ int main(int argc, char* argv[]){
     sprintf(label_mouvements.text,"Mouvement possible : %d",0);
 
     fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
+    fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 80 ));
+
     window.visible = true;
 
     fprintf(stdout,"Initialisation end.\n");
@@ -77,6 +80,7 @@ int main(int argc, char* argv[]){
             // event UI
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
+            Button_direction_event(&button_direction, &event, &draw, grid1);
         }
 
         /* logique */
@@ -101,6 +105,7 @@ int main(int argc, char* argv[]){
         UI_label_draw(&label_nbMove,pRenderer);
         UI_label_draw(&label_mouvements,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
+        UI_button_draw(&button_direction, pRenderer);
 
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
