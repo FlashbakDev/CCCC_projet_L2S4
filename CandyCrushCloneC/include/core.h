@@ -28,6 +28,8 @@ typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE }Colors;
 
 typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
 
+typedef enum GameStates { MENU, GAMESESSION, EDITOR, QUIT }GameStates;
+
 typedef struct Image{
 
     SDL_Texture *pTexture;
@@ -70,7 +72,7 @@ typedef struct Grid{
     SDL_Rect rect;
 
     Directions direction;
-    bool isdir_random;
+    bool is_randomizeInsert;
     int score;
     int moveAvailable;
 
@@ -119,13 +121,15 @@ extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
 
+extern GameStates gameState;
+
 // ========================================================= Logique
 
-/* initailisation et chargement des ressources */
-SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
+/* initialisae la sdl */
+void InitSDL();
 
-/* fermeture du jeu / déchargement */
-int CleanGame(Array *pArray);
+/* libère la sdl */
+void CleanSDL();
 
 /* permute 2 jetons et place leurs texture au bon endroit */
 void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);

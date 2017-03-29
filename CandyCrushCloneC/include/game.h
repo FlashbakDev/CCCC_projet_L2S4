@@ -22,8 +22,14 @@ Rôle : fonctions gérants une partie de CCCC.
 
 // =========================================================
 
+/* initailisation et chargement des ressources */
+SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
+
+/* fermeture du jeu / déchargement */
+int CleanGame(Array *pArray);
+
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
-Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor);
+Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor,bool randomizeInsert);
 
 /* remplie la grille aléatoirement */
 void RandomizeGrid(Grid *pGrid);
@@ -49,8 +55,10 @@ Token *GetColumnUpperToken(Grid *pGrid,int x);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
-/*Change la direction de la grille*/
+/*Change la direction de la grille aléatoirement */
 void ChangeDirectionRandom(Grid *pGrid);
+
+/*Change la direction de la grille*/
 void ChangeDirection(Grid *pGrid, Directions dir);
 
 /* regroupe les jetons dans la direction donné */
@@ -88,12 +96,13 @@ void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image);
 
 // =========================================================
 
-void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
 void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
 void Game_logic(Grid *pGrid);
+
+void GameSession(int width, int height,int nbColor, int nbMove,bool randomizeInsert);
 
 // =========================================================
 
