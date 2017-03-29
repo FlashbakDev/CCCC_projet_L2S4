@@ -708,8 +708,10 @@ void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool 
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,Grid *pGrid ){
     if ( UI_button_event(pButton, pEvent, pDraw) )
     {
-        if(pGrid->isdir_random==true)pGrid->isdir_random = false; else pGrid->isdir_random =true;
+        if(pGrid->isdir_random==true)pGrid->isdir_random = false; else {pGrid->isdir_random =true;ChangeDirectionRandom(pGrid);}
         printf("direction  : %d\n",pGrid->isdir_random );
+
+
     }
 }
 
@@ -849,11 +851,11 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                     *pQuit = true;
                                 }
-                                printf("direction  : %d\n",pGrid->isdir_random );
+                                //printf("direction  : %d\n",pGrid->isdir_random );
                                 if(pGrid->isdir_random == true)
                                 {
                                     ChangeDirectionRandom(pGrid);
-                                    printf("changement direction\n");
+                                    printf("changement direction: direction = %d ", pGrid->direction);
                                 }
                             }
                         }

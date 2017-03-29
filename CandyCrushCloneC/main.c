@@ -80,7 +80,7 @@ printf("direction  : %d\n",grid1->isdir_random );
             // event UI
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
-            Button_direction_event(&button_direction, &event, &draw, &grid1);
+            Button_direction_event(&button_direction, &event, &draw, grid1);
         }
 
         /* logique */
