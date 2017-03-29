@@ -19,11 +19,13 @@ int main(int argc, char* argv[]){
     UI_button button_direction = {false};
     UI_label label_mouvements = {false};
     UI_label label_nbMove = {false};
+    UI_label label_direction = {false};
+    UI_label label_indic_random = {false};
 
     /* initialisation du jeu */
     int gridHeight = 10;
     int gridWidth = 10;
-    int nbColor = 6;
+    int nbColor = 4;
     int nbMove = 5;
 
     // création des zone de jeu et d'affichage
@@ -47,13 +49,16 @@ printf("direction  : %d\n",grid1->isdir_random );
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
     fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_direction, &window, "Test", rect_UI.x + 20 , rect_UI.y + 80 ));
+    fprintf(stdout,"UI_label_new return %d.\n", UI_label_new(&label_indic_random, &window, "Test", rect_UI.x + 20 , rect_UI.y + 100 ));
 
     sprintf(label_score.text,"Score : %d ",0);
     sprintf(label_nbMove.text,"NbCoups : %d", nbMove);
     sprintf(label_mouvements.text,"Mouvement possible : %d",0);
+    sprintf(label_mouvements.text,"Direction haut vers bas",0);
 
     fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
-    fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 80 ));
+    fprintf(stdout,"UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction Aleatoire", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 120 ));
 
     window.visible = true;
 
@@ -90,8 +95,25 @@ printf("direction  : %d\n",grid1->isdir_random );
         sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
         sprintf(label_score.text,"Score : %d ", grid1->score);
         sprintf(label_mouvements.text,"Nombre de mouvement : %d",grid1->moveAvailable);
+        sprintf(label_direction.text,"Direction haut vers bas",0);
 
-        /* animations - textes */
+
+        if(grid1->isdir_random==true)
+        sprintf(button_direction.text,"Bloqué la direction");
+        else
+        sprintf(button_direction.text,"Direction Aleatoire");
+        if(grid1->isdir_random == true)
+        sprintf(label_indic_random.text,"Changement de direction aleatoire");
+        else sprintf(label_indic_random.text,"");
+        switch(grid1->direction)
+        {
+            case UP: sprintf(label_direction.text,"Direction bas vers haut"); break;
+            case DOWN: sprintf(label_direction.text,"Direction haut vers bas");break;
+            case LEFT: sprintf(label_direction.text,"Direction droite vers gauche");break;
+            case RIGHT: sprintf(label_direction.text,"Direction gauche vers droite");break;
+
+        }
+        /* animations - textes*/
         Grid_anim(grid1);
 
         /* affichage */
@@ -104,6 +126,8 @@ printf("direction  : %d\n",grid1->isdir_random );
         UI_label_draw(&label_score,pRenderer);
         UI_label_draw(&label_nbMove,pRenderer);
         UI_label_draw(&label_mouvements,pRenderer);
+        UI_label_draw(&label_direction,pRenderer);
+        UI_label_draw(&label_indic_random,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
         UI_button_draw(&button_direction, pRenderer);
 

@@ -79,6 +79,10 @@ void AnimDestructingTokens(Grid *pGrid);
 
 /* anime la grille */
 void Grid_anim(Grid *pGrid);
+/* detect les coudées et ajoute les jetons speciaux */
+void Token_speciaux(Grid *pGrid);
+
+TokenTypes TypeRandom(int borne);
 
 /* calcul le score */
 int Calc_Score(Grid *pGrid );

@@ -16,7 +16,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor){
     pGrid->nbColor = nbColor;
     pGrid->pastTokens = NULL;
     pGrid->direction =DOWN;
-    pGrid->isdir_random = true;
+    pGrid->isdir_random = false;
     pGrid->score = 0;
 
     MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
@@ -248,7 +248,72 @@ void Grid_anim(Grid *pGrid){
         AnimDestructingTokens(pGrid);
     }
 }
+//==========================================================
+void Token_speciaux(Grid *pGrid)
+{
+    int vecteur_point[4][2][2] = {{{0,1},{1,0}} ,{{0,-1},{1,0}} ,{{0,1},{-1,0}},{{0,-1},{-1,0}}};
+    Colors save_color;
+    bool coude = false;
+for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+            coude = false;
+            if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].type == TOKEN){
+                    save_color = pGrid->tokens[i][j].color;
 
+                for(int n =0; n<3; n++)
+                {
+                    if(i+vecteur_point[n][0][0] >=0 &&
+                       i+vecteur_point[n][0][0] <pGrid->height &&
+                       j+vecteur_point[n][0][1] <pGrid->width &&
+                       j+vecteur_point[n][0][1] >=0  &&
+                       i+vecteur_point[n][1][0] >=0 &&
+                       i+vecteur_point[n][1][0] <pGrid->height &&
+                       j+vecteur_point[n][1][1] <pGrid->width &&
+                       j+vecteur_point[n][1][1] >=0  &&
+                       pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]].color == save_color &&
+                       pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].color == save_color &&
+                       pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]].aligned == true &&
+                       pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].aligned == true
+                       )
+                       coude = true;
+
+
+
+                }
+
+                 if(coude == true)
+                    {
+                        printf("coude detecter en %d,%d \n",i,j);
+                        pGrid->tokens[i][j].color = 5;
+                        pGrid->tokens[i][j].aligned = false;
+
+                        pGrid->tokens[i][j].type = TypeRandom(2);
+
+
+                    }
+
+            }
+
+
+        }
+    }
+
+
+}
+
+//============================
+TokenTypes TypeRandom(int borne)
+{
+    switch(rand()%borne)
+    {
+        case 0: return HORIZONTAL;
+        case 1: return VERTICAL;
+
+        default: printf("TypeRandom -> valeur non comprise"); return TOKEN;
+
+    }
+
+}
 // =========================================================
 
 int Calc_Score(Grid *pGrid ){
@@ -534,8 +599,6 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
 
-    CheckGrid(pGrid);
-
     int cpt = 0;
 
     for(int i = 0; i < pGrid->height; i++){
@@ -737,7 +800,7 @@ void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool 
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,Grid *pGrid ){
     if ( UI_button_event(pButton, pEvent, pDraw) )
     {
-        if(pGrid->isdir_random==true)pGrid->isdir_random = false; else {pGrid->isdir_random =true;ChangeDirectionRandom(pGrid);}
+        if(pGrid->isdir_random==true)pGrid->isdir_random = false; else {pGrid->isdir_random =true;}
         printf("direction  : %d\n",pGrid->isdir_random );
 
 
@@ -791,7 +854,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
                     }
                     else{
-
+                        printf("Boutton s");
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
                     }
 
@@ -804,9 +867,34 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 }
                 break;
 
-                  case SDLK_a : {
 
-                    pGrid->direction = UP;
+                case SDLK_j :{
+
+                    ChangeDirection(pGrid,LEFT);
+
+                }
+                break;
+
+                case SDLK_i :{
+
+                    ChangeDirection(pGrid,UP);
+
+                }
+                break;
+
+
+                case SDLK_k :{
+
+                    ChangeDirection(pGrid,DOWN);
+
+                }
+                break;
+
+
+                case SDLK_l :{
+
+                    ChangeDirection(pGrid,RIGHT);
+
                 }
                 break;
             }
@@ -981,6 +1069,8 @@ void Game_logic(Grid *pGrid){
             // score
             Calc_Score(pGrid);
 
+            //Token speciaux
+            Token_speciaux(pGrid);
             // détruit les lignes et remplie les cases manquantes du tableau
             fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(pGrid) );
         }
