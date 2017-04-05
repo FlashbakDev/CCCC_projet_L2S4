@@ -55,6 +55,11 @@ Token *GetColumnUpperToken(Grid *pGrid,int x);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
+/* */
+bool Compare_TokenColor(Token t1, Token t2);
+
+bool Compare_TokenColor_color(Token t1, Colors c);
+
 /*Change la direction de la grille aléatoirement */
 void ChangeDirectionRandom(Grid *pGrid);
 

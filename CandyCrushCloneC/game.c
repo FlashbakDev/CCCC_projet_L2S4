@@ -226,7 +226,7 @@ void CheckGrid(Grid *pGrid){
                 // vérification verticale
                 if ( i > 0 && i < pGrid->height - 1){
 
-                    if ( pGrid->tokens[i][j].color == pGrid->tokens[i-1][j].color && pGrid->tokens[i][j].color == pGrid->tokens[i+1][j].color ){
+                    if ( Compare_TokenColor(pGrid->tokens[i][j], pGrid->tokens[i-1][j]) && Compare_TokenColor(pGrid->tokens[i][j],pGrid->tokens[i+1][j]) ){
 
                         pGrid->tokens[i][j].aligned = true;
                         pGrid->tokens[i-1][j].aligned = true;
@@ -237,7 +237,7 @@ void CheckGrid(Grid *pGrid){
                 // vérification horizontale
                 if ( j > 0 && j < pGrid->width - 1){
 
-                    if ( pGrid->tokens[i][j].color == pGrid->tokens[i][j-1].color && pGrid->tokens[i][j].color == pGrid->tokens[i][j+1].color ){
+                    if ( Compare_TokenColor(pGrid->tokens[i][j],pGrid->tokens[i][j-1])&& Compare_TokenColor(pGrid->tokens[i][j], pGrid->tokens[i][j+1]) ){
 
                         pGrid->tokens[i][j].aligned = true;
                         pGrid->tokens[i][j-1].aligned = true;
@@ -374,8 +374,8 @@ void Token_speciaux(Grid *pGrid)
                        i+vecteur_point[n][1][0] <pGrid->height &&
                        j+vecteur_point[n][1][1] <pGrid->width &&
                        j+vecteur_point[n][1][1] >=0  &&
-                       pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]].color == save_color &&
-                       pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].color == save_color &&
+                       Compare_TokenColor_color(pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]], save_color) &&
+                       Compare_TokenColor_color(pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]], save_color) &&
                        pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]].aligned == true &&
                        pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].aligned == true
                        )
@@ -391,7 +391,7 @@ void Token_speciaux(Grid *pGrid)
                         pGrid->tokens[i][j].aligned = false;
                         pGrid->tokens[i][j].color = NONE_COLOR;
                         pGrid->tokens[i][j].type = MULTI;
-                        CalculTokenImages(pGrid,&pGrid->tokens[i][j],i,j);
+                        CalculTokenImages(pGrid,&pGrid->tokens[i][j],j,i);
                         printf("special apparut en %d,%d \n",i,j);
 
                     }
@@ -431,7 +431,7 @@ int Calc_Score(Grid *pGrid ){
     int nb_align;
     int multi;
     int val = 0;
-    Colors savedColor;
+    Token Token_save;
 
     /* traitement au cas par cas */
 
@@ -439,12 +439,12 @@ int Calc_Score(Grid *pGrid ){
     for(int i = 0; i < pGrid->height; i++){
 
         nb_align = 1;
-        savedColor = pGrid->tokens[i][0].color;
+        Token_save = pGrid->tokens[i][0];
         val = pGrid->tokens[i][0].score;
 
         for(int j = 1; j < pGrid->width; j++){
 
-            if(pGrid->tokens[i][j].color == savedColor){
+            if(Compare_TokenColor(pGrid->tokens[i][j], Token_save)){
 
                 nb_align++;
                 val += pGrid->tokens[i][j].score;
@@ -472,7 +472,7 @@ int Calc_Score(Grid *pGrid ){
                     printf("Score de la ligne : %d \n", score);
                 }
                 nb_align = 1;
-                savedColor = pGrid->tokens[i][j].color;
+                Token_save = pGrid->tokens[i][j];
                 val = pGrid->tokens[i][j].score;
             }
         }
@@ -502,12 +502,12 @@ int Calc_Score(Grid *pGrid ){
     for(int j = 0; j < pGrid->width; j++){
 
         nb_align = 1;
-        savedColor = pGrid->tokens[0][j].color;
+        Token_save = pGrid->tokens[0][j];
          val = pGrid->tokens[0][j].score;
 
         for(int i = 1; i < pGrid->height; i++){
 
-            if(pGrid->tokens[i][j].color == savedColor){
+            if(Compare_TokenColor(pGrid->tokens[i][j],Token_save)){
 
                 nb_align++;
                 val += pGrid->tokens[i][j].score;
@@ -531,7 +531,7 @@ int Calc_Score(Grid *pGrid ){
                     printf("Score de la colonne : %d \n", score);
                 }
                 nb_align = 1;
-                savedColor = pGrid->tokens[i][j].color;
+                Token_save = pGrid->tokens[i][j];
                 val = pGrid->tokens[i][j].score;
             }
         }
@@ -724,7 +724,22 @@ int DestroyAlignedTokens(Grid *pGrid){
 
 // =========================================================
 
-//bool Compare_Color()
+bool Compare_TokenColor(Token t1, Token t2)
+{
+    //Si le type est un des types speciaux sans couleur, nb : cerise, noisette, multi (situé apres Vertical dans l'enumertation)
+    return (t1.type >VERTICAL || t2.type >VERTICAL )?false: t1.color==t2.color;
+
+
+
+}
+
+bool Compare_TokenColor_color(Token t1, Colors c)
+{
+     return (t1.type >VERTICAL )?false: t1.color==c;
+
+
+
+}
 
 
 // =========================================================
