@@ -920,6 +920,42 @@ void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,G
 
 // =========================================================
 
+void Button_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        pGrid->nbHelp --;
+
+        printf("=> help\n");
+    }
+}
+
+// =========================================================
+
+void Button_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        pGrid->nbSuperHelp --;
+
+        printf("=> superHelp\n");
+    }
+}
+
+// =========================================================
+
+void Button_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        pGrid->nbRevertOnce --;
+
+        printf("=> revertOnce\n");
+    }
+}
+
+// =========================================================
+
 void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
     switch(pEvent->type){
@@ -943,7 +979,6 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                         *pQuit = true;
                         gameState = MENU;
                     }
-
                 }
                 break;
 
@@ -958,6 +993,10 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = 0;
                     }
 
+                    CalculTokenImages(  pGrid,
+                                        &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
+                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
+                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                 }
                 break;
 
@@ -968,10 +1007,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
                     }
                     else{
-                        printf("Boutton s");
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
                     }
 
+                    CalculTokenImages(  pGrid,
+                                        &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
+                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
+                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                 }
                 break;
 
@@ -1301,10 +1343,10 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
             Button_menu_event(&button_menu, &event, &draw, &quit);
-            Button_menu_event(&button_direction, &event, &draw, &quit);
-            //Button_menu_event(&button_help, &event, &draw, &quit);
-            //Button_menu_event(&button_superHelp, &event, &draw, &quit);
-            //Button_direction_event(&button_revertOnce, &event, &draw, grid1);
+            Button_direction_event(&button_direction, &event, &draw, grid1);
+            Button_help_event(&button_help, &event, &draw, grid1);
+            Button_superHelp_event(&button_superHelp, &event, &draw, grid1);
+            Button_revertOnce_event(&button_revertOnce, &event, &draw, grid1);
         }
 
         /* logique */
@@ -1314,6 +1356,9 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
         sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
         sprintf(label_score.text,"Score : %d ", grid1->score);
         sprintf(label_mouvements.text,"Nombre de mouvement : %d",grid1->moveAvailable);
+        sprintf(button_help.text,"Aide ( %d )",grid1->nbHelp);
+        sprintf(button_superHelp.text,"Super aide ( %d )",grid1->nbSuperHelp);
+        sprintf(button_revertOnce.text,"Retour arriere ( %d )",grid1->nbRevertOnce);
 
         /* animations */
         Grid_anim(grid1);
