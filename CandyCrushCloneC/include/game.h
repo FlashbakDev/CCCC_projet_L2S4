@@ -29,7 +29,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
 int CleanGame(Array *pArray);
 
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
-Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor,bool randomizeInsert);
+Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
 
 /* remplie la grille aléatoirement */
 void RandomizeGrid(Grid *pGrid);
@@ -106,7 +106,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
 void Game_logic(Grid *pGrid);
 
-void GameSession(int width, int height,int nbColor, int nbMove,bool randomizeInsert);
+void GameSession(int width, int height,int nbColor, int nbMove,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
 
 // =========================================================
 

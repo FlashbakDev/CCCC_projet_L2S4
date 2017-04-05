@@ -103,7 +103,7 @@ int CleanGame(Array *pArray){
 
 // =========================================================
 
-Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert){
+Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int nbHelp, int nbSuperHelp, int nbRevertOnce){
 
     /* aléatoire */
     srand(time(NULL));
@@ -119,6 +119,9 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert){
     pGrid->is_randomizeInsert = true;
     pGrid->score = 0;
     pGrid->is_randomizeInsert = randomizeInsert;
+    pGrid->nbHelp = nbHelp;
+    pGrid->nbSuperHelp = nbSuperHelp;
+    pGrid->nbRevertOnce = nbRevertOnce;
 
     MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
 
@@ -1217,7 +1220,7 @@ void Game_logic(Grid *pGrid){
 
 // =========================================================
 
-void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool randomizeInsert){
+void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool randomizeInsert, int nbHelp, int nbSuperHelp, int nbRevertOnce){
 
     fprintf(stdout, "game.c -> GameSession(...) : start \n");
 
@@ -1230,6 +1233,9 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
     UI_button button_quit = {false};
     UI_button button_direction = {false};
     UI_button button_menu = {false};
+    UI_button button_help = {false};
+    UI_button button_superHelp = {false};
+    UI_button button_revertOnce = {false};
     UI_label label_mouvements = {false};
     UI_label label_nbMove = {false};
 
@@ -1248,20 +1254,27 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
     if ( !pRenderer )
         return;
 
-    Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor,randomizeInsert);
+    Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor,randomizeInsert,nbHelp,nbSuperHelp,nbRevertOnce);
 
     fprintf(stdout,"game.c -> GameSession(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     fprintf(stdout,"game.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
     fprintf(stdout,"game.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
     fprintf(stdout,"game.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
 
-    sprintf(label_score.text,"Score : %d ",0);
-    sprintf(label_nbMove.text,"NbCoups : %d", nbMove);
-    sprintf(label_mouvements.text,"Mouvement possible : %d",0);
+    sprintf(label_score.text,"Score : %d ",grid1->score);
+    sprintf(label_nbMove.text,"NbCoups : %d", grid1->nbMove);
+    sprintf(label_mouvements.text,"Mouvement possible : %d",grid1->moveAvailable);
 
     fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
     fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_menu, &window, "Retour menu", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 80 ));
     fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 200 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_help, &window, "Aide", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 110 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_superHelp, &window, "Super aide", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 140 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_revertOnce, &window, "Retour arriere", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 170 ));
+
+    sprintf(button_help.text,"Aide ( %d )",grid1->nbHelp);
+    sprintf(button_superHelp.text,"Super aide ( %d )",grid1->nbSuperHelp);
+    sprintf(button_revertOnce.text,"Retour arriere ( %d )",grid1->nbRevertOnce);
 
     window.visible = true;
 
@@ -1288,7 +1301,10 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
             Button_menu_event(&button_menu, &event, &draw, &quit);
-            Button_direction_event(&button_direction, &event, &draw, grid1);
+            Button_menu_event(&button_direction, &event, &draw, &quit);
+            //Button_menu_event(&button_help, &event, &draw, &quit);
+            //Button_menu_event(&button_superHelp, &event, &draw, &quit);
+            //Button_direction_event(&button_revertOnce, &event, &draw, grid1);
         }
 
         /* logique */
@@ -1315,6 +1331,9 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
         UI_button_draw(&button_quit, pRenderer);
         UI_button_draw(&button_direction, pRenderer);
         UI_button_draw(&button_menu, pRenderer);
+        UI_button_draw(&button_help, pRenderer);
+        UI_button_draw(&button_superHelp, pRenderer);
+        UI_button_draw(&button_revertOnce, pRenderer);
 
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
