@@ -254,7 +254,7 @@ void Token_speciaux(Grid *pGrid)
     int vecteur_point[4][2][2] = {{{0,1},{1,0}} ,{{0,-1},{1,0}} ,{{0,1},{-1,0}},{{0,-1},{-1,0}}};
     Colors save_color;
     bool coude = false;
-for(int i = 0; i < pGrid->height; i++){
+    for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
             coude = false;
             if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].type == TOKEN){
@@ -284,11 +284,11 @@ for(int i = 0; i < pGrid->height; i++){
                  if(coude == true)
                     {
                         printf("coude detecter en %d,%d \n",i,j);
-                        pGrid->tokens[i][j].color = 5;
                         pGrid->tokens[i][j].aligned = false;
-
-                        pGrid->tokens[i][j].type = TypeRandom(2);
-
+                        pGrid->tokens[i][j].color = NONE_COLOR;
+                        pGrid->tokens[i][j].type = MULTI;
+                        CalculTokenImages(pGrid,&pGrid->tokens[i][j],i,j);
+                        printf("special apparut en %d,%d \n",i,j);
 
                     }
 
@@ -617,6 +617,11 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     return cpt;
 }
+
+// =========================================================
+
+//bool Compare_Color()
+
 
 // =========================================================
 

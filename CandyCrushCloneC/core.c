@@ -4,7 +4,7 @@
 
 Font font_default;
 Image image_normal, image_prelight, image_active, image_selected, image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[6];
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[19];
 int screen_width, screen_height;
 
 bool dragAndDrop;
@@ -65,6 +65,22 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_tokens[3], "data/Tokens/Token_yellow.png", pArray, pRenderer);
     error += Image_new(&image_tokens[4], "data/Tokens/Token_purple.png", pArray, pRenderer);
     error += Image_new(&image_tokens[5], "data/Tokens/Token_orange.png", pArray, pRenderer);
+
+    error += Image_new(&image_tokens[6], "data/Tokens/Token_red_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[7], "data/Tokens/Token_blue_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[8], "data/Tokens/Token_green_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[9], "data/Tokens/Token_yellow_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[10], "data/Tokens/Token_purple_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[11], "data/Tokens/Token_orange_horizontal.png", pArray, pRenderer);
+
+    error += Image_new(&image_tokens[12], "data/Tokens/Token_red_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[13], "data/Tokens/Token_blue_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[14], "data/Tokens/Token_green_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[15], "data/Tokens/Token_yellow_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[16], "data/Tokens/Token_purple_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[17], "data/Tokens/Token_orange_vertical.png", pArray, pRenderer);
+
+    error += Image_new(&image_tokens[18], "data/Tokens/Token_multi.png", pArray, pRenderer);
 
     if ( error > 0 ) {
 
@@ -237,7 +253,25 @@ void DebugToken(Token token){
 void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
 
     //fprintf(stdout,"CalculTokenRectTexure(Grid *pGrid, Token *token, int x = %d, int y = %d)\n", x, y);
-    token->image = image_tokens[token->color];
+    switch(token->type)
+    {
+    case TOKEN:
+        token->image = image_tokens[token->color];
+        break;
+
+    case HORIZONTAL:
+        token->image = image_tokens[token->color+6];
+        break;
+    case VERTICAL:
+        token->image = image_tokens[token->color+12];
+        break;
+    case MULTI:
+        token->image = image_tokens[18];
+
+
+
+    }
+
     token->image_background = image_cursorBlue;
     token->drawBackground = false;
 
