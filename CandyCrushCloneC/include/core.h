@@ -75,6 +75,9 @@ typedef struct Grid{
     bool is_randomizeInsert;
     int score;
     int moveAvailable;
+    int nbHelp;
+    int nbSuperHelp;
+    int nbRevertOnce;
 
 }Grid;
 
