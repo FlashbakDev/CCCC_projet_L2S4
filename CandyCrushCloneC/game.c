@@ -46,7 +46,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_tokens[3], "data/Tokens/Token_yellow.png", pArray, pRenderer);
     error += Image_new(&image_tokens[4], "data/Tokens/Token_purple.png", pArray, pRenderer);
     error += Image_new(&image_tokens[5], "data/Tokens/Token_orange.png", pArray, pRenderer);
-  
+
     error += Image_new(&image_tokens[6], "data/Tokens/Token_red_horizontal.png", pArray, pRenderer);
     error += Image_new(&image_tokens[7], "data/Tokens/Token_blue_horizontal.png", pArray, pRenderer);
     error += Image_new(&image_tokens[8], "data/Tokens/Token_green_horizontal.png", pArray, pRenderer);
@@ -62,7 +62,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_tokens[17], "data/Tokens/Token_orange_vertical.png", pArray, pRenderer);
 
     error += Image_new(&image_tokens[18], "data/Tokens/Token_multi.png", pArray, pRenderer);
-  
+
     if ( error > 0 ) {
 
 		CleanGame(pArray);
@@ -1266,11 +1266,11 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
     sprintf(label_mouvements.text,"Mouvement possible : %d",grid1->moveAvailable);
 
     fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_menu, &window, "Retour menu", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 80 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_menu, &window, "Retour menu", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 90 ));
     fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 200 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_help, &window, "Aide", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 110 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_superHelp, &window, "Super aide", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 140 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_revertOnce, &window, "Retour arriere", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 170 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_help, &window, "Aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 240 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_superHelp, &window, "Super aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 280 ));
+    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_revertOnce, &window, "Retour arriere ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 320 ));
 
     sprintf(button_help.text,"Aide ( %d )",grid1->nbHelp);
     sprintf(button_superHelp.text,"Super aide ( %d )",grid1->nbSuperHelp);
