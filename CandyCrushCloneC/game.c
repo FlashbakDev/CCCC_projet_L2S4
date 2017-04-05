@@ -46,7 +46,23 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_tokens[3], "data/Tokens/Token_yellow.png", pArray, pRenderer);
     error += Image_new(&image_tokens[4], "data/Tokens/Token_purple.png", pArray, pRenderer);
     error += Image_new(&image_tokens[5], "data/Tokens/Token_orange.png", pArray, pRenderer);
+  
+    error += Image_new(&image_tokens[6], "data/Tokens/Token_red_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[7], "data/Tokens/Token_blue_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[8], "data/Tokens/Token_green_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[9], "data/Tokens/Token_yellow_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[10], "data/Tokens/Token_purple_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[11], "data/Tokens/Token_orange_horizontal.png", pArray, pRenderer);
 
+    error += Image_new(&image_tokens[12], "data/Tokens/Token_red_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[13], "data/Tokens/Token_blue_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[14], "data/Tokens/Token_green_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[15], "data/Tokens/Token_yellow_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[16], "data/Tokens/Token_purple_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[17], "data/Tokens/Token_orange_vertical.png", pArray, pRenderer);
+
+    error += Image_new(&image_tokens[18], "data/Tokens/Token_multi.png", pArray, pRenderer);
+  
     if ( error > 0 ) {
 
 		CleanGame(pArray);
@@ -333,7 +349,72 @@ void Grid_anim(Grid *pGrid){
         AnimDestructingTokens(pGrid);
     }
 }
+//==========================================================
+void Token_speciaux(Grid *pGrid)
+{
+    int vecteur_point[4][2][2] = {{{0,1},{1,0}} ,{{0,-1},{1,0}} ,{{0,1},{-1,0}},{{0,-1},{-1,0}}};
+    Colors save_color;
+    bool coude = false;
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+            coude = false;
+            if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].type == TOKEN){
+                    save_color = pGrid->tokens[i][j].color;
 
+                for(int n =0; n<3; n++)
+                {
+                    if(i+vecteur_point[n][0][0] >=0 &&
+                       i+vecteur_point[n][0][0] <pGrid->height &&
+                       j+vecteur_point[n][0][1] <pGrid->width &&
+                       j+vecteur_point[n][0][1] >=0  &&
+                       i+vecteur_point[n][1][0] >=0 &&
+                       i+vecteur_point[n][1][0] <pGrid->height &&
+                       j+vecteur_point[n][1][1] <pGrid->width &&
+                       j+vecteur_point[n][1][1] >=0  &&
+                       pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]].color == save_color &&
+                       pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].color == save_color &&
+                       pGrid->tokens[i+vecteur_point[n][0][0]][j+vecteur_point[n][0][1]].aligned == true &&
+                       pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].aligned == true
+                       )
+                       coude = true;
+
+
+
+                }
+
+                 if(coude == true)
+                    {
+                        printf("coude detecter en %d,%d \n",i,j);
+                        pGrid->tokens[i][j].aligned = false;
+                        pGrid->tokens[i][j].color = NONE_COLOR;
+                        pGrid->tokens[i][j].type = MULTI;
+                        CalculTokenImages(pGrid,&pGrid->tokens[i][j],i,j);
+                        printf("special apparut en %d,%d \n",i,j);
+
+                    }
+
+            }
+
+
+        }
+    }
+
+
+}
+
+//============================
+TokenTypes TypeRandom(int borne)
+{
+    switch(rand()%borne)
+    {
+        case 0: return HORIZONTAL;
+        case 1: return VERTICAL;
+
+        default: printf("TypeRandom -> valeur non comprise"); return TOKEN;
+
+    }
+
+}
 // =========================================================
 
 int Calc_Score(Grid *pGrid ){
@@ -619,8 +700,6 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
 
-    CheckGrid(pGrid);
-
     int cpt = 0;
 
     for(int i = 0; i < pGrid->height; i++){
@@ -639,6 +718,11 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     return cpt;
 }
+
+// =========================================================
+
+//bool Compare_Color()
+
 
 // =========================================================
 
@@ -881,7 +965,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
                     }
                     else{
-
+                        printf("Boutton s");
                         pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
                     }
 
@@ -894,9 +978,34 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 }
                 break;
 
-                  case SDLK_a : {
 
-                    pGrid->direction = UP;
+                case SDLK_j :{
+
+                    ChangeDirection(pGrid,LEFT);
+
+                }
+                break;
+
+                case SDLK_i :{
+
+                    ChangeDirection(pGrid,UP);
+
+                }
+                break;
+
+
+                case SDLK_k :{
+
+                    ChangeDirection(pGrid,DOWN);
+
+                }
+                break;
+
+
+                case SDLK_l :{
+
+                    ChangeDirection(pGrid,RIGHT);
+
                 }
                 break;
             }
@@ -1072,6 +1181,8 @@ void Game_logic(Grid *pGrid){
             // score
             Calc_Score(pGrid);
 
+            //Token speciaux
+            Token_speciaux(pGrid);
             // détruit les lignes et remplie les cases manquantes du tableau
             fprintf(stdout,"Nombre de jeton detruit(s) : %d\n", DestroyAlignedTokens(pGrid) );
         }
