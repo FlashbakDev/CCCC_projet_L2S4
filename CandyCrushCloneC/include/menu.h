@@ -17,12 +17,24 @@ Rôle : fonctions liées au menu, boutons etc.
 // =========================================================
 
 #include "core.h"
+#include "UI.h"
 #include "constants.h"
 
 // =========================================================
 
 
-
 // =========================================================
+
+/* initailisation et chargement des ressources */
+SDL_Renderer *InitMenu(char * pChar_name, Array *pArray, int w, int h);
+
+/* libère les ressources */
+int CleanMenu(Array *pArray);
+
+void Menu_event(SDL_Event *pEvent, bool *pQuit);
+
+void Menu_logic();
+
+void MenuSession();
 
 #endif // MENU_H_INCLUDED

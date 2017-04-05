@@ -11,117 +11,30 @@ bool dragAndDrop;
 SDL_Point dragStart;
 SDL_Rect rect_CursorOver;
 
+GameStates gameState;
+
 // =========================================================
 
-SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
+void InitSDL(){
 
     //Initialisation random
     srand(time(NULL));
 
-    SDL_Window *pWindow;
-    SDL_Renderer *pRenderer;
-    SDL_Rect rect_bounds;
-    int error = 0;
-
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_GetDisplayBounds(0, &rect_bounds);
-
-    if ( !pArray || w > rect_bounds.w || h > rect_bounds.h ){
-
-        SDL_Quit();
-        return NULL;
-    }
-
-    screen_width = w;
-    screen_height = h;
 
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 
     SDL_StartTextInput();
-
-    Array_new(pArray);
-
-    pWindow = SDL_CreateWindow(pChar_name, rect_bounds.w / 2 - w / 2, rect_bounds.h / 2 - h / 2, w, h, SDL_WINDOW_SHOWN);
-    if ( pWindow ) Array_append(pArray, WINDOW_TYPE , pWindow);
-    // void SDL_SetWindowIcon(SDL_Window*  window , SDL_Surface* icon); //ajoute une icône à la fenêtre
-
-    pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if ( pRenderer ) Array_append(pArray, RENDERER_TYPE, pRenderer);
-
-    // init des ressources
-    error += Font_new(&font_default, "data/fonts/arial.ttf", pArray, 15);
-    error += Image_new(&image_active, "data/UI/image_active.png", pArray, pRenderer);
-    error += Image_new(&image_prelight, "data/UI/image_prelight.png", pArray, pRenderer);
-    error += Image_new(&image_normal, "data/UI/image_normal.png", pArray, pRenderer);
-    error += Image_new(&image_cursorBlue, "data/image_cursorBlue.png", pArray, pRenderer);
-    error += Image_new(&image_cursorGreen, "data/image_cursorGreen.png", pArray, pRenderer);
-    error += Image_new(&image_cursorRed, "data/image_cursorRed.png", pArray, pRenderer);
-
-    // image des jetons
-    error += Image_new(&image_tokens[0], "data/Tokens/Token_red.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[1], "data/Tokens/Token_blue.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[2], "data/Tokens/Token_green.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[3], "data/Tokens/Token_yellow.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[4], "data/Tokens/Token_purple.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[5], "data/Tokens/Token_orange.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[6], "data/Tokens/Token_red_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[7], "data/Tokens/Token_blue_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[8], "data/Tokens/Token_green_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[9], "data/Tokens/Token_yellow_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[10], "data/Tokens/Token_purple_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[11], "data/Tokens/Token_orange_horizontal.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[12], "data/Tokens/Token_red_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[13], "data/Tokens/Token_blue_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[14], "data/Tokens/Token_green_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[15], "data/Tokens/Token_yellow_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[16], "data/Tokens/Token_purple_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[17], "data/Tokens/Token_orange_vertical.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[18], "data/Tokens/Token_multi.png", pArray, pRenderer);
-
-    if ( error > 0 ) {
-
-		CleanGame(pArray);
-		return NULL;
-	}
-
-	return pRenderer;
 }
 
 // =========================================================
 
-int CleanGame(Array *pArray){
-
-    if ( pArray )
-        return -1;
-
-    if ( pArray->length ){
-
-        for(int i = pArray->length - 1; i >= 0; i--){
-
-            switch( Array_GET_id(pArray, i) ){
-
-                case FONT_TYPE :{ TTF_CloseFont((TTF_Font*)Array_GET_data(pArray,i)); } break;
-                case TEXTURE_TYPE : { SDL_DestroyTexture((SDL_Texture*)Array_GET_data(pArray,i)); } break;
-                case RENDERER_TYPE : { SDL_DestroyRenderer((SDL_Renderer*)Array_GET_data(pArray,i)); } break;
-                case WINDOW_TYPE : { SDL_DestroyWindow((SDL_Window*)Array_GET_data(pArray,i)); } break;
-                case ARRAY_TYPE : { Array_free((Array*)Array_GET_data(pArray,i)); } break;
-                default : { free( pArray->tab_data[i]); }
-            }
-        }
-    }
-
-    pArray->length = 0;
-    Array_free(pArray);
+void CleanSDL(){
 
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
-
-    return 0;
 }
 
 // =========================================================
@@ -253,6 +166,7 @@ void DebugToken(Token token){
 void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
 
     //fprintf(stdout,"CalculTokenRectTexure(Grid *pGrid, Token *token, int x = %d, int y = %d)\n", x, y);
+
     switch(token->type)
     {
     case TOKEN:
@@ -267,9 +181,6 @@ void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
         break;
     case MULTI:
         token->image = image_tokens[18];
-
-
-
     }
 
     token->image_background = image_cursorBlue;
@@ -484,6 +395,8 @@ int Font_new(Font *pFont, char *pChar_name, Array *pArray, int size){
 
         return 0;
     }
+
+    return -1;
 }
 
 // =========================================================
