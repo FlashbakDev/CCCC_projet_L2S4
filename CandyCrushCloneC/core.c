@@ -4,7 +4,7 @@
 
 Font font_default;
 Image image_normal, image_prelight, image_active, image_selected, image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[6];
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[19];
 int screen_width, screen_height;
 
 bool dragAndDrop;
@@ -166,7 +166,23 @@ void DebugToken(Token token){
 void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
 
     //fprintf(stdout,"CalculTokenRectTexure(Grid *pGrid, Token *token, int x = %d, int y = %d)\n", x, y);
-    token->image = image_tokens[token->color];
+
+    switch(token->type)
+    {
+    case TOKEN:
+        token->image = image_tokens[token->color];
+        break;
+
+    case HORIZONTAL:
+        token->image = image_tokens[token->color+6];
+        break;
+    case VERTICAL:
+        token->image = image_tokens[token->color+12];
+        break;
+    case MULTI:
+        token->image = image_tokens[18];
+    }
+
     token->image_background = image_cursorBlue;
     token->drawBackground = false;
 
