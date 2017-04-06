@@ -69,6 +69,12 @@ void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
                 if ( pGrid->tokens[i][j].drawBackground )
                     RenderImage(pRenderer,pGrid->tokens[i][j].image_background,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
 
+                if ( pGrid->isHelpActive )
+                    MoveAvailable(pGrid, true);
+
+                if ( pGrid->isSuperHelpActive )
+                    HighlightBestMove(pGrid);
+
                 RenderImage(pRenderer,pGrid->tokens[i][j].image,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
             }
         }
@@ -297,7 +303,7 @@ int Utf8Fix(char *str){
 
 // ========================================================
 
-void MoveAvailable(Grid * pGrid){
+void MoveAvailable(Grid * pGrid, bool highlight){
 
     //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
@@ -307,6 +313,8 @@ void MoveAvailable(Grid * pGrid){
 
         for(int j=0;j < pGrid->width-1; j++){
 
+            int n = pGrid->moveAvailable;
+
             // vers la droite
             PermuteToken(pGrid,j,i,j+1,i);
 
@@ -314,12 +322,56 @@ void MoveAvailable(Grid * pGrid){
 
             PermuteToken(pGrid,j,i,j+1,i);
 
+            if ( n != pGrid->moveAvailable && highlight){
+
+                pGrid->tokens[i][j].image_background = image_cursorGreen;
+                pGrid->tokens[i][j].drawBackground = true;
+                pGrid->tokens[i][j+1].image_background = image_cursorGreen;
+                pGrid->tokens[i][j+1].drawBackground = true;
+
+                n = pGrid->moveAvailable;
+            }
+
             // vers le bas
             PermuteToken(pGrid,j,i,j,i+1);
 
             pGrid->moveAvailable += IsLineOnGrid(pGrid);
 
             PermuteToken(pGrid,j,i,j,i+1);
+
+            if ( n != pGrid->moveAvailable && highlight){
+
+                pGrid->tokens[i][j].image_background = image_cursorGreen;
+                pGrid->tokens[i][j].drawBackground = true;
+                pGrid->tokens[i+1][j].image_background = image_cursorGreen;
+                pGrid->tokens[i+1][j].drawBackground = true;
+            }
+        }
+    }
+}
+
+// ========================================================
+
+void SaveTokensInPastTokens(Grid *pGrid){
+
+    for(int i=0; i< pGrid->height; i++){
+        for(int j=0;j < pGrid->width; j++){
+
+            pGrid->pastTokens[i][j] = pGrid->tokens[i][j];
+            pGrid->pastTokens[i][j].drawBackground = false;
+            CalculTokenImages(pGrid,&pGrid->pastTokens[i][j],j,i);
+        }
+    }
+}
+
+// ========================================================
+
+void LoadTokensInPastTokens(Grid *pGrid){
+
+    for(int i=0; i< pGrid->height; i++){
+        for(int j=0;j < pGrid->width; j++){
+
+            pGrid->tokens[i][j] = pGrid->pastTokens[i][j];
         }
     }
 }

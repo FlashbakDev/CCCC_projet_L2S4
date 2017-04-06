@@ -50,7 +50,7 @@ bool IsTokenMoving(Grid *pGrid);
 bool IsTokenDestructing(Grid *pGrid);
 
 /* met en vert le meillur coup possible */
-void GetBestMove(Grid *pGrid);
+void HighlightBestMove(Grid *pGrid);
 
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);

@@ -165,6 +165,12 @@ int Utf8Fix(char *str);
 
 void MoveAvailable(Grid * pGrid, bool highlight);
 
+/* copie les token actuel dans la sauvegarde */
+void SaveTokensInPastTokens(Grid *pGrid);
+
+/* copie les token de la sauvegarde dans l'actuel */
+void LoadTokensInPastTokens(Grid *pGrid);
+
 // ========================================================= Chargement de ressources
 
 /* créée une nouvelle fenêtre */

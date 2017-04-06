@@ -132,25 +132,32 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int 
 
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
-    if ( pGrid->tokens == NULL ){ return NULL; }
+    pGrid->pastTokens = (Token*)malloc( pGrid->height * sizeof(Token*));
+
+    if ( pGrid->tokens == NULL || pGrid->pastTokens == NULL){ return NULL; }
 
     for(int i = 0; i < pGrid->height; i++){
 
         pGrid->tokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
+        pGrid->pastTokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
 
         /* désallocation de la mémoire en cas d'erreur */
-        if ( pGrid->tokens[i] == NULL ){
+        if ( pGrid->tokens[i] == NULL || pGrid->pastTokens[i] == NULL){
 
             for(i=i-1 ; i >= 0 ; i--){
                 free(pGrid->tokens[i]);
+                free(pGrid->pastTokens[i]);
             }
             free(pGrid->tokens);
+            free(pGrid->pastTokens);
 
             return NULL;
         }
     }
 
     RandomizeGrid(pGrid);
+
+    SaveTokensInPastTokens(pGrid);
 
     return pGrid;
 }
@@ -462,7 +469,7 @@ int Calc_Score(Grid *pGrid ){
 
                     score += multi * val;
 
-                    printf("Score de la ligne : %d \n", score);
+                    //printf("Score de la ligne : %d \n", score);
                 }
                 nb_align = 1;
                 savedColor = pGrid->tokens[i][j].color;
@@ -488,7 +495,7 @@ int Calc_Score(Grid *pGrid ){
 
             score += multi * val;
 
-            printf("Score de la ligne : %d \n", score);
+            //printf("Score de la ligne : %d \n", score);
         }
     }
     //Verification des allignements verticaux
@@ -521,7 +528,7 @@ int Calc_Score(Grid *pGrid ){
                     }
 
                     score += multi * val;
-                    printf("Score de la colonne : %d \n", score);
+                    //printf("Score de la colonne : %d \n", score);
                 }
                 nb_align = 1;
                 savedColor = pGrid->tokens[i][j].color;
@@ -546,11 +553,9 @@ int Calc_Score(Grid *pGrid ){
 
             score += multi * val;
 
-            printf("Score de la ligne : %d \n", score);
+            //printf("Score de la ligne : %d \n", score);
         }
     }
-
-    pGrid->score += score;
 
     return score;
 }
@@ -619,11 +624,11 @@ bool IsTokenDestructing(Grid *pGrid){
 
 // =========================================================
 
-void GetBestMove(Grid *pGrid){
+void HighlightBestMove(Grid *pGrid){
 
-    int nbPoints = 0;
+    int nbPointsBest = 0;
     int nbPointTemp = 0;
-    int i1, i2, j1, j2;
+    int i1 = 0, i2 = 0, j1 = 0, j2 = 0;
 
     for(int i = 0; i < pGrid->height-1; i++){
         for(int j = 0; j < pGrid->width-1; j++){
@@ -631,42 +636,36 @@ void GetBestMove(Grid *pGrid){
             // vers le haut
             PermuteToken(pGrid,j,i,j+1,i);
 
-            if( IsLineOnGrid(pGrid) ){
+            nbPointTemp = Calc_Score(pGrid);
 
-                int nbPointTemp = 30;
-            }
+            PermuteToken(pGrid,j,i,j+1,i);
 
-            if(  nbPointTemp > nbPoints ){
+            if(  nbPointTemp > nbPointsBest ){
 
                 i1 = i;
                 i2 = i;
                 j1 = j;
                 j2 = j+1;
 
-                nbPoints = nbPointTemp;
+                nbPointsBest = nbPointTemp;
             }
-
-            PermuteToken(pGrid,j,i,j+1,i);
 
             // vers le bas
             PermuteToken(pGrid,j,i,j,i+1);
 
-            if( IsLineOnGrid(pGrid) ){
+            nbPointTemp = Calc_Score(pGrid);
 
-                int nbPointTemp = 30;
-            }
+            PermuteToken(pGrid,j,i,j,i+1);
 
-            if(  nbPointTemp > nbPoints ){
+            if(  nbPointTemp > nbPointsBest ){
 
                 i1 = i;
                 i2 = i+1;
                 j1 = j;
                 j2 = j;
 
-                nbPoints = nbPointTemp;
+                nbPointsBest = nbPointTemp;
             }
-
-            PermuteToken(pGrid,j,i,j,i+1);
         }
     }
 
@@ -716,7 +715,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 
                 if ( pGrid->tokens[i][x].type != NONE ){
 
-                        return &pGrid->tokens[i][x];
+                    return &pGrid->tokens[i][x];
                 }
             }
 
@@ -729,7 +728,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 
                 if ( pGrid->tokens[x][i].type != NONE ){
 
-                        return &pGrid->tokens[x][i];
+                    return &pGrid->tokens[x][i];
                 }
             }
         }
@@ -741,7 +740,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 
                 if ( pGrid->tokens[x][i].type != NONE ){
 
-                        return &pGrid->tokens[x][i];
+                    return &pGrid->tokens[x][i];
                 }
             }
         }
@@ -810,6 +809,7 @@ int DestroyAlignedTokens(Grid *pGrid){
                 pGrid->tokens[i][j].type = NONE;
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
+                pGrid->tokens[i][j].drawBackground = false;
 
                 cpt++;
             }
@@ -1024,8 +1024,6 @@ void Button_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid 
         pGrid->isHelpActive = true;
 
         pGrid->nbHelp --;
-
-        printf("=> help\n");
     }
 }
 
@@ -1038,8 +1036,6 @@ void Button_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, 
         pGrid->isSuperHelpActive = true;
 
         pGrid->nbSuperHelp --;
-
-        printf("=> superHelp\n");
     }
 }
 
@@ -1051,7 +1047,7 @@ void Button_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,
 
         pGrid->nbRevertOnce --;
 
-        printf("=> revertOnce\n");
+        LoadTokensInPastTokens(pGrid);
     }
 }
 
@@ -1218,6 +1214,10 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                             }
                             else {
 
+                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
+                                SaveTokensInPastTokens(pGrid);
+                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
+
                                 /* coups réussi */
                                 pGrid->nbMove --;
 
@@ -1327,7 +1327,7 @@ void Game_logic(Grid *pGrid){
         if( IsLineOnGrid(pGrid) == true ){
 
             // score
-            Calc_Score(pGrid);
+            pGrid->score += Calc_Score(pGrid);
 
             //Token speciaux
             Token_speciaux(pGrid);
@@ -1445,9 +1445,9 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
             Button_quit_event(&button_quit, &event, &draw, &quit);
             Button_menu_event(&button_menu, &event, &draw, &quit);
             Button_direction_event(&button_direction, &event, &draw, grid1);
-            Button_help_event(&button_help, &event, &draw, grid1);
-            Button_superHelp_event(&button_superHelp, &event, &draw, grid1);
-            Button_revertOnce_event(&button_revertOnce, &event, &draw, grid1);
+            if( grid1->nbHelp > 0 ) Button_help_event(&button_help, &event, &draw, grid1);
+            if( grid1->nbSuperHelp > 0 ) Button_superHelp_event(&button_superHelp, &event, &draw, grid1);
+            if( grid1->nbRevertOnce > 0 ) Button_revertOnce_event(&button_revertOnce, &event, &draw, grid1);
         }
 
         /* logique */
@@ -1457,9 +1457,9 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
         sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
         sprintf(label_score.text,"Score : %d ", grid1->score);
         sprintf(label_mouvements.text,"Nombre de mouvement : %d",grid1->moveAvailable);
-        sprintf(button_help.text,"Aide ( %d )",grid1->nbHelp);
-        sprintf(button_superHelp.text,"Super aide ( %d )",grid1->nbSuperHelp);
-        sprintf(button_revertOnce.text,"Retour arriere ( %d )",grid1->nbRevertOnce);
+        if( grid1->nbHelp > 0 ) sprintf(button_help.text,"Aide ( %d )",grid1->nbHelp);
+        if( grid1->nbSuperHelp > 0 ) sprintf(button_superHelp.text,"Super aide ( %d )",grid1->nbSuperHelp);
+        if( grid1->nbRevertOnce > 0 ) sprintf(button_revertOnce.text,"Retour arriere ( %d )",grid1->nbRevertOnce);
 
         /* animations */
         Grid_anim(grid1);
@@ -1477,9 +1477,9 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
         UI_button_draw(&button_quit, pRenderer);
         UI_button_draw(&button_direction, pRenderer);
         UI_button_draw(&button_menu, pRenderer);
-        UI_button_draw(&button_help, pRenderer);
-        UI_button_draw(&button_superHelp, pRenderer);
-        UI_button_draw(&button_revertOnce, pRenderer);
+        if( grid1->nbHelp > 0 ) UI_button_draw(&button_help, pRenderer);
+        if( grid1->nbSuperHelp > 0 ) UI_button_draw(&button_superHelp, pRenderer);
+        if( grid1->nbRevertOnce > 0 ) UI_button_draw(&button_revertOnce, pRenderer);
 
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
