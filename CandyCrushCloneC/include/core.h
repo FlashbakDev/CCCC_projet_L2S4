@@ -22,7 +22,7 @@ Rôle : fonctions générales du jeu, aussi bien affichage que logique.
 
 typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
-typedef enum TokenTypes { NONE, TOKEN,HORIZONTAL,VERTICAL,MULTI}TokenTypes;
+typedef enum TokenTypes { NONE, TOKEN,HORIZONTAL,VERTICAL,PACKED,MULTI}TokenTypes;
 
 typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, NONE_COLOR }Colors;
 
@@ -117,7 +117,7 @@ typedef struct Window {
 
 extern Font font_default;
 extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[19];
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[25];
 extern int screen_width, screen_height;
 
 extern bool dragAndDrop;
