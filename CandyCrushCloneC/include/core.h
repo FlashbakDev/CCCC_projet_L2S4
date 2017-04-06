@@ -22,7 +22,7 @@ Rôle : fonctions générales du jeu, aussi bien affichage que logique.
 
 typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
-typedef enum TokenTypes { NONE, TOKEN,HORIZONTAL,VERTICAL,MULTI}TokenTypes;
+typedef enum TokenTypes { NONE, TOKEN, HORIZONTAL, VERTICAL, MULTI}TokenTypes;
 
 typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, NONE_COLOR }Colors;
 
@@ -78,6 +78,9 @@ typedef struct Grid{
     int nbHelp;
     int nbSuperHelp;
     int nbRevertOnce;
+
+    bool isHelpActive;
+    bool isSuperHelpActive;
 
 }Grid;
 
@@ -160,7 +163,7 @@ char *String_copy(char *dest, size_t size, char *str1, char *str2);
 
 int Utf8Fix(char *str);
 
-void MoveAvailable(Grid * pGrid);
+void MoveAvailable(Grid * pGrid, bool highlight);
 
 // ========================================================= Chargement de ressources
 

@@ -128,6 +128,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int 
     pGrid->is_cursorOnGrid = false;
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
+    pGrid->isHelpActive = false;
 
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
@@ -188,7 +189,7 @@ void RandomizeGrid(Grid *pGrid){
     }
 
     // recalcul les mouvements possibles
-    MoveAvailable(pGrid);
+    MoveAvailable(pGrid, false);
 }
 
 // =========================================================
@@ -380,29 +381,21 @@ void Token_speciaux(Grid *pGrid)
                        pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].aligned == true
                        )
                        coude = true;
-
-
-
                 }
 
-                 if(coude == true)
-                    {
-                        printf("coude detecter en %d,%d \n",i,j);
-                        pGrid->tokens[i][j].aligned = false;
-                        pGrid->tokens[i][j].color = NONE_COLOR;
-                        pGrid->tokens[i][j].type = MULTI;
-                        CalculTokenImages(pGrid,&pGrid->tokens[i][j],i,j);
-                        printf("special apparut en %d,%d \n",i,j);
+                if(coude == true){
 
-                    }
+                    printf("coude detecter en %d,%d \n",i,j);
+                    pGrid->tokens[i][j].aligned = false;
+                    pGrid->tokens[i][j].color = NONE_COLOR;
+                    pGrid->tokens[i][j].type = MULTI;
+                    CalculTokenImages(pGrid,&pGrid->tokens[i][j],j,i);
+                    printf("special apparut en %d,%d \n",i,j);
 
+                }
             }
-
-
         }
     }
-
-
 }
 
 //============================
@@ -626,6 +619,65 @@ bool IsTokenDestructing(Grid *pGrid){
 
 // =========================================================
 
+void GetBestMove(Grid *pGrid){
+
+    int nbPoints = 0;
+    int nbPointTemp = 0;
+    int i1, i2, j1, j2;
+
+    for(int i = 0; i < pGrid->height-1; i++){
+        for(int j = 0; j < pGrid->width-1; j++){
+
+            // vers le haut
+            PermuteToken(pGrid,j,i,j+1,i);
+
+            if( IsLineOnGrid(pGrid) ){
+
+                int nbPointTemp = 30;
+            }
+
+            if(  nbPointTemp > nbPoints ){
+
+                i1 = i;
+                i2 = i;
+                j1 = j;
+                j2 = j+1;
+
+                nbPoints = nbPointTemp;
+            }
+
+            PermuteToken(pGrid,j,i,j+1,i);
+
+            // vers le bas
+            PermuteToken(pGrid,j,i,j,i+1);
+
+            if( IsLineOnGrid(pGrid) ){
+
+                int nbPointTemp = 30;
+            }
+
+            if(  nbPointTemp > nbPoints ){
+
+                i1 = i;
+                i2 = i+1;
+                j1 = j;
+                j2 = j;
+
+                nbPoints = nbPointTemp;
+            }
+
+            PermuteToken(pGrid,j,i,j,i+1);
+        }
+    }
+
+    pGrid->tokens[i1][j1].image_background = image_cursorGreen;
+    pGrid->tokens[i1][j1].drawBackground = true;
+    pGrid->tokens[i2][j2].image_background = image_cursorGreen;
+    pGrid->tokens[i2][j2].drawBackground = true;
+}
+
+// =========================================================
+
 bool IsTokenOfType(Grid *pGrid, TokenTypes type){
 
    for(int i = 0; i < pGrid->height; i++){
@@ -704,6 +756,51 @@ int DestroyAlignedTokens(Grid *pGrid){
     //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
 
     int cpt = 0;
+
+    /*if ( IsTokenOfType(pGrid, VERTICAL) || IsTokenOfType(pGrid, HORIZONTAL) ){
+
+        for(int i = 0; i < pGrid->height; i++){
+            for(int j = 0; j < pGrid->width; j++){
+
+                if  ( pGrid->tokens[i][j].aligned == true &&
+                    ( pGrid->tokens[i][j].type == VERTICAL || pGrid->tokens[i][j].type == HORIZONTAL) ){
+
+                    if(pGrid->tokens[i][j].type == VERTICAL ){
+
+                        for(int k = 0; k < pGrid->height; k ++){
+
+                            if ( k != j ){
+
+                                pGrid->tokens[i][k].type = NONE;
+                                pGrid->tokens[i][k].isDestruct = true;
+                                pGrid->tokens[i][k].startDestructAnim = -1;
+
+                                cpt++;
+                            }
+                        }
+                    }
+                    else if(pGrid->tokens[i][j].type == HORIZONTAL ){
+
+                        for(int k = 0; k < pGrid->width; k ++){
+
+                            if ( k != i ){
+
+                                pGrid->tokens[k][j].type = NONE;
+                                pGrid->tokens[k][j].isDestruct = true;
+                                pGrid->tokens[k][j].startDestructAnim = -1;
+
+                                cpt++;
+                            }
+                        }
+                    }
+
+                    pGrid->tokens[i][j].type = TOKEN;
+
+                    CheckGrid(pGrid);
+                }
+            }
+        }
+    }*/
 
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
@@ -922,7 +1019,9 @@ void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,G
 
 void Button_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
+    if ( UI_button_event(pButton, pEvent, pDraw) && pGrid->nbHelp > 0 ){
+
+        pGrid->isHelpActive = true;
 
         pGrid->nbHelp --;
 
@@ -934,7 +1033,9 @@ void Button_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid 
 
 void Button_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
+    if ( UI_button_event(pButton, pEvent, pDraw) && pGrid->nbSuperHelp > 0 ){
+
+        pGrid->isSuperHelpActive = true;
 
         pGrid->nbSuperHelp --;
 
@@ -1117,19 +1218,21 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                             }
                             else {
 
+                                /* coups réussi */
                                 pGrid->nbMove --;
 
+                                pGrid->isHelpActive = false;
+                                pGrid->isSuperHelpActive = false;
 
                                 if ( pGrid->nbMove <= 0 ){
 
                                     *pQuit = true;
                                     gameState = MENU;
                                 }
-                                //printf("direction  : %d\n",pGrid->isdir_random );
-                                if(pGrid->is_randomizeInsert == true)
-                                {
+
+                                if(pGrid->is_randomizeInsert == true){
+
                                     ChangeDirectionRandom(pGrid);
-                                    printf("changement direction: direction = %d ", pGrid->direction);
                                 }
                             }
                         }
@@ -1244,10 +1347,8 @@ void Game_logic(Grid *pGrid){
                    InjectLigne(pGrid);
                 }
 
-
-
                 // recalcul les mouvements possibles
-                MoveAvailable(pGrid);
+                MoveAvailable(pGrid, false);
 
             }else {
 

@@ -49,8 +49,8 @@ bool IsTokenMoving(Grid *pGrid);
 /* indique si un jeton a une animation de destruction en cours */
 bool IsTokenDestructing(Grid *pGrid);
 
-/* renvoie le jeton le plus haut de la colonne donné ( pour les animations... ) */
-Token *GetColumnUpperToken(Grid *pGrid,int x);
+/* met en vert le meillur coup possible */
+void GetBestMove(Grid *pGrid);
 
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
