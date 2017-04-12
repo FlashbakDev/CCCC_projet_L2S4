@@ -27,7 +27,7 @@ int main(int argc, char* argv[]){
 
             case GAMESESSION : {
 
-                GameSession(10,10,6,5,false,5,2,2);
+                GameSession(10,10,6,15,false,5,2,2);
             }
             break;
 

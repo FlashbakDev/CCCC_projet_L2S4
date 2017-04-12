@@ -55,6 +55,14 @@ Token *GetColumnUpperToken(Grid *pGrid,int x);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
+void Token_special_action(TokenTypes t, Grid *pGrid, int y, int x);
+
+int destruct_color(Colors c, Grid *pGrid);
+
+int destruct_lign(int x, Grid * pGrid);
+int destruct_colon(int y, Grid *pGrid);
+int destruct_square(int x,int y,int l,Grid *pGrid);
+
 /* */
 bool Compare_TokenColor(Token t1, Token t2);
 
@@ -95,13 +103,12 @@ void Grid_anim(Grid *pGrid);
 /* detect les coudées et ajoute les jetons speciaux */
 void Token_speciaux(Grid *pGrid);
 
-TokenTypes TypeRandom(int borne);
-
 /* calcul le score */
 int Calc_Score(Grid *pGrid );
 
 /* change la couleur de fond des jetons alignés */
 void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image);
+void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c);
 
 // =========================================================
 

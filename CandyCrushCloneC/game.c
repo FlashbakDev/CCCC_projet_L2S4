@@ -39,6 +39,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_cursorGreen, "data/image_cursorGreen.png", pArray, pRenderer);
     error += Image_new(&image_cursorRed, "data/image_cursorRed.png", pArray, pRenderer);
 
+
     // image des jetons
     error += Image_new(&image_tokens[0], "data/Tokens/Token_red.png", pArray, pRenderer);
     error += Image_new(&image_tokens[1], "data/Tokens/Token_blue.png", pArray, pRenderer);
@@ -365,13 +366,13 @@ void Token_speciaux(Grid *pGrid)
 {
     int vecteur_point[4][2][2] = {{{0,1},{1,0}} ,{{0,-1},{1,0}} ,{{0,1},{-1,0}},{{0,-1},{-1,0}}};
     Colors save_color;
+    int cpt = 0;
     bool coude = false;
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
             coude = false;
             if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].type == TOKEN){
                     save_color = pGrid->tokens[i][j].color;
-
                 for(int n =0; n<3; n++)
                 {
                     if(i+vecteur_point[n][0][0] >=0 &&
@@ -388,24 +389,14 @@ void Token_speciaux(Grid *pGrid)
                        pGrid->tokens[i+vecteur_point[n][1][0]][j+vecteur_point[n][1][1]].aligned == true
                        )
                        coude = true;
-
-
-
                 }
-
                  if(coude == true)
                     {
-
                         pGrid->tokens[i][j].aligned = false;
                         pGrid->tokens[i][j].type = PACKED;
                         CalculTokenImages(pGrid,&pGrid->tokens[i][j],j,i);
-
-
                     }
-
             }
-
-
         }
     }
 
@@ -416,7 +407,8 @@ void Token_speciaux(Grid *pGrid)
     Token Token_save;
     int nb_align = 1;
     int j;
-    for(int i = 0; i < pGrid->height; i++){
+    int i;
+    for(i = 0; i < pGrid->height; i++){
 
 
         Token_save = pGrid->tokens[i][0];
@@ -434,7 +426,12 @@ void Token_speciaux(Grid *pGrid)
              if(nb_align==4){
                 //Si ligne de 4 fait apparaitre un jeton horizontal qqpart dans la ligne
                 printf("ligne de 4\n");
+                cpt=0; //Anti bouclage infini
+                do{
                 value_random = 1+ rand()%4;
+                cpt++;
+                }
+                while(pGrid->tokens[i][j-value_random].type != TOKEN && cpt<200);
                 pGrid->tokens[i][j-value_random].type = HORIZONTAL;
                 pGrid->tokens[i][j-value_random].aligned = false;
                 pGrid->tokens[i][j-value_random].isDestruct = false;
@@ -459,7 +456,12 @@ void Token_speciaux(Grid *pGrid)
          if(nb_align==4){
 
                         //Ajout jeton special
+                cpt=0; //Anti bouclage infini
+                do{
                 value_random = 1+ rand()%4;
+                cpt++;
+                }
+                while(pGrid->tokens[i][j-value_random].type != TOKEN && cpt<200);
                 pGrid->tokens[i][j-value_random].type = HORIZONTAL;
 
                 pGrid->tokens[i][j-value_random].aligned = false;
@@ -479,21 +481,81 @@ void Token_speciaux(Grid *pGrid)
     }
 
 
-}
 
-//============================
-TokenTypes TypeRandom(int borne)
-{
-    switch(rand()%borne)
-    {
-        case 0: return HORIZONTAL;
-        case 1: return VERTICAL;
+    //Verification des alignements verticaux
+    for(j = 0; j < pGrid->width; j++){
+        Token_save = pGrid->tokens[0][j];
+        nb_align = 1;
 
-        default: printf("TypeRandom -> valeur non comprise"); return TOKEN;
+        for( i = 1; i < pGrid->height; i++){
+
+            if(Compare_TokenColor(pGrid->tokens[i][j], Token_save)){
+
+                nb_align++;
+               // printf("align = %d\n", nb_align);
+            }
+            else {
+
+             if(nb_align==4){
+                //Si ligne de 4 fait apparaitre un jeton horizontal qqpart dans la ligne
+                printf("ligne de 4\n");
+                cpt=0; //Anti bouclage infini
+                do{
+                value_random = 1+ rand()%4;
+                cpt++;
+                }
+                while(pGrid->tokens[i-value_random][j].type != TOKEN && cpt<200);
+                pGrid->tokens[i-value_random][j].type =VERTICAL;
+                pGrid->tokens[i-value_random][j].aligned = false;
+                pGrid->tokens[i-value_random][j].isDestruct = false;
+                CalculTokenImages(pGrid,&pGrid->tokens[i-value_random][j],j,i-value_random);
+             }
+
+             if(nb_align == 5){
+                        pGrid->tokens[i][j-3].aligned = false;
+                        pGrid->tokens[i][j-3].color = NONE_COLOR;
+                        pGrid->tokens[i][j-3].type = MULTI;
+                        CalculTokenImages(pGrid,&pGrid->tokens[i][j-3],j-3,i);
+
+             }
+                nb_align = 1;
+                Token_save = pGrid->tokens[i][j];
+
+            }
+
+
+        }
+
+         if(nb_align==4){
+
+                        //Ajout jeton special
+                cpt=0; //Anti bouclage infini
+                do{
+                value_random = 1+ rand()%4;
+                cpt++;
+                }
+                while(pGrid->tokens[i-value_random][j].type != TOKEN && cpt<200);
+                pGrid->tokens[i-value_random][j].type = VERTICAL;
+
+                pGrid->tokens[i-value_random][j].aligned = false;
+                CalculTokenImages(pGrid,&pGrid->tokens[i-value_random][j],j,i-value_random);
+
+         }
+
+         if(nb_align == 5){
+                        pGrid->tokens[i-3][j].aligned = false;
+                        pGrid->tokens[i-3][j].color = NONE_COLOR;
+                        pGrid->tokens[i-3][j].type = MULTI;
+                        CalculTokenImages(pGrid,&pGrid->tokens[i-3][j],j,i-3);
+
+         }
+
 
     }
 
 }
+
+
 // =========================================================
 
 int Calc_Score(Grid *pGrid ){
@@ -523,7 +585,7 @@ int Calc_Score(Grid *pGrid ){
             if(Compare_TokenColor(pGrid->tokens[i][j], Token_save)){
 
                 nb_align++;
-                val += pGrid->tokens[i][j].score;
+                val += TOKEN_SCORE;
 
             }
             else {
@@ -549,7 +611,7 @@ int Calc_Score(Grid *pGrid ){
                 }
                 nb_align = 1;
                 Token_save = pGrid->tokens[i][j];
-                val = pGrid->tokens[i][j].score;
+                val = TOKEN_SCORE;
             }
         }
 
@@ -574,19 +636,19 @@ int Calc_Score(Grid *pGrid ){
             printf("Score de la ligne : %d \n", score);
         }
     }
-    //Verification des allignements verticaux
+    //Verification des alignements verticaux
     for(int j = 0; j < pGrid->width; j++){
 
         nb_align = 1;
         Token_save = pGrid->tokens[0][j];
-         val = pGrid->tokens[0][j].score;
+         val = TOKEN_SCORE;
 
         for(int i = 1; i < pGrid->height; i++){
 
             if(Compare_TokenColor(pGrid->tokens[i][j],Token_save)){
 
                 nb_align++;
-                val += pGrid->tokens[i][j].score;
+                val += TOKEN_SCORE;
             }
             else {
 
@@ -608,7 +670,7 @@ int Calc_Score(Grid *pGrid ){
                 }
                 nb_align = 1;
                 Token_save = pGrid->tokens[i][j];
-                val = pGrid->tokens[i][j].score;
+                val = TOKEN_SCORE;
             }
         }
         if(nb_align >= 3){
@@ -654,6 +716,19 @@ void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image){
     }
 }
 
+void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c){
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].color == c ){
+
+                pGrid->tokens[i][j].image_background = image;
+                pGrid->tokens[i][j].drawBackground = true;
+            }
+        }
+    }
+}
 //====================================================
 
 bool IsLineOnGrid(Grid *pGrid){
@@ -784,11 +859,21 @@ int DestroyAlignedTokens(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].aligned == true ){
-
+            if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].isDestruct == false){
+                if(pGrid->tokens [i][j].type != TOKEN && pGrid->tokens [i][j].type != NULL )
+                {
+                    Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+                    i=0;j=0;
+                    printf("special !!! \n");
+                }
+                else{
+                      //  printf("salut \n");
                 pGrid->tokens[i][j].type = NONE;
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
+                pGrid->tokens[i][j].aligned = false;
+                }
+
                // pGrid->tokens[i][j].color = NONE_COLOR;
 
                 cpt++;
@@ -798,6 +883,97 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     return cpt;
 }
+//===========================================================
+
+int destruct_colon(int y,Grid * pGrid)
+{
+    for(int i =0; i< pGrid->height-1; i++)
+    {
+        if(pGrid->tokens[i][y].type != MULTI)
+        {
+            if(pGrid->tokens[i][y].type != TOKEN &&pGrid->tokens[i][y].type !=NONE &&pGrid->tokens[i][y].type !=VERTICAL)
+            {
+                Token_special_action(pGrid->tokens[i][y].type,pGrid,i,y);
+            }
+         pGrid->tokens[i][y].type = NONE;
+         pGrid->tokens[i][y].isDestruct = true;
+         pGrid->tokens[i][y].startDestructAnim = -1;
+        }
+
+    }
+    CheckGrid(pGrid);
+}
+
+int destruct_lign(int x,Grid * pGrid)
+{
+    for(int i =0; i< pGrid->width; i++)
+    {
+        if(pGrid->tokens[x][i].type != MULTI)
+        {
+            if(pGrid->tokens[x][i].type != TOKEN &&pGrid->tokens[x][i].type !=NONE &&pGrid->tokens[x][i].type != HORIZONTAL)
+            {
+                Token_special_action(pGrid->tokens[x][i].type,pGrid,x,i);
+            }
+         pGrid->tokens[x][i].type = NONE;
+         pGrid->tokens[x][i].isDestruct = true;
+         pGrid->tokens[x][i].startDestructAnim = -1;
+        }
+
+    }
+    CheckGrid(pGrid);
+}
+//==================================================================
+void Token_special_action(TokenTypes t, Grid *pGrid, int x, int y){
+
+    switch(t)
+    {
+    case VERTICAL:
+        destruct_colon(y, pGrid);
+        break;
+
+    case HORIZONTAL:
+        //pGrid->tokens[y][x].isDestruct = true;
+        destruct_lign(x, pGrid);
+        break;
+
+    case MULTI:
+
+        break;
+
+    case PACKED:
+         pGrid->tokens[y][x].isDestruct = true;
+        break;
+
+    }
+
+}
+
+//==========================================================
+int destruct_color(Colors c, Grid *pGrid)
+{
+     int cpt = 0;
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].color == c ){
+                if(pGrid->tokens[i][j].type != TOKEN)Token_special_action(pGrid->tokens[i][j].type, pGrid, i,j);
+                pGrid->tokens[i][j].type = NONE;
+                pGrid->tokens[i][j].isDestruct = true;
+                pGrid->tokens[i][j].startDestructAnim = -1;
+               // pGrid->tokens[i][j].color = NONE_COLOR;
+               //pGrid->tokens[i][j].aligned = true;
+
+                cpt++;
+            }
+        }
+    }
+
+    return cpt;
+
+
+}
+
 
 // =========================================================
 
@@ -1164,7 +1340,8 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                             HardPermuteToken(pGrid, dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
 
-                            if ( IsLineOnGrid(pGrid) == false ){
+
+                            if ( IsLineOnGrid(pGrid) == false && pGrid->tokens[dragEnd.y][dragEnd.x].type != MULTI && pGrid->tokens[dragStart.y][dragStart.x].type != MULTI){
 
                                 HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, dragStart.x, dragStart.y);
                             }
@@ -1172,6 +1349,20 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                 pGrid->nbMove --;
 
+                                if(pGrid->tokens[dragEnd.y][dragEnd.x].type == MULTI )
+                                {
+                                    pGrid->score += destruct_color(pGrid->tokens[dragStart.y][dragStart.x].color, pGrid)* TOKEN_SCORE;
+                                    pGrid->tokens[dragEnd.y][dragEnd.x].isDestruct = true;
+                                    pGrid->tokens[dragEnd.y][dragEnd.x].type = NONE;
+                                    pGrid->tokens[dragEnd.y][dragEnd.x].startDestructAnim = -1;
+                                }else if(pGrid->tokens[dragStart.y][dragStart.x].type == MULTI)
+                                {
+                                    pGrid->score += destruct_color(pGrid->tokens[dragEnd.y][dragEnd.x].color, pGrid)* TOKEN_SCORE;
+                                    pGrid->tokens[dragStart.y][dragStart.x].isDestruct = true;
+                                    pGrid->tokens[dragStart.y][dragStart.x].type = NONE;
+                                    pGrid->tokens[dragStart.y][dragStart.x].startDestructAnim = -1;
+
+                                }
 
                                 if ( pGrid->nbMove <= 0 ){
 
@@ -1219,13 +1410,20 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                         PermuteToken(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
 
-                        if ( IsLineOnGrid(pGrid) == false ){
+                        if ( IsLineOnGrid(pGrid) == false && pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type != MULTI && pGrid->tokens[dragStart.y][dragStart.x].type != MULTI ){
 
                             //fprintf(stdout,"game.c -> Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit) -> switch(pEvent->type) -> case SDL_MOUSEMOTION -> !IsLineOnGrid(pGrid) ");
                             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].image_background = image_cursorRed;
                             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
                         }
+                        if( pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type == MULTI){
+                            ChangeColorTokenBackgroundImage(pGrid,image_cursorGreen,pGrid->tokens[dragStart.y][dragStart.x].color);
+                        }else if(pGrid->tokens[dragStart.y][dragStart.x].type == MULTI){
+                            ChangeColorTokenBackgroundImage(pGrid,image_cursorGreen,pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color);
+                        }else
+                        {
 
+                        }
                         ChangeAlignedTokenBackgroundImage(pGrid, image_cursorGreen);
 
                         PermuteToken(pGrid, dragStart.x, dragStart.y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
