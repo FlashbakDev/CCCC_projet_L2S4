@@ -30,6 +30,8 @@ typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, 
 
 typedef enum GameStates { MENU, GAME, EDITOR, QUIT }GameStates;
 
+typedef enum GameSessionTypes { RANDOM, PUZZLE }GameSessionTypes;
+
 typedef struct Image{
 
     SDL_Texture *pTexture;
@@ -118,16 +120,23 @@ typedef struct Window {
 
 // =========================================================
 
+// ressources
 extern Font font_default;
 extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
 image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[19];
 extern int screen_width, screen_height;
 
+// variables UI
 extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
 
+// variable machine d'etat
 extern GameStates gameState, gameState_prec;
+extern GameSessionTypes gameSessionType;
+
+// ?
+extern Grid loadedGrid;
 
 // ========================================================= Logique
 

@@ -18,6 +18,7 @@ int main(int argc, char* argv[]){
     // avec une pile ça serais mieux !
     gameState = MENU;
     gameState_prec = QUIT;
+    gameSessionType = RANDOM;
 
     /* boucle */
     bool quit = false;
@@ -33,7 +34,11 @@ int main(int argc, char* argv[]){
 
             case GAME : {
 
-                GameSession(10,10,6,5,false,5,2,2);
+                switch( gameSessionType ){
+
+                    case RANDOM : GameSessionRandom(10,10,6,5,false,5,2,2); break;
+                    case PUZZLE : GameSessionPuzzle(&loadedGrid); break;
+                }
             }
             break;
 
@@ -84,6 +89,7 @@ void Button_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool 
 
         gameState_prec = gameState;
         gameState = GAME;
+        gameSessionType = RANDOM;
         *pQuit = true;
     }
 }

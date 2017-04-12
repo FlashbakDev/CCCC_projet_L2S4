@@ -12,6 +12,9 @@ SDL_Point dragStart;
 SDL_Rect rect_CursorOver;
 
 GameStates gameState, gameState_prec;
+GameSessionTypes gameSessionType;
+
+Grid loadedGrid;
 
 // =========================================================
 

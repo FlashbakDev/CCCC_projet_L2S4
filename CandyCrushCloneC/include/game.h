@@ -74,7 +74,7 @@ void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 void PermuteTokenImage(Grid *pGrid,int x1,int y1,int x2,int y2);
 
 /* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
-void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y);
+void InitRandomToken(Grid *pGrid, Token *token, int x, int y);
 
 /* anime les mouvements des jetons */
 void AnimMovingTokens(Grid *pGrid);
@@ -84,6 +84,7 @@ void AnimDestructingTokens(Grid *pGrid);
 
 /* anime la grille */
 void Grid_anim(Grid *pGrid);
+
 /* detect les coudées et ajoute les jetons speciaux */
 void Token_speciaux(Grid *pGrid);
 
@@ -109,7 +110,9 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
 void Game_logic(Grid *pGrid);
 
-void GameSession(int width, int height,int nbColor, int nbMove,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
+void GameSessionRandom(int width, int height,int nbColor, int nbMove,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
+
+void GameSessionPuzzle(Grid *pGrid);
 
 // =========================================================
 

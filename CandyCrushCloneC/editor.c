@@ -73,6 +73,87 @@ SDL_Renderer *InitEditor(char * pChar_name, Array *pArray, int w, int h){
 
 // =========================================================
 
+Grid *NewEmptyGrid(SDL_Rect rect){
+
+    Grid *pGrid = malloc(sizeof(Grid));
+
+    pGrid->width = rect.w;
+    pGrid->height = rect.h;
+    pGrid->nbMove = 0;
+    pGrid->nbColor = 0;
+    pGrid->direction = DOWN;
+    pGrid->is_randomizeInsert = false;
+    pGrid->score = 0;
+    pGrid->nbHelp = 0;
+    pGrid->nbSuperHelp = 0;
+    pGrid->nbRevertOnce = 0;
+
+    MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
+
+    pGrid->is_cursorOnGrid = false;
+    pGrid->cursorTokenPosition.x = 0;
+    pGrid->cursorTokenPosition.y = 0;
+    pGrid->isHelpActive = false;
+
+    /* allocation de la grille et remplissage */
+    pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
+    pGrid->pastTokens = (Token*)malloc( pGrid->height * sizeof(Token*));
+
+    if ( pGrid->tokens == NULL || pGrid->pastTokens == NULL){ return NULL; }
+
+    for(int i = 0; i < pGrid->height; i++){
+
+        pGrid->tokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
+        pGrid->pastTokens[i] = (Token*)malloc( pGrid->width * sizeof(Token));
+
+        /* désallocation de la mémoire en cas d'erreur */
+        if ( pGrid->tokens[i] == NULL || pGrid->pastTokens[i] == NULL){
+
+            for(i=i-1 ; i >= 0 ; i--){
+                free(pGrid->tokens[i]);
+                free(pGrid->pastTokens[i]);
+            }
+            free(pGrid->tokens);
+            free(pGrid->pastTokens);
+
+            return NULL;
+        }
+    }
+
+    ClearGrid(pGrid);
+
+    return pGrid;
+}
+
+// =========================================================
+
+void ClearGrid(Grid *pGrid){
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            ClearToken(pGrid, &pGrid->tokens[i][j], j , i);
+        }
+    }
+}
+
+// =========================================================
+
+void ClearToken(Grid *pGrid, Token *token, int x, int y){
+
+    token->type = NONE;
+    token->color = NONE_COLOR;
+    token->isMoving = false;
+    token->isDestruct = false;
+    token->startDestructAnim = -1;
+
+    token->textureSize = 100;
+
+    CalculTokenImages(pGrid, token, x, y);
+}
+
+// =========================================================
+
 void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
 }
@@ -122,7 +203,7 @@ void EditorSession(int gridWidth, int gridHeight){
     int nbHelp = 0;
     int nbSuperHelp = 0;
     int nbRevertOnce = 0;
-    Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor,randomizeInsert,nbHelp,nbSuperHelp,nbRevertOnce);
+    Grid *grid1 = NewEmptyGrid(rect_grid);
 
     fprintf(stdout,"game.c -> GameSession(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     Array_append(&objects, WINDOW_TYPE, &window);
@@ -167,7 +248,6 @@ void EditorSession(int gridWidth, int gridHeight){
         }
 
         /* logique */
-        Game_logic(grid1);
 
         /* maj des labels */
         sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);

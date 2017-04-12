@@ -85,9 +85,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int 
     pGrid->height = rect.h;
     pGrid->nbMove = nbMove;
     pGrid->nbColor = nbColor;
-    pGrid->pastTokens = NULL;
     pGrid->direction =DOWN;
-    pGrid->is_randomizeInsert = true;
     pGrid->score = 0;
     pGrid->is_randomizeInsert = randomizeInsert;
     pGrid->nbHelp = nbHelp;
@@ -142,7 +140,7 @@ void RandomizeGrid(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            InitRandomToken(pGrid, &pGrid->tokens[i][j], pGrid->nbColor, j, i);
+            InitRandomToken(pGrid, &pGrid->tokens[i][j], j, i);
         }
     }
 
@@ -172,18 +170,16 @@ void RandomizeGrid(Grid *pGrid){
 
 // =========================================================
 
-void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y){
+void InitRandomToken(Grid *pGrid, Token *token, int x, int y){
 
     token->type = TOKEN;
-    token->color = (Colors)(rand() % nbColor);
+    token->color = (Colors)(rand() % pGrid->nbColor);
     token->isMoving = false;
     token->isDestruct = false;
     token->startDestructAnim = -1;
 
     token->textureSize = 100;
     CalculTokenImages(pGrid, token, x, y);
-
-    token->score = TOKEN_SCORE;
 }
 
 // =========================================================
@@ -881,9 +877,9 @@ void InjectLigne(Grid *pGrid){
                 if ( pGrid->tokens[0][j].type == NONE ){
                     //printf("token == Null\n");
                     if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 < 0 )
-                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 );
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) - 1 );
                     else
-                        InitRandomToken(pGrid, &pGrid->tokens[0][j], pGrid->nbColor, j, - 1 );
+                        InitRandomToken(pGrid, &pGrid->tokens[0][j], j, - 1 );
 
                 }
             }
@@ -897,9 +893,9 @@ void InjectLigne(Grid *pGrid){
                 if ( pGrid->tokens[pGrid->height-1][j].type == NONE ){
                     printf("token == Null\n");
                     if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) + 1 > pGrid->height-1 )
-                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) +1 );
+                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) +1 );
                     else
-                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], pGrid->nbColor, j, pGrid->height );
+                        InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], j, pGrid->height );
                 }
             }
         }
@@ -911,9 +907,9 @@ void InjectLigne(Grid *pGrid){
                 if(pGrid->tokens[i][0].type==NONE)
                 {
                     if( (GetFirstDirToken(pGrid,i,dir)->rect_image.x /TOKEN_WIDTH) -1 < 0)
-                        InitRandomToken(pGrid, &pGrid->tokens[i][0], pGrid->nbColor, ( GetFirstDirToken(pGrid,i,dir)->rect_image.x / TOKEN_WIDTH ) -1, i );
+                        InitRandomToken(pGrid, &pGrid->tokens[i][0], ( GetFirstDirToken(pGrid,i,dir)->rect_image.x / TOKEN_WIDTH ) -1, i );
                     else
-                        InitRandomToken(pGrid, &pGrid->tokens[i][0], pGrid->nbColor, -1, i );
+                        InitRandomToken(pGrid, &pGrid->tokens[i][0], -1, i );
 
                 }
 
@@ -928,9 +924,9 @@ void InjectLigne(Grid *pGrid){
                 if(pGrid->tokens[i][pGrid->width-1].type==NONE)
                 {
                     if( (GetFirstDirToken(pGrid,i,dir)->rect_image.x /TOKEN_WIDTH) +1 > pGrid->width-1)
-                        InitRandomToken(pGrid, &pGrid->tokens[i][pGrid->width-1], pGrid->nbColor, ( GetFirstDirToken(pGrid,i,dir)->rect_image.x / TOKEN_WIDTH ) +1, i );
+                        InitRandomToken(pGrid, &pGrid->tokens[i][pGrid->width-1], ( GetFirstDirToken(pGrid,i,dir)->rect_image.x / TOKEN_WIDTH ) +1, i );
                     else
-                        InitRandomToken(pGrid, &pGrid->tokens[i][pGrid->width-1], pGrid->nbColor, pGrid->width-1, i );
+                        InitRandomToken(pGrid, &pGrid->tokens[i][pGrid->width-1], pGrid->width-1, i );
 
                 }
 
@@ -1334,9 +1330,9 @@ void Game_logic(Grid *pGrid){
 
 // =========================================================
 
-void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool randomizeInsert, int nbHelp, int nbSuperHelp, int nbRevertOnce){
+void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,bool randomizeInsert, int nbHelp, int nbSuperHelp, int nbRevertOnce){
 
-    fprintf(stdout, "game.c -> GameSession(...) : start \n");
+    fprintf(stdout, "game.c -> GameSessionRandom(...) : start \n");
 
     SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
     SDL_Event event;            // gestionnaire d'évènements
@@ -1370,21 +1366,21 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
 
     Grid *grid1 = NewGrid(rect_grid,nbMove,nbColor,randomizeInsert,nbHelp,nbSuperHelp,nbRevertOnce);
 
-    fprintf(stdout,"game.c -> GameSession(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
 
     sprintf(label_score.text,"Score : %d ",grid1->score);
     sprintf(label_nbMove.text,"NbCoups : %d", grid1->nbMove);
     sprintf(label_mouvements.text,"Mouvement possible : %d",grid1->moveAvailable);
 
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_menu, &window, "Retour menu", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 90 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 200 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_help, &window, "Aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 240 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_superHelp, &window, "Super aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 280 ));
-    fprintf(stdout,"game.c -> GameSession(...) -> UI_button_new return %d.\n", UI_button_new(&button_revertOnce, &window, "Retour arriere ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 320 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_button_new return %d.\n", UI_button_new(&button_menu, &window, "Retour menu", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 90 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 200 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_button_new return %d.\n", UI_button_new(&button_help, &window, "Aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 240 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_button_new return %d.\n", UI_button_new(&button_superHelp, &window, "Super aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 280 ));
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_button_new return %d.\n", UI_button_new(&button_revertOnce, &window, "Retour arriere ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 320 ));
 
     sprintf(button_help.text,"Aide ( %d )",grid1->nbHelp);
     sprintf(button_superHelp.text,"Super aide ( %d )",grid1->nbSuperHelp);
@@ -1461,7 +1457,137 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
     /* fin du programme */
     Clean(&objects);
 
-    fprintf(stdout, "game.c -> GameSession(...) : end \n");
+    fprintf(stdout, "game.c -> GameSessionRandom(...) : end \n");
+}
+
+// =========================================================
+
+void GameSessionPuzzle(Grid *pGrid){
+
+    fprintf(stdout, "game.c -> GameSessionPuzzle(...) : start \n");
+
+    SDL_Renderer *pRenderer;    // renderer = canvas ( endroit où l'on va déssiner )
+    SDL_Event event;            // gestionnaire d'évènements
+    Array objects;
+    Window window;
+
+    UI_label label_score = {false};
+    UI_button button_quit = {false};
+    UI_button button_direction = {false};
+    UI_button button_menu = {false};
+    UI_button button_help = {false};
+    UI_button button_superHelp = {false};
+    UI_button button_revertOnce = {false};
+    UI_label label_mouvements = {false};
+    UI_label label_nbMove = {false};
+
+    // création des zone de jeu et d'affichage
+    SDL_Rect rect_grid = { 0,0,pGrid->width, pGrid->height };
+    SDL_Rect rect_UI = { rect_grid.x * TOKEN_WIDTH + rect_grid.w * TOKEN_WIDTH, 0, 250, rect_grid.h * TOKEN_HEIGHT };
+
+    SDL_Rect rect_screen = {0 ,
+                            0 ,
+                            (rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH > rect_UI.w + rect_UI.x ) ? rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH : rect_UI.w + rect_UI.x ,
+                            (rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT > rect_UI.h + rect_UI.y ) ? rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT : rect_UI.h + rect_UI.y } ;
+
+    Array_new(&objects);
+
+    pRenderer = InitGame("Candy Crush Clone C", &objects, rect_screen.w, rect_screen.h );
+    if ( !pRenderer )
+        return;
+
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
+
+    sprintf(label_score.text,"Score : %d ",pGrid->score);
+    sprintf(label_nbMove.text,"NbCoups : %d", pGrid->nbMove);
+    sprintf(label_mouvements.text,"Mouvement possible : %d",pGrid->moveAvailable);
+
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_menu, &window, "Retour menu", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 90 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_direction, &window, "Direction", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 200 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_help, &window, "Aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 240 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_superHelp, &window, "Super aide ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 280 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_revertOnce, &window, "Retour arriere ( 0 )", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 320 ));
+
+    sprintf(button_help.text,"Aide ( %d )",pGrid->nbHelp);
+    sprintf(button_superHelp.text,"Super aide ( %d )",pGrid->nbSuperHelp);
+    sprintf(button_revertOnce.text,"Retour arriere ( %d )",pGrid->nbRevertOnce);
+
+    window.visible = true;
+
+    bool draw = true; // non utilisé
+    bool quit = false;
+
+    while( !quit ){
+
+        int frameStart = SDL_GetTicks();
+
+        /* évènements */
+        while( SDL_PollEvent( &event ) != 0 ){
+
+            if( event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)){
+
+                gameState = QUIT;
+                quit = true;
+            }
+
+            // entré lié a la grille
+            Game_event(pGrid, &event, &quit);
+
+            // event UI
+            Window_event(&window, &event, &draw );
+            Button_quit_event(&button_quit, &event, &draw, &quit);
+            Button_menu_event(&button_menu, &event, &draw, &quit);
+            Button_direction_event(&button_direction, &event, &draw, pGrid);
+            if( pGrid->nbHelp > 0 ) Button_help_event(&button_help, &event, &draw, pGrid);
+            if( pGrid->nbSuperHelp > 0 ) Button_superHelp_event(&button_superHelp, &event, &draw, pGrid);
+            if( pGrid->nbRevertOnce > 0 ) Button_revertOnce_event(&button_revertOnce, &event, &draw, pGrid);
+        }
+
+        /* logique */
+        Game_logic(pGrid);
+
+        /* maj des labels */
+        sprintf(label_nbMove.text," NbCoups : %d", pGrid->nbMove);
+        sprintf(label_score.text,"Score : %d ", pGrid->score);
+        sprintf(label_mouvements.text,"Nombre de mouvement : %d",pGrid->moveAvailable);
+        if( pGrid->nbHelp > 0 ) sprintf(button_help.text,"Aide ( %d )",pGrid->nbHelp);
+        if( pGrid->nbSuperHelp > 0 ) sprintf(button_superHelp.text,"Super aide ( %d )",pGrid->nbSuperHelp);
+        if( pGrid->nbRevertOnce > 0 ) sprintf(button_revertOnce.text,"Retour arriere ( %d )",pGrid->nbRevertOnce);
+
+        /* animations */
+        Grid_anim(pGrid);
+
+        /* affichage */
+        SDL_RenderClear(pRenderer);                                                             // efface tout le contenu du renderer
+
+        Window_draw(&window, pRenderer);
+
+        Grid_draw(pGrid,pRenderer);                                                              // désine la grille sur le renderer
+
+        UI_label_draw(&label_score,pRenderer);
+        UI_label_draw(&label_nbMove,pRenderer);
+        UI_label_draw(&label_mouvements,pRenderer);
+        UI_button_draw(&button_quit, pRenderer);
+        UI_button_draw(&button_direction, pRenderer);
+        UI_button_draw(&button_menu, pRenderer);
+        if( pGrid->nbHelp > 0 ) UI_button_draw(&button_help, pRenderer);
+        if( pGrid->nbSuperHelp > 0 ) UI_button_draw(&button_superHelp, pRenderer);
+        if( pGrid->nbRevertOnce > 0 ) UI_button_draw(&button_revertOnce, pRenderer);
+
+        SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
+
+        /* gestion de la fréquence d'affichage ( pour les animations )*/
+        WaitForNextFrame(frameStart);
+    }
+
+    /* fin du programme */
+    Clean(&objects);
+
+    fprintf(stdout, "game.c -> GameSessionPuzzle(...) : end \n");
 }
 
 // =========================================================
