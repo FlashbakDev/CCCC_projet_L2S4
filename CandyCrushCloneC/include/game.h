@@ -25,9 +25,6 @@ Rôle : fonctions gérants une partie de CCCC.
 /* initailisation et chargement des ressources */
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
 
-/* fermeture du jeu / déchargement */
-int CleanGame(Array *pArray);
-
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
 

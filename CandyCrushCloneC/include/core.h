@@ -28,7 +28,7 @@ typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, NONE_COLOR }Colo
 
 typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
 
-typedef enum GameStates { MENU, GAMESESSION, EDITOR, QUIT }GameStates;
+typedef enum GameStates { MENU, GAME, EDITOR, QUIT }GameStates;
 
 typedef struct Image{
 
@@ -127,7 +127,7 @@ extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
 
-extern GameStates gameState;
+extern GameStates gameState, gameState_prec;
 
 // ========================================================= Logique
 
@@ -136,6 +136,9 @@ void InitSDL();
 
 /* libère la sdl */
 void CleanSDL();
+
+/* libere le champs */
+int Clean(Array *pArray);
 
 /* permute 2 jetons et place leurs texture au bon endroit */
 void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);

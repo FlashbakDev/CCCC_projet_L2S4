@@ -11,7 +11,7 @@ bool dragAndDrop;
 SDL_Point dragStart;
 SDL_Rect rect_CursorOver;
 
-GameStates gameState;
+GameStates gameState, gameState_prec;
 
 // =========================================================
 
@@ -35,6 +35,35 @@ void CleanSDL(){
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
+}
+
+// =========================================================
+
+int Clean(Array *pArray){
+
+    if ( !pArray )
+        return -1;
+
+    if ( pArray->length ){
+
+        for(int i = pArray->length - 1; i >= 0; i--){
+
+            switch( Array_GET_id(pArray, i) ){
+
+                case FONT_TYPE :{ TTF_CloseFont((TTF_Font*)Array_GET_data(pArray,i)); } break;
+                case TEXTURE_TYPE : { SDL_DestroyTexture((SDL_Texture*)Array_GET_data(pArray,i)); } break;
+                case RENDERER_TYPE : { SDL_DestroyRenderer((SDL_Renderer*)Array_GET_data(pArray,i)); } break;
+                case WINDOW_TYPE : { SDL_DestroyWindow((SDL_Window*)Array_GET_data(pArray,i)); } break;
+                case ARRAY_TYPE : { Array_free((Array*)Array_GET_data(pArray,i)); } break;
+                default : { free( pArray->tab_data[i]); }
+            }
+        }
+    }
+
+    pArray->length = 0;
+    Array_free(pArray);
+
+    return 0;
 }
 
 // =========================================================

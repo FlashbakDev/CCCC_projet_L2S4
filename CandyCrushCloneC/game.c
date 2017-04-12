@@ -65,40 +65,11 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
 
     if ( error > 0 ) {
 
-		CleanGame(pArray);
+		Clean(pArray);
 		return NULL;
 	}
 
 	return pRenderer;
-}
-
-// =========================================================
-
-int CleanGame(Array *pArray){
-
-    if ( !pArray )
-        return -1;
-
-    if ( pArray->length ){
-
-        for(int i = pArray->length - 1; i >= 0; i--){
-
-            switch( Array_GET_id(pArray, i) ){
-
-                case FONT_TYPE :{ TTF_CloseFont((TTF_Font*)Array_GET_data(pArray,i)); } break;
-                case TEXTURE_TYPE : { SDL_DestroyTexture((SDL_Texture*)Array_GET_data(pArray,i)); } break;
-                case RENDERER_TYPE : { SDL_DestroyRenderer((SDL_Renderer*)Array_GET_data(pArray,i)); } break;
-                case WINDOW_TYPE : { SDL_DestroyWindow((SDL_Window*)Array_GET_data(pArray,i)); } break;
-                case ARRAY_TYPE : { Array_free((Array*)Array_GET_data(pArray,i)); } break;
-                default : { free( pArray->tab_data[i]); }
-            }
-        }
-    }
-
-    pArray->length = 0;
-    Array_free(pArray);
-
-    return 0;
 }
 
 // =========================================================
@@ -1488,7 +1459,7 @@ void GameSession(int gridWidth, int gridHeight,int nbColor, int nbMove,bool rand
     }
 
     /* fin du programme */
-    CleanGame(&objects);
+    Clean(&objects);
 
     fprintf(stdout, "game.c -> GameSession(...) : end \n");
 }
