@@ -413,11 +413,15 @@ void LoadTokensInPastTokens(Grid *pGrid){
 
 // ========================================================
 
-char* GetTokenImagePath(char *pDirectory, Colors c, TokenTypes type){
+char* StrCont(char *str1, char *str2){
 
-    char *path;
+    char path[strlen(str1)+strlen(str2)];
 
-    sprintf(path, "%c",pDirectory );
+    sprintf(path, "%s%s", str1, str2);
+
+    //fprintf(stdout,"%s",path);
+
+    return path;
 }
 
 // ========================================================
