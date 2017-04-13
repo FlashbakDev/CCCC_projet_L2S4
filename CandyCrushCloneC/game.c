@@ -62,7 +62,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_tokens[16], "data/Tokens/Token_purple_vertical.png", pArray, pRenderer);
     error += Image_new(&image_tokens[17], "data/Tokens/Token_orange_vertical.png", pArray, pRenderer);
 
-      error += Image_new(&image_tokens[18], "data/Tokens/Token_red_packed.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[18], "data/Tokens/Token_red_packed.png", pArray, pRenderer);
     error += Image_new(&image_tokens[19], "data/Tokens/Token_blue_packed.png", pArray, pRenderer);
     error += Image_new(&image_tokens[20], "data/Tokens/Token_green_packed.png", pArray, pRenderer);
     error += Image_new(&image_tokens[21], "data/Tokens/Token_yellow_packed.png", pArray, pRenderer);
@@ -794,7 +794,7 @@ bool IsTokenOfType(Grid *pGrid, TokenTypes type){
 Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 {
     int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
-
+    Token T;
     switch(dir){
 
         case UP:{
@@ -806,6 +806,9 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
                     return &pGrid->tokens[i][x];
                 }
             }
+            //Renvoie un token ayant comme position vertical "juste en dehors de la grille
+            T.rect_image.y = pGrid->height;
+
         }
         break;
 
@@ -818,6 +821,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
                         return &pGrid->tokens[i][x];
                 }
             }
+            T.rect_image.y = -1;
 
         }
         break;
@@ -831,6 +835,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
                         return &pGrid->tokens[x][i];
                 }
             }
+            T.rect_image.x = pGrid->width;
         }
         break;
 
@@ -843,9 +848,11 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
                         return &pGrid->tokens[x][i];
                 }
             }
+            T.rect_image.y = -1;
         }
         break;
     }
+    return &T;
 }
 
 // =========================================================
@@ -887,7 +894,7 @@ int DestroyAlignedTokens(Grid *pGrid){
 
 int destruct_colon(int y,Grid * pGrid)
 {
-    for(int i =0; i< pGrid->height-1; i++)
+    for(int i =0; i< pGrid->height; i++)
     {
         if(pGrid->tokens[i][y].type != MULTI)
         {
