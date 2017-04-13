@@ -11,7 +11,10 @@ bool dragAndDrop;
 SDL_Point dragStart;
 SDL_Rect rect_CursorOver;
 
-GameStates gameState;
+GameStates gameState, gameState_prec;
+GameSessionTypes gameSessionType;
+
+Grid loadedGrid;
 
 // =========================================================
 
@@ -35,6 +38,35 @@ void CleanSDL(){
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
+}
+
+// =========================================================
+
+int Clean(Array *pArray){
+
+    if ( !pArray )
+        return -1;
+
+    if ( pArray->length ){
+
+        for(int i = pArray->length - 1; i >= 0; i--){
+
+            switch( Array_GET_id(pArray, i) ){
+
+                case FONT_TYPE :{ TTF_CloseFont((TTF_Font*)Array_GET_data(pArray,i)); } break;
+                case TEXTURE_TYPE : { SDL_DestroyTexture((SDL_Texture*)Array_GET_data(pArray,i)); } break;
+                case RENDERER_TYPE : { SDL_DestroyRenderer((SDL_Renderer*)Array_GET_data(pArray,i)); } break;
+                case WINDOW_TYPE : { SDL_DestroyWindow((SDL_Window*)Array_GET_data(pArray,i)); } break;
+                case ARRAY_TYPE : { Array_free((Array*)Array_GET_data(pArray,i)); } break;
+                default : { free( pArray->tab_data[i]); }
+            }
+        }
+    }
+
+    pArray->length = 0;
+    Array_free(pArray);
+
+    return 0;
 }
 
 // =========================================================
@@ -68,6 +100,12 @@ void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
 
                 if ( pGrid->tokens[i][j].drawBackground )
                     RenderImage(pRenderer,pGrid->tokens[i][j].image_background,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
+
+                if ( pGrid->isHelpActive )
+                    MoveAvailable(pGrid, true);
+
+                if ( pGrid->isSuperHelpActive )
+                    HighlightBestMove(pGrid);
 
                 RenderImage(pRenderer,pGrid->tokens[i][j].image,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
             }
@@ -300,7 +338,7 @@ int Utf8Fix(char *str){
 
 // ========================================================
 
-void MoveAvailable(Grid * pGrid){
+void MoveAvailable(Grid * pGrid, bool highlight){
 
     //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
@@ -310,6 +348,8 @@ void MoveAvailable(Grid * pGrid){
 
         for(int j=0;j < pGrid->width-1; j++){
 
+            int n = pGrid->moveAvailable;
+
             // vers la droite
             PermuteToken(pGrid,j,i,j+1,i);
 
@@ -317,14 +357,67 @@ void MoveAvailable(Grid * pGrid){
 
             PermuteToken(pGrid,j,i,j+1,i);
 
+            if ( n != pGrid->moveAvailable && highlight){
+
+                pGrid->tokens[i][j].image_background = image_cursorGreen;
+                pGrid->tokens[i][j].drawBackground = true;
+                pGrid->tokens[i][j+1].image_background = image_cursorGreen;
+                pGrid->tokens[i][j+1].drawBackground = true;
+
+                n = pGrid->moveAvailable;
+            }
+
             // vers le bas
             PermuteToken(pGrid,j,i,j,i+1);
 
             pGrid->moveAvailable += IsLineOnGrid(pGrid);
 
             PermuteToken(pGrid,j,i,j,i+1);
+
+            if ( n != pGrid->moveAvailable && highlight){
+
+                pGrid->tokens[i][j].image_background = image_cursorGreen;
+                pGrid->tokens[i][j].drawBackground = true;
+                pGrid->tokens[i+1][j].image_background = image_cursorGreen;
+                pGrid->tokens[i+1][j].drawBackground = true;
+            }
         }
     }
+}
+
+// ========================================================
+
+void SaveTokensInPastTokens(Grid *pGrid){
+
+    for(int i=0; i< pGrid->height; i++){
+        for(int j=0;j < pGrid->width; j++){
+
+            pGrid->pastTokens[i][j] = pGrid->tokens[i][j];
+            pGrid->pastTokens[i][j].drawBackground = false;
+            CalculTokenImages(pGrid,&pGrid->pastTokens[i][j],j,i);
+        }
+    }
+}
+
+// ========================================================
+
+void LoadTokensInPastTokens(Grid *pGrid){
+
+    for(int i=0; i< pGrid->height; i++){
+        for(int j=0;j < pGrid->width; j++){
+
+            pGrid->tokens[i][j] = pGrid->pastTokens[i][j];
+        }
+    }
+}
+
+// ========================================================
+
+char* GetTokenImagePath(char *pDirectory, Colors c, TokenTypes type){
+
+    char *path;
+
+    sprintf(path, "%c",pDirectory );
 }
 
 // ========================================================

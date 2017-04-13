@@ -22,13 +22,15 @@ Rôle : fonctions générales du jeu, aussi bien affichage que logique.
 
 typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
 
-typedef enum TokenTypes { NONE, TOKEN,HORIZONTAL,VERTICAL,PACKED,MULTI}TokenTypes;
+typedef enum TokenTypes { NONE, TOKEN, HORIZONTAL, VERTICAL, PACKED, MULTI }TokenTypes;
 
 typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, NONE_COLOR }Colors;
 
 typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
 
-typedef enum GameStates { MENU, GAMESESSION, EDITOR, QUIT }GameStates;
+typedef enum GameStates { MENU, GAME, EDITOR, QUIT }GameStates;
+
+typedef enum GameSessionTypes { RANDOM, PUZZLE }GameSessionTypes;
 
 typedef struct Image{
 
@@ -79,6 +81,9 @@ typedef struct Grid{
     int nbSuperHelp;
     int nbRevertOnce;
 
+    bool isHelpActive;
+    bool isSuperHelpActive;
+
 }Grid;
 
 typedef struct Array{
@@ -115,16 +120,23 @@ typedef struct Window {
 
 // =========================================================
 
+// ressources
 extern Font font_default;
 extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
 image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[25];
 extern int screen_width, screen_height;
 
+// variables UI
 extern bool dragAndDrop;
 extern SDL_Point dragStart;
 extern SDL_Rect rect_CursorOver;
 
-extern GameStates gameState;
+// variable machine d'etat
+extern GameStates gameState, gameState_prec;
+extern GameSessionTypes gameSessionType;
+
+// ?
+extern Grid loadedGrid;
 
 // ========================================================= Logique
 
@@ -133,6 +145,9 @@ void InitSDL();
 
 /* libère la sdl */
 void CleanSDL();
+
+/* libere le champs */
+int Clean(Array *pArray);
 
 /* permute 2 jetons et place leurs texture au bon endroit */
 void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
@@ -160,9 +175,18 @@ char *String_copy(char *dest, size_t size, char *str1, char *str2);
 
 int Utf8Fix(char *str);
 
-void MoveAvailable(Grid * pGrid);
+void MoveAvailable(Grid * pGrid, bool highlight);
+
+/* copie les token actuel dans la sauvegarde */
+void SaveTokensInPastTokens(Grid *pGrid);
+
+/* copie les token de la sauvegarde dans l'actuel */
+void LoadTokensInPastTokens(Grid *pGrid);
 
 // ========================================================= Chargement de ressources
+
+/* renvoie le token relatif au dossier */
+char* GetTokenImagePath(char *pDirectory, Colors c, TokenTypes type);
 
 /* créée une nouvelle fenêtre */
 int Window_new(Window *pWindow, Window *pWindow_parent, bool outline, int x, int y, int w, int h);

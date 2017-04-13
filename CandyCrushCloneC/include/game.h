@@ -25,9 +25,6 @@ Rôle : fonctions gérants une partie de CCCC.
 /* initailisation et chargement des ressources */
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
 
-/* fermeture du jeu / déchargement */
-int CleanGame(Array *pArray);
-
 /* Crée une grille de largeur X hauteur remplie aléatoirement */
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
 
@@ -49,8 +46,8 @@ bool IsTokenMoving(Grid *pGrid);
 /* indique si un jeton a une animation de destruction en cours */
 bool IsTokenDestructing(Grid *pGrid);
 
-/* renvoie le jeton le plus haut de la colonne donné ( pour les animations... ) */
-Token *GetColumnUpperToken(Grid *pGrid,int x);
+/* met en vert le meillur coup possible */
+void HighlightBestMove(Grid *pGrid);
 
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
@@ -90,7 +87,7 @@ void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 void PermuteTokenImage(Grid *pGrid,int x1,int y1,int x2,int y2);
 
 /* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
-void InitRandomToken(Grid *pGrid, Token *token, int nbColor, int x, int y);
+void InitRandomToken(Grid *pGrid, Token *token, int x, int y);
 
 /* anime les mouvements des jetons */
 void AnimMovingTokens(Grid *pGrid);
@@ -100,6 +97,7 @@ void AnimDestructingTokens(Grid *pGrid);
 
 /* anime la grille */
 void Grid_anim(Grid *pGrid);
+
 /* detect les coudées et ajoute les jetons speciaux */
 void Token_speciaux(Grid *pGrid);
 
@@ -114,11 +112,19 @@ void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c);
 
 void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
+void Button_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+
+void Button_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+
+void Button_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+
 void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
 void Game_logic(Grid *pGrid);
 
-void GameSession(int width, int height,int nbColor, int nbMove,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
+void GameSessionRandom(int width, int height,int nbColor, int nbMove,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
+
+void GameSessionPuzzle(Grid *pGrid);
 
 // =========================================================
 

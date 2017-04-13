@@ -367,23 +367,24 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\editor.c
+1491984133 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\editor.c
+	"editor.h"
 
-1489564792 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\files.c
+1489568392 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\files.c
 
-1489665911 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\game.c
+1491980198 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\game.c
 	"game.h"
 	"core.h"
 
-1489666265 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\game.h
+1491980162 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\game.h
 	"core.h"
 	"UI.h"
 	"constants.h"
 
-1489665911 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\core.h
+1491983875 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\core.h
 	"constants.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\constants.h
+1490174172 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\constants.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_mixer.h>
@@ -394,7 +395,7 @@
 	<time.h>
 	"stdbool.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl.h
 	"SDL_main.h"
 	"SDL_stdinc.h"
 	"SDL_assert.h"
@@ -425,12 +426,12 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_main.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_main.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_stdinc.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_stdinc.h
 	"SDL_config.h"
 	<sys/types.h>
 	<stdio.h>
@@ -458,34 +459,34 @@
 	<stdlib.h>
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_config.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_config.h
 	"SDL_platform.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_platform.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_platform.h
 	"AvailabilityMacros.h"
 	"TargetConditionals.h"
 	<winapifamily.h>
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\begin_code.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\begin_code.h
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\close_code.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\close_code.h
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_assert.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_assert.h
 	"SDL_config.h"
 	"begin_code.h"
 	<signal.h>
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_atomic.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_atomic.h
 	"SDL_stdinc.h"
 	"SDL_platform.h"
 	"begin_code.h"
 	<mbarrier.h>
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_audio.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_audio.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_endian.h"
@@ -495,24 +496,24 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_error.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_error.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_endian.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_endian.h
 	"SDL_stdinc.h"
 	<endian.h>
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_mutex.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_mutex.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_thread.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_thread.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_atomic.h"
@@ -521,18 +522,18 @@
 	<process.h>
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_rwops.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_rwops.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_clipboard.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_clipboard.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_cpuinfo.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_cpuinfo.h
 	"SDL_stdinc.h"
 	<intrin.h>
 	<intrin.h>
@@ -544,7 +545,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_events.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_events.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
@@ -558,7 +559,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_video.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_video.h
 	"SDL_stdinc.h"
 	"SDL_pixels.h"
 	"SDL_rect.h"
@@ -566,13 +567,13 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_pixels.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_pixels.h
 	"SDL_stdinc.h"
 	"SDL_endian.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_rect.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_rect.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_pixels.h"
@@ -580,7 +581,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_surface.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_surface.h
 	"SDL_stdinc.h"
 	"SDL_pixels.h"
 	"SDL_rect.h"
@@ -589,11 +590,11 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_blendmode.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_blendmode.h
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_keyboard.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_keyboard.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_keycode.h"
@@ -601,27 +602,27 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_keycode.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_keycode.h
 	"SDL_stdinc.h"
 	"SDL_scancode.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_scancode.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_scancode.h
 	"SDL_stdinc.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_mouse.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_mouse.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_joystick.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_joystick.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_gamecontroller.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_gamecontroller.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_rwops.h"
@@ -629,11 +630,11 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_quit.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_quit.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_gesture.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_gesture.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
@@ -641,60 +642,60 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_touch.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_touch.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_filesystem.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_filesystem.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_haptic.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_haptic.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_joystick.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_hints.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_hints.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_loadso.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_loadso.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_log.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_log.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_messagebox.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_messagebox.h
 	"SDL_stdinc.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_power.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_power.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_render.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_render.h
 	"SDL_stdinc.h"
 	"SDL_rect.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_system.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_system.h
 	"SDL_stdinc.h"
 	"SDL_keyboard.h"
 	"SDL_render.h"
@@ -702,24 +703,24 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_timer.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_timer.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_version.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_version.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_image.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_image.h
 	"SDL.h"
 	"SDL_version.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_mixer.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_mixer.h
 	"SDL_stdinc.h"
 	"SDL_rwops.h"
 	"SDL_audio.h"
@@ -728,34 +729,38 @@
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_ttf.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\sdl2\sdl_ttf.h
 	"SDL.h"
 	"begin_code.h"
 	"close_code.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\ui.h
+1489568392 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\ui.h
 	"core.h"
 	"constants.h"
 
-1489666327 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\main.c
+1491983885 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\main.c
 	"UI.h"
 	"constants.h"
 	"game.h"
 	"menu.h"
 	"editor.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\menu.h
+1491980162 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\menu.h
 	"core.h"
+	"UI.h"
 	"constants.h"
 
-1489564792 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\editor.h
+1491980646 c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\include\editor.h
+	"core.h"
+	"UI.h"
+	"constants.h"
 
-1489666464 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\core.c
+1491980162 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\core.c
 	"core.h"
 
-1489564792 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\menu.c
+1491984141 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\menu.c
 	"menu.h"
 
-1489564792 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\ui.c
+1489568392 source:c:\users\benjamindesbouchages\documents\github\cccc_projet_l2s4\candycrushclonec\ui.c
 	"UI.h"
 
