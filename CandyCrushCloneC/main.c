@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
 
                 switch( gameSessionType ){
 
-                    case RANDOM : GameSessionRandom(10,10,6,5,false,5,2,2); break;
+                    case RANDOM : GameSessionRandom(10,10,6,15,false,5,2,2); break;
                     case PUZZLE : GameSessionPuzzle(&loadedGrid); break;
                 }
             }

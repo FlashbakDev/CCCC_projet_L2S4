@@ -446,7 +446,7 @@ void Token_speciaux(Grid *pGrid)
                         pGrid->tokens[i][j-3].aligned = false;
                         pGrid->tokens[i][j-3].color = NONE_COLOR;
                         pGrid->tokens[i][j-3].type = MULTI;
-                        CalculTokenImages(pGrid,&pGrid->tokens[i][j-3],j-3,i);
+                        CalculTokenImages(pGrid,&pGrid->tokens[i-3][j],j,i-3);
 
          }
 
@@ -484,10 +484,10 @@ void Token_speciaux(Grid *pGrid)
              }
 
              if(nb_align == 5){
-                        pGrid->tokens[i][j-3].aligned = false;
-                        pGrid->tokens[i][j-3].color = NONE_COLOR;
-                        pGrid->tokens[i][j-3].type = MULTI;
-                        CalculTokenImages(pGrid,&pGrid->tokens[i][j-3],j-3,i);
+                        pGrid->tokens[i-3][j].aligned = false;
+                        pGrid->tokens[i-3][j].color = NONE_COLOR;
+                        pGrid->tokens[i-3][j].type = MULTI;
+                        CalculTokenImages(pGrid,&pGrid->tokens[i-3][j],j,i-3);
 
              }
                 nb_align = 1;
@@ -886,58 +886,13 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     int cpt = 0;
 
-    /*if ( IsTokenOfType(pGrid, VERTICAL) || IsTokenOfType(pGrid, HORIZONTAL) ){
-
-        for(int i = 0; i < pGrid->height; i++){
-            for(int j = 0; j < pGrid->width; j++){
-
-                if  ( pGrid->tokens[i][j].aligned == true &&
-                    ( pGrid->tokens[i][j].type == VERTICAL || pGrid->tokens[i][j].type == HORIZONTAL) ){
-
-                    if(pGrid->tokens[i][j].type == VERTICAL ){
-
-                        for(int k = 0; k < pGrid->height; k ++){
-
-                            if ( k != j ){
-
-                                pGrid->tokens[i][k].type = NONE;
-                                pGrid->tokens[i][k].isDestruct = true;
-                                pGrid->tokens[i][k].startDestructAnim = -1;
-
-                                cpt++;
-                            }
-                        }
-                    }
-                    else if(pGrid->tokens[i][j].type == HORIZONTAL ){
-
-                        for(int k = 0; k < pGrid->width; k ++){
-
-                            if ( k != i ){
-
-                                pGrid->tokens[k][j].type = NONE;
-                                pGrid->tokens[k][j].isDestruct = true;
-                                pGrid->tokens[k][j].startDestructAnim = -1;
-
-                                cpt++;
-                            }
-                        }
-                    }
-
-                    pGrid->tokens[i][j].type = TOKEN;
-
-                    CheckGrid(pGrid);
-                }
-            }
-        }
-    }*/
-
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
             if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].isDestruct == false){
                 if(pGrid->tokens [i][j].type != TOKEN && pGrid->tokens [i][j].type != NULL )
                 {
-                    Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+                    cpt +=Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
                     i=0;j=0;
                 }
                 else{
@@ -946,11 +901,12 @@ int DestroyAlignedTokens(Grid *pGrid){
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
                 pGrid->tokens[i][j].aligned = false;
+                cpt++;
                 }
 
                // pGrid->tokens[i][j].color = NONE_COLOR;
 
-                cpt++;
+
             }
         }
     }
@@ -958,56 +914,85 @@ int DestroyAlignedTokens(Grid *pGrid){
     return cpt;
 }
 //===========================================================
-
-int destruct_colon(int y,Grid * pGrid)
+int destruct_square(int x,int y, int l, Grid *pGrid)
 {
+    int debut_x = x- l/2;
+    if(debut_x<0)debut_x =1;
+    int debut_y = y- l/2;
+    if(debut_y<0)debut_y=1;
+    int cpt = 0;
+    for(int i = debut_y; i< debut_y+l-1 && i < pGrid->height;i++)
+    {
+            printf("boucle de square   ");
+        for(int j = debut_x; j< debut_x+l-1 && j< pGrid->width;j++)
+        {
+            if(pGrid->tokens[i][j].type != TOKEN && pGrid->tokens[i][j].type !=NONE && (i != y || j != x))
+            {
+               cpt += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+            }
+         pGrid->tokens[i][j].type = NONE;
+         pGrid->tokens[i][j].isDestruct = true;
+         pGrid->tokens[i][j].startDestructAnim = -1;
+         cpt ++;
+        }
+    }
+}
+
+
+int destruct_colon(int x,Grid * pGrid)
+{
+    int cpt =0;
     for(int i =0; i< pGrid->height; i++)
     {
-        if(pGrid->tokens[i][y].type != MULTI)
+        if(pGrid->tokens[i][x].type != MULTI)
         {
-            if(pGrid->tokens[i][y].type != TOKEN &&pGrid->tokens[i][y].type !=NONE &&pGrid->tokens[i][y].type !=VERTICAL)
+            if(pGrid->tokens[i][x].type != TOKEN &&pGrid->tokens[i][x].type !=NONE &&pGrid->tokens[i][x].type !=VERTICAL)
             {
-                Token_special_action(pGrid->tokens[i][y].type,pGrid,i,y);
+                cpt += Token_special_action(pGrid->tokens[i][x].type,pGrid,i,x);
             }
-         pGrid->tokens[i][y].type = NONE;
-         pGrid->tokens[i][y].isDestruct = true;
-         pGrid->tokens[i][y].startDestructAnim = -1;
+         pGrid->tokens[i][x].type = NONE;
+         pGrid->tokens[i][x].isDestruct = true;
+         pGrid->tokens[i][x].startDestructAnim = -1;
+         cpt ++;
         }
 
     }
     CheckGrid(pGrid);
 }
 
-int destruct_lign(int x,Grid * pGrid)
+int destruct_lign(int y,Grid * pGrid)
 {
+    int cpt = 0;
     for(int i =0; i< pGrid->width; i++)
     {
-        if(pGrid->tokens[x][i].type != MULTI)
+        if(pGrid->tokens[y][i].type != MULTI)
         {
-            if(pGrid->tokens[x][i].type != TOKEN &&pGrid->tokens[x][i].type !=NONE &&pGrid->tokens[x][i].type != HORIZONTAL)
+            if(pGrid->tokens[y][i].type != TOKEN &&pGrid->tokens[y][i].type !=NONE &&pGrid->tokens[y][i].type != HORIZONTAL)
             {
-                Token_special_action(pGrid->tokens[x][i].type,pGrid,x,i);
+              cpt +=  Token_special_action(pGrid->tokens[y][i].type,pGrid,y,i);
             }
-         pGrid->tokens[x][i].type = NONE;
-         pGrid->tokens[x][i].isDestruct = true;
-         pGrid->tokens[x][i].startDestructAnim = -1;
+         pGrid->tokens[y][i].type = NONE;
+         pGrid->tokens[y][i].isDestruct = true;
+         pGrid->tokens[y][i].startDestructAnim = -1;
+         cpt ++;
         }
 
     }
     CheckGrid(pGrid);
+    return cpt;
 }
 //==================================================================
-void Token_special_action(TokenTypes t, Grid *pGrid, int x, int y){
+int Token_special_action(TokenTypes t, Grid *pGrid, int y, int x){
 
     switch(t)
     {
     case VERTICAL:
-        destruct_colon(y, pGrid);
+       return destruct_colon(x, pGrid);
         break;
 
     case HORIZONTAL:
         //pGrid->tokens[y][x].isDestruct = true;
-        destruct_lign(x, pGrid);
+       return destruct_lign(y, pGrid);
         break;
 
     case MULTI:
@@ -1015,7 +1000,7 @@ void Token_special_action(TokenTypes t, Grid *pGrid, int x, int y){
         break;
 
     case PACKED:
-         pGrid->tokens[y][x].isDestruct = true;
+       return  destruct_square(y,x,3,pGrid);
         break;
 
     }
@@ -1031,7 +1016,7 @@ int destruct_color(Colors c, Grid *pGrid)
         for(int j = 0; j < pGrid->width; j++){
 
             if ( pGrid->tokens[i][j].color == c ){
-                if(pGrid->tokens[i][j].type != TOKEN)Token_special_action(pGrid->tokens[i][j].type, pGrid, i,j);
+                if(pGrid->tokens[i][j].type != TOKEN)cpt += Token_special_action(pGrid->tokens[i][j].type, pGrid, i,j);
                 pGrid->tokens[i][j].type = NONE;
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
@@ -1364,6 +1349,26 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                 case SDLK_e : {
 
                     RandomizeGrid(pGrid);
+                }
+                break;
+
+
+                case SDLK_a : {
+
+                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type >1){
+
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type --;
+                    }
+                    else{
+                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type = 5;
+                    }
+                    CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
+
+
+                    CalculTokenImages(  pGrid,
+                                        &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
+                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
+                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                 }
                 break;
 

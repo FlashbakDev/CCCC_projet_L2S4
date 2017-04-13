@@ -52,12 +52,12 @@ void HighlightBestMove(Grid *pGrid);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
-void Token_special_action(TokenTypes t, Grid *pGrid, int y, int x);
+int Token_special_action(TokenTypes t, Grid *pGrid, int y, int x);
 
 int destruct_color(Colors c, Grid *pGrid);
 
-int destruct_lign(int x, Grid * pGrid);
-int destruct_colon(int y, Grid *pGrid);
+int destruct_lign(int y, Grid * pGrid);
+int destruct_colon(int x, Grid *pGrid);
 int destruct_square(int x,int y,int l,Grid *pGrid);
 
 /* */
