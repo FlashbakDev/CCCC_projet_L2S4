@@ -69,7 +69,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_tokens[22], "data/Tokens/Default/Token_purple_bomb.png", pArray, pRenderer);
     error += Image_new(&image_tokens[23], "data/Tokens/Default/Token_orange_bomb.png", pArray, pRenderer);
 
-    error += Image_new(&image_tokens[24], "data/Tokens/Token_multi.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[24], "data/Tokens/Default/Token_multi.png", pArray, pRenderer);
 
     if ( error > 0 ) {
 
@@ -422,7 +422,8 @@ void Token_speciaux(Grid *pGrid)
              }
                 nb_align = 1;
                 Token_save = pGrid->tokens[i][j];
-            
+
+            }
         }
 
          if(nb_align==4){
@@ -451,7 +452,7 @@ void Token_speciaux(Grid *pGrid)
 
 
     }
-}
+
 
     //Verification des alignements verticaux
     for(j = 0; j < pGrid->width; j++){
@@ -469,7 +470,7 @@ void Token_speciaux(Grid *pGrid)
 
              if(nb_align==4){
                 //Si ligne de 4 fait apparaitre un jeton horizontal qqpart dans la ligne
-                printf("ligne de 4\n");
+                //printf("ligne de 4\n");
                 cpt=0; //Anti bouclage infini
                 do{
                 value_random = 1+ rand()%4;
@@ -938,7 +939,6 @@ int DestroyAlignedTokens(Grid *pGrid){
                 {
                     Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
                     i=0;j=0;
-                    printf("special !!! \n");
                 }
                 else{
                       //  printf("salut \n");
@@ -1036,7 +1036,7 @@ int destruct_color(Colors c, Grid *pGrid)
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
                 pGrid->tokens[i][j].drawBackground = false;
-              
+
                 cpt++;
             }
         }
@@ -1483,7 +1483,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
                                     pGrid->tokens[dragStart.y][dragStart.x].startDestructAnim = -1;
 
                                 }
-                              
+
                                 pGrid->isHelpActive = false;
                                 pGrid->isSuperHelpActive = false;
 
