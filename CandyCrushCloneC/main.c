@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
     /* Initialisation */
     InitSDL();
 
-    // avec une pile ça serais mieux !
+    // avec une pile Ã§a serais mieux !
     gameState = MENU;
     gameState_prec = QUIT;
     gameSessionType = RANDOM;

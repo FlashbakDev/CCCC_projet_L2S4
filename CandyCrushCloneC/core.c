@@ -217,8 +217,11 @@ void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
     case VERTICAL:
         token->image = image_tokens[token->color+12];
         break;
+    case PACKED:
+        token->image = image_tokens[token->color+18];
+        break;
     case MULTI:
-        token->image = image_tokens[18];
+        token->image = image_tokens[24];
     }
 
     token->image_background = image_cursorBlue;
