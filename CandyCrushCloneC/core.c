@@ -4,7 +4,7 @@
 
 Font font_default;
 Image image_normal, image_prelight, image_active, image_selected, image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[19];
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[25];
 int screen_width, screen_height;
 
 bool dragAndDrop;
@@ -406,6 +406,15 @@ void LoadTokensInPastTokens(Grid *pGrid){
             pGrid->tokens[i][j] = pGrid->pastTokens[i][j];
         }
     }
+}
+
+// ========================================================
+
+char* GetTokenImagePath(char *pDirectory, Colors c, TokenTypes type){
+
+    char *path;
+
+    sprintf(path, "%c",pDirectory );
 }
 
 // ========================================================

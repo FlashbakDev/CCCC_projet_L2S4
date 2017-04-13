@@ -40,28 +40,35 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_cursorRed, "data/image_cursorRed.png", pArray, pRenderer);
 
     // image des jetons
-    error += Image_new(&image_tokens[0], "data/Tokens/Token_red.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[1], "data/Tokens/Token_blue.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[2], "data/Tokens/Token_green.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[3], "data/Tokens/Token_yellow.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[4], "data/Tokens/Token_purple.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[5], "data/Tokens/Token_orange.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[0], "data/Tokens/Default/Token_red.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[1], "data/Tokens/Default/Token_blue.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[2], "data/Tokens/Default/Token_green.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[3], "data/Tokens/Default/Token_yellow.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[4], "data/Tokens/Default/Token_purple.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[5], "data/Tokens/Default/Token_orange.png", pArray, pRenderer);
 
-    error += Image_new(&image_tokens[6], "data/Tokens/Token_red_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[7], "data/Tokens/Token_blue_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[8], "data/Tokens/Token_green_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[9], "data/Tokens/Token_yellow_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[10], "data/Tokens/Token_purple_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[11], "data/Tokens/Token_orange_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[6], "data/Tokens/Default/Token_red_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[7], "data/Tokens/Default/Token_blue_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[8], "data/Tokens/Default/Token_green_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[9], "data/Tokens/Default/Token_yellow_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[10], "data/Tokens/Default/Token_purple_horizontal.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[11], "data/Tokens/Default/Token_orange_horizontal.png", pArray, pRenderer);
 
-    error += Image_new(&image_tokens[12], "data/Tokens/Token_red_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[13], "data/Tokens/Token_blue_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[14], "data/Tokens/Token_green_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[15], "data/Tokens/Token_yellow_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[16], "data/Tokens/Token_purple_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[17], "data/Tokens/Token_orange_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[12], "data/Tokens/Default/Token_red_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[13], "data/Tokens/Default/Token_blue_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[14], "data/Tokens/Default/Token_green_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[15], "data/Tokens/Default/Token_yellow_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[16], "data/Tokens/Default/Token_purple_vertical.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[17], "data/Tokens/Default/Token_orange_vertical.png", pArray, pRenderer);
 
-    error += Image_new(&image_tokens[18], "data/Tokens/Token_multi.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[18], "data/Tokens/Default/Token_red_bomb.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[19], "data/Tokens/Default/Token_blue_bomb.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[20], "data/Tokens/Default/Token_green_bomb.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[21], "data/Tokens/Default/Token_yellow_bomb.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[22], "data/Tokens/Default/Token_purple_bomb.png", pArray, pRenderer);
+    error += Image_new(&image_tokens[23], "data/Tokens/Default/Token_orange_bomb.png", pArray, pRenderer);
+
+    error += Image_new(&image_tokens[24], "data/Tokens/Token_multi.png", pArray, pRenderer);
 
     if ( error > 0 ) {
 

@@ -123,7 +123,7 @@ typedef struct Window {
 // ressources
 extern Font font_default;
 extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[19];
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[25];
 extern int screen_width, screen_height;
 
 // variables UI
@@ -184,6 +184,9 @@ void SaveTokensInPastTokens(Grid *pGrid);
 void LoadTokensInPastTokens(Grid *pGrid);
 
 // ========================================================= Chargement de ressources
+
+/* renvoie le token relatif au dossier */
+char* GetTokenImagePath(char *pDirectory, Colors c, TokenTypes type);
 
 /* créée une nouvelle fenêtre */
 int Window_new(Window *pWindow, Window *pWindow_parent, bool outline, int x, int y, int w, int h);
