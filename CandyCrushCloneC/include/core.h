@@ -158,6 +158,9 @@ void DebugToken(Token token);
 /* Calcul le rect_texture du jeton par raport à textureSize et à une position donné */
 void CalculTokenImages(Grid *pGrid, Token *token, int x, int y);
 
+/* assigne l'image en fonction des parrametre du token */
+void AssignImageToToken(Token *token);
+
 /* remet les bonnes images aux bon jetons */
 void ResetTokenImages(Grid *pGrid);
 
@@ -175,6 +178,10 @@ char *String_copy(char *dest, size_t size, char *str1, char *str2);
 
 int Utf8Fix(char *str);
 
+int Utf8next(char *str, int index);
+
+char *Backspace(char *str);
+
 void MoveAvailable(Grid * pGrid, bool highlight);
 
 /* copie les token actuel dans la sauvegarde */
@@ -184,6 +191,9 @@ void SaveTokensInPastTokens(Grid *pGrid);
 void LoadTokensInPastTokens(Grid *pGrid);
 
 // ========================================================= Chargement de ressources
+
+/* charge les images des jetons du dossier donné ( renvoie le nombre d'erreur ) */
+int LoadTokenImagesFromPath(char *folder, Array *pArray, SDL_Renderer *pRenderer);
 
 /* créée une nouvelle fenêtre */
 int Window_new(Window *pWindow, Window *pWindow_parent, bool outline, int x, int y, int w, int h);

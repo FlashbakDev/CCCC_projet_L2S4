@@ -38,6 +38,7 @@ typedef struct UI_button {
 
 	bool visible;
 	bool focus;
+	bool draw;
 	SDL_Rect rect;
 	SDL_Point position_text;
 	char text[UI_MAX_LENGTH];
@@ -58,8 +59,7 @@ typedef struct UI_toggle {
 	bool focus;
 	SDL_Rect rect;
 	bool selected;
-	Image image_selected;
-	Image image_unselected;
+	SDL_Color color;
 	Window *pWindow;
 
 } UI_toggle;
@@ -165,7 +165,7 @@ typedef struct UI_textBox {
 
 } UI_textBox;
 
-typedef struct kiss_combobox {
+typedef struct UI_combobox {
 
 	bool visible;
 	char text[UI_MAX_LENGTH];
@@ -176,7 +176,7 @@ typedef struct kiss_combobox {
 	Image image_combo;
 	Window *pWindow;
 
-} kiss_combobox;
+} UI_combobox;
 
 // ========================================================= Création des widgets
 
@@ -186,14 +186,22 @@ int UI_label_new(UI_label *pLabel, Window *pWindow, char *text, int x, int y);
 /* créé un nouveau bouton */
 int UI_button_new(UI_button *pButton, Window *pWindow, char *text, int x, int y);
 
+/* change les images d'un bouton */
+void UI_set_button_images(UI_button *pButton, Image image_active, Image image_normal, Image image_prelight);
+
 /* crée un nouveau toggle ( bouton séléctionnable ) */
-int UI_toggle_new(UI_toggle *pToggle, Window *pWindow, int x, int y);
+UI_toggle_new(UI_toggle *pToggle, Window *pWindow, int x, int y,int w, int h, SDL_Color color);
+
+/* crée un nouveau champ de texte */
+int UI_entry_new(UI_entry *pEntry, Window *pWindow, char *pText, int x, int y, int w);
 
 // ========================================================= évenements sur les widget
 
 int UI_button_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw);
 
 int UI_toggle_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw);
+
+int UI_entry_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw);
 
 // ========================================================= affichage des widget
 
@@ -202,6 +210,8 @@ int UI_label_draw(UI_label *pLabel, SDL_Renderer *pRenderer);
 int UI_button_draw(UI_button *pButton, SDL_Renderer *pRenderer);
 
 int UI_toggle_draw(UI_toggle *pToggle, SDL_Renderer *pRenderer);
+
+int UI_entry_draw(UI_entry *pEntry, SDL_Renderer *pRenderer);
 
 // ========================================================= Autre
 

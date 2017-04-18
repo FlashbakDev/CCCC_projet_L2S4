@@ -44,7 +44,10 @@ int main(int argc, char* argv[]){
 
             case EDITOR : {
 
-                EditorSession(10,10);
+                /* a faire par chargement d'un fichier ou par création d'un nouveau */
+                loadedGrid = *NewEmptyGrid(10, 10);
+
+                EditorSession(&loadedGrid);
             }
             break;
 

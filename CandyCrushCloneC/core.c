@@ -84,22 +84,13 @@ void WaitForNextFrame(int frameStart){
 
 void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
 
-    /*if ( pGrid->is_cursorOnGrid && pGrid->tokens[ pGrid->cursorTokenPosition.x ][ pGrid->cursorTokenPosition.y ].type != NONE ){
-
-        RenderImage(pRenderer,
-                    pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ].image_background,
-                    pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ].rect_image.x,
-                    pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ].rect_image.y,
-                    NULL );
-    }*/
-
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].type != NONE || pGrid->tokens[i][j].isDestruct ){
+            if ( pGrid->tokens[i][j].drawBackground && !pGrid->tokens[i][j].isDestruct)
+                RenderImage(pRenderer,pGrid->tokens[i][j].image_background,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
 
-                if ( pGrid->tokens[i][j].drawBackground )
-                    RenderImage(pRenderer,pGrid->tokens[i][j].image_background,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
+            if ( pGrid->tokens[i][j].type != NONE || pGrid->tokens[i][j].isDestruct ){
 
                 if ( pGrid->isHelpActive )
                     MoveAvailable(pGrid, true);
@@ -205,27 +196,10 @@ void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
 
     //fprintf(stdout,"CalculTokenRectTexure(Grid *pGrid, Token *token, int x = %d, int y = %d)\n", x, y);
 
-    switch(token->type)
-    {
-    case TOKEN:
-        token->image = image_tokens[token->color];
-        break;
-
-    case HORIZONTAL:
-        token->image = image_tokens[token->color+6];
-        break;
-    case VERTICAL:
-        token->image = image_tokens[token->color+12];
-        break;
-    case PACKED:
-        token->image = image_tokens[token->color+18];
-        break;
-    case MULTI:
-        token->image = image_tokens[24];
-    }
+    AssignImageToToken(token);
 
     token->image_background = image_cursorBlue;
-    token->drawBackground = false;
+    //token->drawBackground = false;
 
     token->rect_image.w = (float)(TOKEN_WIDTH / 100.0 * token->textureSize);
     token->rect_image.h = (float)(TOKEN_HEIGHT / 100.0 * token->textureSize);
@@ -236,6 +210,18 @@ void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
     token->image.h = token->rect_image.h;
     token->image_background.h = token->rect_image.w;
     token->image_background.h = token->rect_image.h;
+}
+
+void AssignImageToToken(Token *token){
+
+    switch(token->type){
+
+        case TOKEN: token->image = image_tokens[token->color]; break;
+        case HORIZONTAL: token->image = image_tokens[token->color+6]; break;
+        case VERTICAL: token->image = image_tokens[token->color+12];break;
+        case PACKED: token->image = image_tokens[token->color+18];break;
+        case MULTI: token->image = image_tokens[24];
+    }
 }
 
 // =========================================================
@@ -336,6 +322,37 @@ int Utf8Fix(char *str){
     return 0;
 }
 
+// =========================================================
+
+int Utf8next(char *str, int index){
+
+    int i;
+
+	if (!str || index < 0) return -1;
+	if (!str[index]) return 0;
+	for (i = 1; str[index + i]; i++)
+		if ((str[index + i] & 128) == 0 ||
+			(str[index + i] & 224) == 192 ||
+			(str[index + i] & 240) == 224 ||
+			(str[index + i] & 248) == 240)
+			break;
+	return i;
+}
+
+// ========================================================
+
+char *Backspace(char *str){
+
+	int len;
+
+	if (!str) return NULL;
+	if (!(len = strlen(str))) return NULL;
+	str[len - 1] = 0;
+	Utf8Fix(str);
+
+	return str;
+}
+
 // ========================================================
 
 void MoveAvailable(Grid * pGrid, bool highlight){
@@ -413,15 +430,70 @@ void LoadTokensInPastTokens(Grid *pGrid){
 
 // ========================================================
 
+int MaxLength(Font font, int width, char *str1, char *str2){
+
+	char buf[UI_MAX_LENGTH];
+	int n, i;
+
+	n = 0;
+	if (!str1 && !str2) return -1;
+	String_copy(buf, UI_MAX_LENGTH, str1, str2);
+
+	/* Maximum length + 1 for '\0', by the rule */
+	for (i = 0; buf[i]; i += Utf8next(buf, i))
+		if (++n * font.advance > width)
+			return i + 1;
+	return i + 1;
+}
+
+// ========================================================
+
 char* StrCont(char *str1, char *str2){
 
-    char path[strlen(str1)+strlen(str2)];
-
-    sprintf(path, "%s%s", str1, str2);
-
-    //fprintf(stdout,"%s",path);
+    char * path = (char *) malloc(1 +sizeof(char*) * (strlen(str1)+ strlen(str2)));
+    strcpy(path, str1);
+    strcat(path, str2);
 
     return path;
+}
+
+// ========================================================
+
+int LoadTokenImagesFromPath(char *folder, Array *pArray, SDL_Renderer *pRenderer){
+
+    int error = 0;
+
+    error += (Image_new(&image_tokens[0], StrCont( folder, "Token_red.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[0], "data/Tokens/Default/Token_red.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[1], StrCont( folder, "Token_blue.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[1], "data/Tokens/Default/Token_blue.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[2], StrCont( folder, "Token_green.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[2], "data/Tokens/Default/Token_green.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[3], StrCont( folder, "Token_yellow.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[3], "data/Tokens/Default/Token_yellow.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[4], StrCont( folder, "Token_purple.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[4], "data/Tokens/Default/Token_purple.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[5], StrCont( folder, "Token_orange.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[5], "data/Tokens/Default/Token_orange.png", pArray, pRenderer);
+
+    error += (Image_new(&image_tokens[6], StrCont( folder, "Token_red_horizontal.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[6], "data/Tokens/Default/Token_red_horizontal.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[7], StrCont( folder, "Token_blue_horizontal.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[7], "data/Tokens/Default/Token_blue_horizontal.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[8], StrCont( folder, "Token_green_horizontal.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[8], "data/Tokens/Default/Token_green_horizontal.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[9], StrCont( folder, "Token_yellow_horizontal.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[9], "data/Tokens/Default/Token_yellow_horizontal.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[10], StrCont( folder, "Token_purple_horizontal.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[10], "data/Tokens/Default/Token_purple_horizontal.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[11], StrCont( folder, "Token_orange_horizontal.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[11], "data/Tokens/Default/Token_orange_horizontal.png", pArray, pRenderer);
+
+    error += (Image_new(&image_tokens[12], StrCont( folder, "Token_red_vertical.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[12], "data/Tokens/Default/Token_red_vertical.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[13], StrCont( folder, "Token_blue_vertical.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[13], "data/Tokens/Default/Token_blue_vertical.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[14], StrCont( folder, "Token_green_vertical.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[14], "data/Tokens/Default/Token_green_vertical.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[15], StrCont( folder, "Token_yellow_vertical.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[15], "data/Tokens/Default/Token_yellow_vertical.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[16], StrCont( folder, "Token_purple_vertical.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[16], "data/Tokens/Default/Token_purple_vertical.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[17], StrCont( folder, "Token_orange_vertical.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[17], "data/Tokens/Default/Token_orange_vertical.png", pArray, pRenderer);
+
+    error += (Image_new(&image_tokens[18], StrCont( folder, "Token_red_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[18], "data/Tokens/Default/Token_red_bomb.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[19], StrCont( folder, "Token_blue_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[19], "data/Tokens/Default/Token_blue_bomb.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[20], StrCont( folder, "Token_green_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[20], "data/Tokens/Default/Token_green_bomb.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[21], StrCont( folder, "Token_yellow_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[21], "data/Tokens/Default/Token_yellow_bomb.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[22], StrCont( folder, "Token_purple_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[22], "data/Tokens/Default/Token_purple_bomb.png", pArray, pRenderer);
+    error += (Image_new(&image_tokens[23], StrCont( folder, "Token_orange_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[23], "data/Tokens/Default/Token_orange_bomb.png", pArray, pRenderer);
+
+    error += (Image_new(&image_tokens[24], StrCont( folder, "Token_multi.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[24], "data/Tokens/Default/Token_multi.png", pArray, pRenderer);
+
+    return error;
 }
 
 // ========================================================

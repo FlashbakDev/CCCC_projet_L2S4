@@ -35,44 +35,13 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_active, "data/UI/image_active.png", pArray, pRenderer);
     error += Image_new(&image_prelight, "data/UI/image_prelight.png", pArray, pRenderer);
     error += Image_new(&image_normal, "data/UI/image_normal.png", pArray, pRenderer);
+    error += Image_new(&image_selected, "data/UI/image_selected.png", pArray, pRenderer);
+    error += Image_new(&image_unselected, "data/UI/image_unselected.png", pArray, pRenderer);
     error += Image_new(&image_cursorBlue, "data/image_cursorBlue.png", pArray, pRenderer);
     error += Image_new(&image_cursorGreen, "data/image_cursorGreen.png", pArray, pRenderer);
     error += Image_new(&image_cursorRed, "data/image_cursorRed.png", pArray, pRenderer);
 
-    /*char dir[100];
-    char temp[100];
-    sprintf(dir,"data/Tokens/Default/");*/
-
-    // image des jetons
-    error += Image_new(&image_tokens[0], "data/Tokens/Jewellery/Token_red.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[1], "data/Tokens/Jewellery/Token_blue.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[2], "data/Tokens/Jewellery/Token_green.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[3], "data/Tokens/Jewellery/Token_yellow.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[4], "data/Tokens/Jewellery/Token_purple.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[5], "data/Tokens/Jewellery/Token_orange.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[6], "data/Tokens/Jewellery/Token_red_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[7], "data/Tokens/Jewellery/Token_blue_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[8], "data/Tokens/Jewellery/Token_green_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[9], "data/Tokens/Jewellery/Token_yellow_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[10], "data/Tokens/Jewellery/Token_purple_horizontal.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[11], "data/Tokens/Jewellery/Token_orange_horizontal.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[12], "data/Tokens/Jewellery/Token_red_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[13], "data/Tokens/Jewellery/Token_blue_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[14], "data/Tokens/Jewellery/Token_green_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[15], "data/Tokens/Jewellery/Token_yellow_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[16], "data/Tokens/Jewellery/Token_purple_vertical.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[17], "data/Tokens/Jewellery/Token_orange_vertical.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[18], "data/Tokens/Jewellery/Token_red_bomb.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[19], "data/Tokens/Jewellery/Token_blue_bomb.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[20], "data/Tokens/Jewellery/Token_green_bomb.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[21], "data/Tokens/Jewellery/Token_yellow_bomb.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[22], "data/Tokens/Jewellery/Token_purple_bomb.png", pArray, pRenderer);
-    error += Image_new(&image_tokens[23], "data/Tokens/Jewellery/Token_orange_bomb.png", pArray, pRenderer);
-
-    error += Image_new(&image_tokens[24], "data/Tokens/Jewellery/Token_multi.png", pArray, pRenderer);
+    error += LoadTokenImagesFromPath("data/Tokens/Jewellery/", pArray, pRenderer);
 
     if ( error > 0 ) {
 
@@ -92,8 +61,8 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int 
 
     Grid *pGrid = malloc(sizeof(Grid));
 
-    pGrid->width = rect.w;
-    pGrid->height = rect.h;
+    pGrid->width = rect.w / TOKEN_WIDTH;
+    pGrid->height = rect.h / TOKEN_HEIGHT;
     pGrid->nbMove = nbMove;
     pGrid->nbColor = nbColor;
     pGrid->direction =DOWN;
@@ -103,7 +72,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int 
     pGrid->nbSuperHelp = nbSuperHelp;
     pGrid->nbRevertOnce = nbRevertOnce;
 
-    MakeRect(&pGrid->rect, rect.x, rect.y, rect.w * TOKEN_WIDTH, rect.h * TOKEN_HEIGHT);
+    MakeRect(&pGrid->rect, rect.x, rect.y, rect.w, rect.h);
 
     pGrid->is_cursorOnGrid = false;
     pGrid->cursorTokenPosition.x = 0;
@@ -689,6 +658,8 @@ void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image){
     }
 }
 
+//====================================================
+
 void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c){
 
     for(int i = 0; i < pGrid->height; i++){
@@ -888,51 +859,6 @@ int DestroyAlignedTokens(Grid *pGrid){
     //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
 
     int cpt = 0;
-
-    /*if ( IsTokenOfType(pGrid, VERTICAL) || IsTokenOfType(pGrid, HORIZONTAL) ){
-
-        for(int i = 0; i < pGrid->height; i++){
-            for(int j = 0; j < pGrid->width; j++){
-
-                if  ( pGrid->tokens[i][j].aligned == true &&
-                    ( pGrid->tokens[i][j].type == VERTICAL || pGrid->tokens[i][j].type == HORIZONTAL) ){
-
-                    if(pGrid->tokens[i][j].type == VERTICAL ){
-
-                        for(int k = 0; k < pGrid->height; k ++){
-
-                            if ( k != j ){
-
-                                pGrid->tokens[i][k].type = NONE;
-                                pGrid->tokens[i][k].isDestruct = true;
-                                pGrid->tokens[i][k].startDestructAnim = -1;
-
-                                cpt++;
-                            }
-                        }
-                    }
-                    else if(pGrid->tokens[i][j].type == HORIZONTAL ){
-
-                        for(int k = 0; k < pGrid->width; k ++){
-
-                            if ( k != i ){
-
-                                pGrid->tokens[k][j].type = NONE;
-                                pGrid->tokens[k][j].isDestruct = true;
-                                pGrid->tokens[k][j].startDestructAnim = -1;
-
-                                cpt++;
-                            }
-                        }
-                    }
-
-                    pGrid->tokens[i][j].type = TOKEN;
-
-                    CheckGrid(pGrid);
-                }
-            }
-        }
-    }*/
 
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
@@ -1645,6 +1571,8 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
     Array objects;
     Window window;
 
+    SDL_Color black = {0,0,0,255};
+
     UI_label label_score = {false};
     UI_button button_quit = {false};
     UI_button button_direction = {false};
@@ -1656,13 +1584,13 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
     UI_label label_nbMove = {false};
 
     // création des zone de jeu et d'affichage
-    SDL_Rect rect_grid = { 0,0,gridWidth, gridHeight };
-    SDL_Rect rect_UI = { rect_grid.x * TOKEN_WIDTH + rect_grid.w * TOKEN_WIDTH, 0, 250, rect_grid.h * TOKEN_HEIGHT };
+    SDL_Rect rect_grid = { 0,0,gridWidth * TOKEN_WIDTH, gridHeight * TOKEN_HEIGHT };
+    SDL_Rect rect_UI = { rect_grid.x + rect_grid.w, 0, 250, rect_grid.h };
 
     SDL_Rect rect_screen = {0 ,
                             0 ,
-                            (rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH > rect_UI.w + rect_UI.x ) ? rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH : rect_UI.w + rect_UI.x ,
-                            (rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT > rect_UI.h + rect_UI.y ) ? rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT : rect_UI.h + rect_UI.y } ;
+                            (rect_grid.w + rect_grid.x > rect_UI.w + rect_UI.x ) ? rect_grid.w + rect_grid.x : rect_UI.w + rect_UI.x ,
+                            (rect_grid.h + rect_grid.y > rect_UI.h + rect_UI.y ) ? rect_grid.h + rect_grid.y : rect_UI.h + rect_UI.y } ;
 
     Array_new(&objects);
 
@@ -1754,6 +1682,9 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
         if( grid1->nbSuperHelp > 0 ) UI_button_draw(&button_superHelp, pRenderer);
         if( grid1->nbRevertOnce > 0 ) UI_button_draw(&button_revertOnce, pRenderer);
 
+        UI_outline(pRenderer, &rect_grid, black, -1 );
+        UI_outline(pRenderer, &rect_UI, black, -1 );
+
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
         /* gestion de la fréquence d'affichage ( pour les animations )*/
@@ -1777,6 +1708,8 @@ void GameSessionPuzzle(Grid *pGrid){
     Array objects;
     Window window;
 
+    SDL_Color black = {0,0,0,255};
+
     UI_label label_score = {false};
     UI_button button_quit = {false};
     UI_button button_direction = {false};
@@ -1788,13 +1721,13 @@ void GameSessionPuzzle(Grid *pGrid){
     UI_label label_nbMove = {false};
 
     // création des zone de jeu et d'affichage
-    SDL_Rect rect_grid = { 0,0,pGrid->width, pGrid->height };
-    SDL_Rect rect_UI = { rect_grid.x * TOKEN_WIDTH + rect_grid.w * TOKEN_WIDTH, 0, 250, rect_grid.h * TOKEN_HEIGHT };
+    SDL_Rect rect_grid = { 0,0,pGrid->width * TOKEN_WIDTH, pGrid->height * TOKEN_HEIGHT };
+    SDL_Rect rect_UI = { rect_grid.x + rect_grid.w * TOKEN_WIDTH, 0, 250, rect_grid.h };
 
     SDL_Rect rect_screen = {0 ,
                             0 ,
-                            (rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH > rect_UI.w + rect_UI.x ) ? rect_grid.w * TOKEN_WIDTH + rect_grid.x * TOKEN_WIDTH : rect_UI.w + rect_UI.x ,
-                            (rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT > rect_UI.h + rect_UI.y ) ? rect_grid.h * TOKEN_HEIGHT + rect_grid.y * TOKEN_HEIGHT : rect_UI.h + rect_UI.y } ;
+                            (rect_grid.w + rect_grid.x > rect_UI.w + rect_UI.x ) ? rect_grid.w + rect_grid.x : rect_UI.w + rect_UI.x ,
+                            (rect_grid.h + rect_grid.y > rect_UI.h + rect_UI.y ) ? rect_grid.h + rect_grid.y : rect_UI.h + rect_UI.y } ;
 
     Array_new(&objects);
 
@@ -1883,6 +1816,9 @@ void GameSessionPuzzle(Grid *pGrid){
         if( pGrid->nbHelp > 0 ) UI_button_draw(&button_help, pRenderer);
         if( pGrid->nbSuperHelp > 0 ) UI_button_draw(&button_superHelp, pRenderer);
         if( pGrid->nbRevertOnce > 0 ) UI_button_draw(&button_revertOnce, pRenderer);
+
+        UI_outline(pRenderer, &rect_grid, black, -1 );
+        UI_outline(pRenderer, &rect_UI, black, -1 );
 
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
 
