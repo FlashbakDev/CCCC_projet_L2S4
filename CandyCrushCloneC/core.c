@@ -4,7 +4,7 @@
 
 Font font_default;
 Image image_normal, image_prelight, image_active, image_selected, image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[25];
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26];
 int screen_width, screen_height;
 
 bool dragAndDrop;
@@ -186,8 +186,8 @@ void HardPermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2){
 void DebugToken(Token token){
 
     fprintf(stdout,
-            "\n- color = %d\n- type = %d\n- aligne = %d\n- isMoving = %d\n- isDestruct = %d\n- textureSize = %d\n- rect_image w = %d, h = %d, x = %d, y = %d",
-            token.color, token.type,token.aligned,token.isMoving, token.isDestruct, token.textureSize, token.rect_image.w, token.rect_image.h, token.rect_image.x, token.rect_image.y );
+            "\n- color = %d\n- type = %d\n- aligne = %d\n- isMoving = %d\n- isDestruct = %d\n- textureSize = %d\n- rect_image w = %d, h = %d, x = %d, y = %d\n- drawBackground = %d",
+            token.color, token.type,token.aligned,token.isMoving, token.isDestruct, token.textureSize, token.rect_image.w, token.rect_image.h, token.rect_image.x, token.rect_image.y, token.drawBackground );
 }
 
 // =========================================================
@@ -220,7 +220,8 @@ void AssignImageToToken(Token *token){
         case HORIZONTAL: token->image = image_tokens[token->color+6]; break;
         case VERTICAL: token->image = image_tokens[token->color+12];break;
         case PACKED: token->image = image_tokens[token->color+18];break;
-        case MULTI: token->image = image_tokens[24];
+        case MULTI: token->image = image_tokens[24];break;
+        case BLOCK: token->image = image_tokens[25];break;
     }
 }
 
@@ -357,49 +358,63 @@ char *Backspace(char *str){
 
 void MoveAvailable(Grid * pGrid, bool highlight){
 
-    //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
+    fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
     pGrid->moveAvailable = 0;
 
-    for(int i=0; i< pGrid->height-1; i++){
+    for(int i=0; i< pGrid->height; i++){
 
-        for(int j=0;j < pGrid->width-1; j++){
+        for(int j=0;j < pGrid->width; j++){
 
             int n = pGrid->moveAvailable;
 
-            // vers la droite
-            PermuteToken(pGrid,j,i,j+1,i);
+            if ( j > 0 && j+1 < pGrid->width ){
 
-            pGrid->moveAvailable += IsLineOnGrid(pGrid);
+                if ( pGrid->tokens[j][i].type != NONE && pGrid->tokens[j+1][i].type != NONE && pGrid->tokens[j][i].color != pGrid->tokens[j+1][i].color ){
 
-            PermuteToken(pGrid,j,i,j+1,i);
+                    // vers la droite
+                    PermuteToken(pGrid,j,i,j+1,i);
 
-            if ( n != pGrid->moveAvailable && highlight){
+                    pGrid->moveAvailable += IsLineOnGrid(pGrid);
 
-                pGrid->tokens[i][j].image_background = image_cursorGreen;
-                pGrid->tokens[i][j].drawBackground = true;
-                pGrid->tokens[i][j+1].image_background = image_cursorGreen;
-                pGrid->tokens[i][j+1].drawBackground = true;
+                    PermuteToken(pGrid,j,i,j+1,i);
 
-                n = pGrid->moveAvailable;
+                    if ( n != pGrid->moveAvailable && highlight){
+
+                        pGrid->tokens[i][j].image_background = image_cursorGreen;
+                        pGrid->tokens[i][j].drawBackground = true;
+                        pGrid->tokens[i][j+1].image_background = image_cursorGreen;
+                        pGrid->tokens[i][j+1].drawBackground = true;
+
+                        n = pGrid->moveAvailable;
+                    }
+                }
             }
 
-            // vers le bas
-            PermuteToken(pGrid,j,i,j,i+1);
+            if ( i > 0 && i+1 < pGrid->height ){
 
-            pGrid->moveAvailable += IsLineOnGrid(pGrid);
+                if ( pGrid->tokens[j][i].type != NONE && pGrid->tokens[j][i+1].type != NONE && pGrid->tokens[j][i].color != pGrid->tokens[j][i+1].color ){
 
-            PermuteToken(pGrid,j,i,j,i+1);
+                    // vers le bas
+                    PermuteToken(pGrid,j,i,j,i+1);
 
-            if ( n != pGrid->moveAvailable && highlight){
+                    pGrid->moveAvailable += IsLineOnGrid(pGrid);
 
-                pGrid->tokens[i][j].image_background = image_cursorGreen;
-                pGrid->tokens[i][j].drawBackground = true;
-                pGrid->tokens[i+1][j].image_background = image_cursorGreen;
-                pGrid->tokens[i+1][j].drawBackground = true;
+                    PermuteToken(pGrid,j,i,j,i+1);
+
+                    if ( n != pGrid->moveAvailable && highlight){
+
+                        pGrid->tokens[i][j].image_background = image_cursorGreen;
+                        pGrid->tokens[i][j].drawBackground = true;
+                        pGrid->tokens[i+1][j].image_background = image_cursorGreen;
+                        pGrid->tokens[i+1][j].drawBackground = true;
+                    }
+                }
             }
         }
     }
+
+    fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d\n",pGrid->moveAvailable);
 }
 
 // ========================================================
@@ -492,6 +507,8 @@ int LoadTokenImagesFromPath(char *folder, Array *pArray, SDL_Renderer *pRenderer
     error += (Image_new(&image_tokens[23], StrCont( folder, "Token_orange_bomb.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[23], "data/Tokens/Default/Token_orange_bomb.png", pArray, pRenderer);
 
     error += (Image_new(&image_tokens[24], StrCont( folder, "Token_multi.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[24], "data/Tokens/Default/Token_multi.png", pArray, pRenderer);
+
+    error += (Image_new(&image_tokens[25], StrCont( folder, "Token_block.png"), pArray, pRenderer) == 0)? 0 : Image_new(&image_tokens[25], "data/Tokens/Default/Token_block.png", pArray, pRenderer);
 
     return error;
 }

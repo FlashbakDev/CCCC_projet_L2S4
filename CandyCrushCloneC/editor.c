@@ -135,6 +135,7 @@ void ResetToken(Token *token){
 
     token->type = NONE;
     token->color = NONE_COLOR;
+    token->aligned = false;
     token->isMoving = false;
     token->isDestruct = false;
     token->startDestructAnim = -1;
@@ -212,6 +213,8 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
 
                         pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ] = tokenToPaste;
                         CalculTokenImages(pGrid, &pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ], pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y );
+
+                        MoveAvailable(pGrid, false);
                     }
                 }
                 break;
@@ -221,6 +224,19 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
                     if ( pGrid->is_cursorOnGrid ){
 
                         ClearToken(pGrid, &pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ], pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+
+                        MoveAvailable(pGrid, false);
+                    }
+                }
+                break;
+
+                case SDL_BUTTON_MIDDLE:{
+
+                    if ( pGrid->is_cursorOnGrid ){
+
+                        fprintf(stdout,"Jeton en posisition (%d,%d) : ",pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                        DebugToken(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x]);
+                        fprintf(stdout,"\n");
                     }
                 }
                 break;
@@ -235,13 +251,11 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
                 // bouton gauche
                 case SDL_BUTTON_LEFT:{
 
-                    fprintf( stdout, "click gauche relache\n");
                 }
                 break;
 
                 case SDL_BUTTON_RIGHT:{
 
-                    fprintf( stdout, "click droit relache\n");
                 }
                 break;
             }
@@ -425,13 +439,20 @@ void EditorSession(Grid *pGrid){
                             UI_set_button_images(&button_token[j], image_tokens[j*6+i], image_tokens[j*6+i], image_tokens[j*6+i]);
                             button_token[j].draw = true;
                         }
+
+                        if ( tokenToPaste.type > 3 ){
+
+                            tokenToPaste.type = TOKEN;
+                            selectedTokenType.x = button_token[0].rect.x;
+                            selectedTokenType.y = button_token[0].rect.y;
+                        }
                     }
                     else{
 
                         selectedTokenType.x = button_token[0].rect.x;
                         selectedTokenType.y = button_token[0].rect.y;
                         UI_set_button_images(&button_token[0], image_tokens[24], image_tokens[24], image_tokens[24]);
-                        button_token[1].draw = false;
+                        UI_set_button_images(&button_token[1], image_tokens[25], image_tokens[25], image_tokens[25]);
                         button_token[2].draw = false;
                         button_token[3].draw = false;
                         tokenToPaste.type = MULTI;
@@ -445,13 +466,29 @@ void EditorSession(Grid *pGrid){
                     break;
                 }
             }
+
+            for(int i = 0; i < 4; i++){
+
+                if ( Button_tokenType_event(&button_token[i], &event, &draw, pGrid)){
+
+                    selectedTokenType.x = button_token[i].rect.x;
+                    selectedTokenType.y = button_token[i].rect.y;
+
+                    if ( tokenToPaste.color < 6 )
+                        tokenToPaste.type = (TokenTypes)i;
+                    else
+                        tokenToPaste.type = (TokenTypes)(i+4);
+
+                    //AssignImageToToken(&tokenToPaste);
+                }
+            }
         }
 
         /* logique */
         Editor_logic(pGrid);
 
         /* maj des labels */
-        sprintf(label_mouvements.text,"Mouvements possibles : %d",pGrid->moveAvailable);
+        sprintf(label_mouvements.text,"Mouvements possibles : %d", pGrid->moveAvailable);
 
         /* animations */
 

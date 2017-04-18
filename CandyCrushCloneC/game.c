@@ -1779,7 +1779,7 @@ void GameSessionPuzzle(Grid *pGrid){
             // event UI
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
-            Button_menu_event(&button_menu, &event, &draw, &quit);
+            Button_return_event(&button_menu, &event, &draw, &quit);
             Button_direction_event(&button_direction, &event, &draw, pGrid);
             if( pGrid->nbHelp > 0 ) Button_help_event(&button_help, &event, &draw, pGrid);
             if( pGrid->nbSuperHelp > 0 ) Button_superHelp_event(&button_superHelp, &event, &draw, pGrid);
