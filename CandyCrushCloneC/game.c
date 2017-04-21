@@ -1034,7 +1034,7 @@ void RegroupTokens(Grid *pGrid){
         for(int i = 0; i < pGrid->height; i++){
             for(int j = 0; j < pGrid->width; j++){
 
-                if ( pGrid->tokens[i][j].type != NONE ){
+                if ( pGrid->tokens[i][j].type != NONE && pGrid->tokens[i][j].type != BLOCK ){
 
                     if( i + DirectionsVectors[dir][1] >= 0 && i + DirectionsVectors[dir][1] < pGrid->height &&
                         j + DirectionsVectors[dir][0] >= 0 && j + DirectionsVectors[dir][0] < pGrid->width ){
@@ -1222,6 +1222,17 @@ void Button_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,
         pGrid->nbRevertOnce --;
 
         LoadTokensInPastTokens(pGrid);
+    }
+}
+
+// =========================================================
+
+void Button_restart_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        fprintf(stdout,"test\n");
+        *pQuit = true;
     }
 }
 
@@ -1510,6 +1521,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
             }
             else{
 
+                for(int i = 0; i < pGrid->height; i++){
+                    for(int j = 0; j < pGrid->width; j++){
+
+                        pGrid->tokens[i][j].drawBackground = false;
+                    }
+                }
+
                 if ( dragAndDrop == true ){
 
                     dragAndDrop = false;
@@ -1716,6 +1734,7 @@ void GameSessionPuzzle(Grid *pGrid){
 
     UI_button button_quit = {false};
     UI_button button_return = {false};
+    UI_button button_restart = {false};
     UI_label label_nbMove = {false};
 
     // création des zone de jeu et d'affichage
@@ -1742,21 +1761,16 @@ void GameSessionPuzzle(Grid *pGrid){
 
     fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_quit, &window, "Quitter", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 50 ));
     fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_return, &window, "Retour", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 90 ));
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_button_new return %d.\n", UI_button_new(&button_restart, &window, "Recommencer", rect_UI.x + ( rect_UI.w / 2 ) - image_normal.w / 2 , rect_UI.h - 130 ));
 
     window.visible = true;
-
-    for(int i=0; i< pGrid->height; i++){
-        for(int j=0;j < pGrid->width; j++){
-
-            fprintf(stdout,"%d %d    ", pGrid->tokens[i][j].type, pGrid->tokens[i][j].color);
-        }
-        fprintf(stdout,"\n");
-    }
 
     bool draw = true; // non utilisé
     bool quit = false;
 
     while( !quit ){
+
+        fprintf(stdout,"%d",quit);
 
         int frameStart = SDL_GetTicks();
 
@@ -1776,6 +1790,7 @@ void GameSessionPuzzle(Grid *pGrid){
             Window_event(&window, &event, &draw );
             Button_quit_event(&button_quit, &event, &draw, &quit);
             Button_return_event(&button_return, &event, &draw, &quit);
+            Button_restart_event(&button_restart, &event, &draw, &quit);
         }
 
         /* logique */
@@ -1797,6 +1812,7 @@ void GameSessionPuzzle(Grid *pGrid){
         UI_label_draw(&label_nbMove,pRenderer);
         UI_button_draw(&button_quit, pRenderer);
         UI_button_draw(&button_return, pRenderer);
+        UI_button_draw(&button_restart, pRenderer);
 
         UI_outline(pRenderer, &rect_UI, black, -1 );
 

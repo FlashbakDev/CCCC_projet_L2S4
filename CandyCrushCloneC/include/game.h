@@ -118,6 +118,8 @@ void Button_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, 
 
 void Button_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
+void Button_restart_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
 void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
 void Game_logic(Grid *pGrid);
