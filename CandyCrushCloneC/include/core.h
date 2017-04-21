@@ -32,6 +32,8 @@ typedef enum GameStates { MENU, GAME, EDITOR, QUIT }GameStates;
 
 typedef enum GameSessionTypes { RANDOM, PUZZLE }GameSessionTypes;
 
+typedef enum EditorSessionTypes { NEWPUZZLE, LOADPUZZLE }EditorSessionTypes;
+
 typedef struct Image{
 
     SDL_Texture *pTexture;
@@ -84,6 +86,10 @@ typedef struct Grid{
     bool isHelpActive;
     bool isSuperHelpActive;
 
+    bool is_puzzle;
+
+    bool outline;
+
 }Grid;
 
 typedef struct Array{
@@ -134,9 +140,10 @@ extern SDL_Rect rect_CursorOver;
 // variable machine d'etat
 extern GameStates gameState, gameState_prec;
 extern GameSessionTypes gameSessionType;
+extern EditorSessionTypes editorSessionType;
 
 // ?
-extern Grid loadedGrid;
+extern char puzzleName[UI_MAX_LENGTH];
 
 // ========================================================= Logique
 

@@ -26,7 +26,7 @@ Rôle : fonctions pour l'édition de niveau.
 SDL_Renderer *InitEditor(char * pChar_name, Array *pArray, int w, int h);
 
 /* crée une grille vide */
-Grid *NewEmptyGrid(int x, int y);
+Grid *NewEmptyPuzzle(int x, int y);
 
 /* suprime tout les token de la grille */
 void ClearGrid(Grid *pGrid);
@@ -43,7 +43,13 @@ bool Toggle_color_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw, Grid
 
 void Entry_nbMove_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
+void Entry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+
 bool Button_tokenType_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+
+void Button_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+
+void Button_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit );
 
 void Button_reset_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 

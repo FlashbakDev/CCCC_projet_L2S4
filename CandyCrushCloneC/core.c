@@ -13,8 +13,9 @@ SDL_Rect rect_CursorOver;
 
 GameStates gameState, gameState_prec;
 GameSessionTypes gameSessionType;
+EditorSessionTypes editorSessionType;
 
-Grid loadedGrid;
+char puzzleName[UI_MAX_LENGTH];
 
 // =========================================================
 
@@ -101,6 +102,12 @@ void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
                 RenderImage(pRenderer,pGrid->tokens[i][j].image,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
             }
         }
+    }
+
+    if ( pGrid->outline ){
+
+        SDL_Color black = {0,0,0,255};
+        UI_outline(pRenderer, &pGrid->rect, black, -1);
     }
 }
 
@@ -358,7 +365,7 @@ char *Backspace(char *str){
 
 void MoveAvailable(Grid * pGrid, bool highlight){
 
-    fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
+    //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
     pGrid->moveAvailable = 0;
 
@@ -414,7 +421,7 @@ void MoveAvailable(Grid * pGrid, bool highlight){
         }
     }
 
-    fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d\n",pGrid->moveAvailable);
+    //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid) -> pGrid->moveAvailable = %d\n",pGrid->moveAvailable);
 }
 
 // ========================================================
