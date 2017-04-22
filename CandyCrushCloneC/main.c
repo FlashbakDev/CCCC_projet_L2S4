@@ -19,6 +19,7 @@ int main(int argc, char* argv[]){
     gameState = MENU;
     gameState_prec = QUIT;
     gameSessionType = RANDOM;
+    editorSessionType = NEWPUZZLE;
 
     /* boucle */
     bool quit = false;
@@ -36,15 +37,20 @@ int main(int argc, char* argv[]){
 
                 switch( gameSessionType ){
 
-                    case RANDOM : GameSessionRandom(10,10,6,15,false,5,2,2); break;
-                    case PUZZLE : GameSessionPuzzle(&loadedGrid); break;
+                    case RANDOM : GameSessionRandom(10,10,6,5,false,5,2,2); break;
+                    case PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
                 }
             }
             break;
 
             case EDITOR : {
 
-                EditorSession(10,10);
+
+                switch( editorSessionType ){
+
+                    case NEWPUZZLE : EditorSession(NewEmptyPuzzle(10, 10)); break;
+                    case LOADPUZZLE : EditorSession(Load_grid(&puzzleName)); break;
+                }
             }
             break;
 
@@ -109,6 +115,7 @@ void Button_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, boo
 
         gameState_prec = gameState;
         gameState = EDITOR;
+        editorSessionType = NEWPUZZLE;
         *pQuit = true;
     }
 }

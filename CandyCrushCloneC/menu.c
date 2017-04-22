@@ -34,6 +34,8 @@ SDL_Renderer *InitMenu(char * pChar_name, Array *pArray, int w, int h){
     error += Image_new(&image_active, "data/UI/image_active.png", pArray, pRenderer);
     error += Image_new(&image_prelight, "data/UI/image_prelight.png", pArray, pRenderer);
     error += Image_new(&image_normal, "data/UI/image_normal.png", pArray, pRenderer);
+    error += Image_new(&image_selected, "data/UI/image_selected.png", pArray, pRenderer);
+    error += Image_new(&image_unselected, "data/UI/image_unselected.png", pArray, pRenderer);
 
     if ( error > 0 ) {
 
@@ -76,8 +78,6 @@ void MenuSession(){
     pRenderer = InitMenu("Candy Crush Clone C", &objects, WINDOW_WIDTH, WINDOW_HEIGHT );
     if ( !pRenderer )
         return;
-
-    fprintf(stdout, "screen_width = %d, screen_height = %d \n",screen_width,screen_height);
 
     fprintf(stdout,"menu.c -> MenuSession() -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     Array_append(&objects, WINDOW_TYPE, &window);
