@@ -106,6 +106,7 @@ Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor, bool randomizeInsert, int 
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
     pGrid->isHelpActive = false;
+    pGrid->isCalc = false;
 
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
@@ -885,18 +886,18 @@ int DestroyAlignedTokens(Grid *pGrid){
     //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
 
     int cpt = 0;
-
+    int score = 0;
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
             if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].isDestruct == false){
                 if(pGrid->tokens [i][j].type != TOKEN && pGrid->tokens [i][j].type != NULL )
                 {
-                    cpt +=Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+                    score += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
                     i=0;j=0;
                 }
                 else{
-                      //  printf("salut \n");
+
                 pGrid->tokens[i][j].type = NONE;
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
@@ -910,32 +911,39 @@ int DestroyAlignedTokens(Grid *pGrid){
             }
         }
     }
-
+    cpt += score;
+    if(pGrid->isCalc == false)pGrid->score += score * TOKEN_SCORE;
     return cpt;
 }
 //===========================================================
-int destruct_square(int x,int y, int l, Grid *pGrid)
+int destruct_square(int y,int x, int l, Grid *pGrid)
 {
-    int debut_x = x- l/2;
-    if(debut_x<0)debut_x =1;
-    int debut_y = y- l/2;
-    if(debut_y<0)debut_y=1;
+    int debut_x = x - (l/2);
+    int debut_y = y - (l/2);
+    printf("debut x : %d, debut y : %d\n",debut_x,debut_y);
     int cpt = 0;
-    for(int i = debut_y; i< debut_y+l-1 && i < pGrid->height;i++)
+    printf("fin x : %d, fin y : %d",debut_x+l-1,debut_y +l-1 );
+    for(int i = debut_y; i<debut_y +l && i < pGrid->height;i++)
     {
-            printf("boucle de square   ");
-        for(int j = debut_x; j< debut_x+l-1 && j< pGrid->width;j++)
+        for(int j = debut_x; j< debut_x+l && j< pGrid->width;j++)
         {
-            if(pGrid->tokens[i][j].type != TOKEN && pGrid->tokens[i][j].type !=NONE && (i != y || j != x))
+            if(j >= 0 && i >=0)
             {
-               cpt += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+                 if(pGrid->tokens[i][j].type != TOKEN && pGrid->tokens[i][j].type != NONE && (i != y || j != x))
+                {
+                 cpt += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+                }
+                pGrid->tokens[i][j].type = NONE;
+                pGrid->tokens[i][j].isDestruct = true;
+                pGrid->tokens[i][j].startDestructAnim = -1;
+                cpt ++;
             }
-         pGrid->tokens[i][j].type = NONE;
-         pGrid->tokens[i][j].isDestruct = true;
-         pGrid->tokens[i][j].startDestructAnim = -1;
-         cpt ++;
         }
     }
+    CheckGrid(pGrid);
+printf("nb detruit carre : %d \n",cpt);
+
+    return cpt;
 }
 
 
@@ -957,28 +965,33 @@ int destruct_colon(int x,Grid * pGrid)
         }
 
     }
-    CheckGrid(pGrid);
+   // CheckGrid(pGrid);
+printf("nb detruit colonne : %d \n",cpt);
+
+    return cpt;
 }
 
 int destruct_lign(int y,Grid * pGrid)
 {
     int cpt = 0;
-    for(int i =0; i< pGrid->width; i++)
+    for(int j =0; j< pGrid->width; j++)
     {
-        if(pGrid->tokens[y][i].type != MULTI)
+        if(pGrid->tokens[y][j].type != MULTI)
         {
-            if(pGrid->tokens[y][i].type != TOKEN &&pGrid->tokens[y][i].type !=NONE &&pGrid->tokens[y][i].type != HORIZONTAL)
+            if(pGrid->tokens[y][j].type != TOKEN &&pGrid->tokens[y][j].type != NONE && pGrid->tokens[y][j].type != HORIZONTAL)
             {
-              cpt +=  Token_special_action(pGrid->tokens[y][i].type,pGrid,y,i);
+              cpt +=  Token_special_action(pGrid->tokens[y][j].type,pGrid,y,j);
             }
-         pGrid->tokens[y][i].type = NONE;
-         pGrid->tokens[y][i].isDestruct = true;
-         pGrid->tokens[y][i].startDestructAnim = -1;
+         pGrid->tokens[y][j].type = NONE;
+         pGrid->tokens[y][j].isDestruct = true;
+         pGrid->tokens[y][j].startDestructAnim = -1;
          cpt ++;
         }
 
     }
-    CheckGrid(pGrid);
+   // CheckGrid(pGrid);
+    printf("nb detruit ligne : %d \n",cpt);
+
     return cpt;
 }
 //==================================================================
@@ -1026,7 +1039,7 @@ int destruct_color(Colors c, Grid *pGrid)
             }
         }
     }
-
+    if(pGrid->isCalc == false)pGrid->score += cpt * TOKEN_SCORE;
     return cpt;
 
 
@@ -1153,7 +1166,7 @@ void InjectLigne(Grid *pGrid){
              for(int j = 0; j < pGrid->width; j++){
 
                 if ( pGrid->tokens[pGrid->height-1][j].type == NONE ){
-                    printf("token == Null\n");
+
                     if (  ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) + 1 > pGrid->height-1 )
                         InitRandomToken(pGrid, &pGrid->tokens[pGrid->height-1][j], j, ( GetFirstDirToken(pGrid,j,dir)->rect_image.y / TOKEN_HEIGHT ) +1 );
                     else
@@ -1476,13 +1489,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit){
 
                                 if(pGrid->tokens[dragEnd.y][dragEnd.x].type == MULTI )
                                 {
-                                    pGrid->score += destruct_color(pGrid->tokens[dragStart.y][dragStart.x].color, pGrid)* TOKEN_SCORE;
+                                    destruct_color(pGrid->tokens[dragStart.y][dragStart.x].color, pGrid);
                                     pGrid->tokens[dragEnd.y][dragEnd.x].isDestruct = true;
                                     pGrid->tokens[dragEnd.y][dragEnd.x].type = NONE;
                                     pGrid->tokens[dragEnd.y][dragEnd.x].startDestructAnim = -1;
                                 }else if(pGrid->tokens[dragStart.y][dragStart.x].type == MULTI)
                                 {
-                                    pGrid->score += destruct_color(pGrid->tokens[dragEnd.y][dragEnd.x].color, pGrid)* TOKEN_SCORE;
+                                    destruct_color(pGrid->tokens[dragEnd.y][dragEnd.x].color, pGrid);
                                     pGrid->tokens[dragStart.y][dragStart.x].isDestruct = true;
                                     pGrid->tokens[dragStart.y][dragStart.x].type = NONE;
                                     pGrid->tokens[dragStart.y][dragStart.x].startDestructAnim = -1;
@@ -1729,6 +1742,7 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
         Game_logic(grid1);
 
         /* maj des labels */
+
         sprintf(label_nbMove.text," NbCoups : %d", grid1->nbMove);
         sprintf(label_score.text,"Score : %d ", grid1->score);
         sprintf(label_mouvements.text,"Nombre de mouvement : %d",grid1->moveAvailable);

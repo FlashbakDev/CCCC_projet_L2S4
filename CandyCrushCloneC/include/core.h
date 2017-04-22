@@ -84,6 +84,8 @@ typedef struct Grid{
     bool isHelpActive;
     bool isSuperHelpActive;
 
+    bool isCalc;
+
 }Grid;
 
 typedef struct Array{

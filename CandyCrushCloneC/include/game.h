@@ -58,7 +58,7 @@ int destruct_color(Colors c, Grid *pGrid);
 
 int destruct_lign(int y, Grid * pGrid);
 int destruct_colon(int x, Grid *pGrid);
-int destruct_square(int x,int y,int l,Grid *pGrid);
+int destruct_square(int y,int x,int l,Grid *pGrid);
 
 /* */
 bool Compare_TokenColor(Token t1, Token t2);
