@@ -86,8 +86,9 @@ typedef struct Grid{
     bool isHelpActive;
     bool isSuperHelpActive;
 
+    bool isCalc;
+  
     bool is_puzzle;
-
     bool outline;
 
 }Grid;
