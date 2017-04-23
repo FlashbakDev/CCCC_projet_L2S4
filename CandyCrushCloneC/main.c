@@ -48,8 +48,8 @@ int main(int argc, char* argv[]){
 
                 switch( editorSessionType ){
 
-                    case NEWPUZZLE : EditorSession(NewEmptyPuzzle(10, 10)); break;
-                    case LOADPUZZLE : EditorSession(Load_grid(&puzzleName)); break;
+                    case NEWPUZZLE : fprintf(stdout,"EDITOR -> NEWPUZZLE\n"); EditorSession(NewEmptyPuzzle(10, 10)); break;
+                    case LOADPUZZLE : fprintf(stdout,"EDITOR -> LOADPUZZLE\n"); EditorSession(Load_grid(&puzzleName)); break;
                 }
             }
             break;

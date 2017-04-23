@@ -44,7 +44,11 @@ Grid *Load_grid(char* name){
     fprintf(stdout , "files.c : Load_grid(char* name = %s) -> start\n", name);
 
     char filename[UI_MAX_LENGTH];
-    sprintf(filename,"data/puzzles/%s.puz",name);
+
+    if ( strcmp( get_filename_ext(name), "puz") == 0 )
+        sprintf(filename,"data/puzzles/%s",name);
+    else
+        sprintf(filename,"data/puzzles/%s.puz",name);
 
     FILE *f = fopen(filename, "r");
     if (f == NULL){
@@ -82,3 +86,117 @@ Grid *Load_grid(char* name){
 }
 
 // =========================================================
+
+const char *get_filename_ext(const char *filename) {
+
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
+// =========================================================
+
+char *Files_getcwd(char *buf, int size){
+
+#ifdef _MSC_VER
+	return _getcwd(buf, size);
+#else
+	return getcwd(buf, size);
+#endif
+
+}
+
+int Files_chdir(char *path){
+
+#ifdef _MSC_VER
+	return _chdir(path);
+#else
+	return chdir(path);
+#endif
+
+}
+
+int Files_getstat(char *pathName, Files_stat *buf){
+
+#ifdef _MSC_VER
+#ifdef _WIN32
+	return _stat32(pathName, buf);
+#else
+	return _stat64(pathName, buf);
+#endif
+#endif
+#ifndef _MSC_VER
+	return stat(pathName, buf);
+#endif
+
+}
+
+Files_dir *Files_opendir(char *name){
+
+#ifdef _MSC_VER
+	Files_dir *dir;
+
+	if (!name || strlen(name) > UI_MAX_LENGTH - 2) return NULL;
+	dir = malloc(sizeof(Files_dir));
+	dir->ent.d_name = NULL;
+	strcpy(dir->name, name);
+	dir->fhandle = (ptrdiff_t) _findfirst(dir->name, &dir->fdata);
+	if ((int) dir->fhandle == -1) {
+		free (dir);
+		return NULL;
+	}
+	return dir;
+#else
+	return opendir(name);
+#endif
+
+}
+
+Files_dirent *Files_readdir(Files_dir *dirp){
+
+#ifdef _MSC_VER
+	if(dirp->ent.d_name &&
+		(int) _findnext(dirp->fhandle, &dirp->fdata) == -1)
+		return NULL;
+	dirp->ent.d_name = dirp->fdata.name;
+	return &dirp->ent;
+#else
+	return readdir(dirp);
+#endif
+
+}
+
+int Files_closedir(Files_dir *dirp){
+
+#ifdef _MSC_VER
+	int n;
+
+	if (!dirp || dirp->fhandle == -1) return -1;
+	n = (int) _findclose(dirp->fhandle);
+	free(dirp);
+	return n;
+#else
+	return closedir(dirp);
+#endif
+
+}
+
+int Files_isdir(Files_stat s){
+
+#ifdef _MSC_VER
+	return s.st_mode & _S_IFDIR;
+#else
+	return S_ISDIR(s.st_mode);
+#endif
+
+}
+
+int Files_isreg(Files_stat s){
+
+#ifdef _MSC_VER
+	return s.st_mode & _S_IFREG;
+#else
+	return S_ISREG(s.st_mode);
+#endif
+
+}

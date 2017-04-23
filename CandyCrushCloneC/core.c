@@ -3,8 +3,8 @@
 // =========================================================
 
 Font font_default;
-Image image_normal, image_prelight, image_active, image_selected, image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26];
+Image image_normal, image_prelight, image_active, image_selected, image_unselected, image_unselected, image_arrow_up, image_arrow_down,
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 int screen_width, screen_height;
 
 bool dragAndDrop;
@@ -692,6 +692,22 @@ int Array_append(Array *pArray, int id, void *pData){
 	pArray->tab_id[pArray->length] = id;
 
 	pArray->length ++;
+
+	return 0;
+}
+
+// =========================================================
+
+int Array_append_string(Array *a, int id, char *pText1, char *pText2){
+
+	char *p;
+
+	if (!a)
+        return -1;
+
+	p = (char *) malloc(UI_MAX_LENGTH);
+	String_copy(p, UI_MAX_LENGTH, pText1, pText2);
+	Array_append(a, id, p);
 
 	return 0;
 }

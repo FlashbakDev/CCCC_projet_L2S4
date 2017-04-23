@@ -87,7 +87,7 @@ typedef struct Grid{
     bool isSuperHelpActive;
 
     bool isCalc;
-  
+
     bool is_puzzle;
     bool outline;
 
@@ -129,8 +129,8 @@ typedef struct Window {
 
 // ressources
 extern Font font_default;
-extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26];
+extern Image image_normal, image_prelight, image_active, image_selected, image_unselected, image_arrow_up, image_arrow_down,
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 extern int screen_width, screen_height;
 
 // variables UI
@@ -251,6 +251,8 @@ int Array_SET(Array *pArray, int index, int id, void *pData);
 
 /* ajoute un item à la liste */
 int Array_append(Array *pArray, int id, void *pData);
+
+int Array_append_string(Array *a, int id, char *pText1, char *pText2);
 
 /* Insertion d'un élément dans le champ */
 int Array_insert(Array *pArray, int index, int id, void *pData);
