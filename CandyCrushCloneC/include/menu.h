@@ -52,11 +52,11 @@ void MenuButton_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,
 void MenuButton_ok_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState );
 void MenuButton_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 
-void MenuTextbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScrollbar *pVerticalScrollbar, UI_label *pLabel, UI_button *pButton, bool *pDraw);
+void MenuTextbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScrollbar *pVerticalScrollbar, UI_label *pLabel, UI_button *pButton, bool *pDraw, char* puzzleName);
 void MenuVerticalScrollbar_files_event(UI_verticalScrollbar *pVerticalScrollbar, SDL_Event *pEvent, UI_textBox *pTextBox, bool *pDraw);
 
 void Menu_logic();
 
-void MenuSession();
+void MenuSession(char *puzzleName);
 
 #endif // MENU_H_INCLUDED

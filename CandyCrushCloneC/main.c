@@ -12,8 +12,9 @@ int main(int argc, char* argv[]){
     // avec une pile ça serais mieux !
     gameState = States_MENU;
     gameState_prec = States_QUIT;
-    gameSessionType = GameTypes_CLASSIC;
-    editorSessionType = EditorTypes_NEW;
+
+    // nom du fichier grille à chargé / éditer / jouer
+    char puzzleName[UI_MAX_LENGTH];
 
     /* boucle de la machine d'état */
     bool quit = false;
@@ -21,38 +22,17 @@ int main(int argc, char* argv[]){
 
         switch(gameState){
 
-            case States_MENU : {
+            case States_MENU : MenuSession(&puzzleName); break;
 
-                MenuSession();
-            }
-            break;
+            case States_GAME_CLASSIC : GameSessionRandom(10,10,6,5,false,5,2,2); break;
 
-            case States_GAME : {
+            case States_GAME_PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
 
-                switch( gameSessionType ){
+            case States_EDITOR_NEW : EditorSession(&puzzleName, true); break;
 
-                    case GameTypes_CLASSIC : GameSessionRandom(10,10,6,5,false,5,2,2); break;
-                    case GameTypes_PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
-                }
-            }
-            break;
+            case States_EDITOR_LOAD : EditorSession(&puzzleName, false); break;
 
-            case States_EDITOR : {
-
-
-                switch( editorSessionType ){
-
-                    case EditorTypes_NEW : fprintf(stdout,"EDITOR -> NEWPUZZLE\n"); EditorSession(NewEmptyPuzzle(10, 10)); break;
-                    case EditorTypes_LOAD : fprintf(stdout,"EDITOR -> LOADPUZZLE\n"); EditorSession(Load_grid(&puzzleName)); break;
-                }
-            }
-            break;
-
-            case States_QUIT : {
-
-                quit = true;
-            }
-            break;
+            case States_QUIT : quit = true; break;
         }
     }
 

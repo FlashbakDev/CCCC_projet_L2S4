@@ -103,7 +103,7 @@ void dirent_read(UI_textBox *pTextBox, UI_verticalScrollbar *pVerticalScrollbar)
 
 // =========================================================
 
-void MenuTextbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScrollbar *pVerticalScrollbar, UI_label *pLabel, UI_button *pButton, bool *pDraw){
+void MenuTextbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScrollbar *pVerticalScrollbar, UI_label *pLabel, UI_button *pButton, bool *pDraw, char* puzzleName){
 
 	int index;
 
@@ -114,7 +114,7 @@ void MenuTextbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_vertica
 		if (strcmp((char *) Array_GET_data(pTextBox->array, index),"")) {
 
 			String_copy(pLabel->text, UI_MAX_LENGTH, (char *) Array_GET_data(pTextBox->array, index), NULL);
-			String_copy(&puzzleName, UI_MAX_LENGTH, pLabel->text, NULL);
+			String_copy(puzzleName, UI_MAX_LENGTH, pLabel->text, NULL);
 			pButton->draw = true;
 			*pDraw = true;
 		}
@@ -171,8 +171,7 @@ void MenuButton_play_classic_event(UI_button *pButton, SDL_Event *pEvent, bool *
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
         gameState_prec = gameState;
-        gameState = States_GAME;
-        gameSessionType = GameTypes_CLASSIC;
+        gameState = States_GAME_CLASSIC;
         *pQuit = true;
     }
 }
@@ -214,8 +213,7 @@ void MenuButton_editor_new_event(UI_button *pButton, SDL_Event *pEvent, bool *pD
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
         gameState_prec = gameState;
-        gameState = States_EDITOR;
-        editorSessionType = EditorTypes_NEW;
+        gameState = States_EDITOR_NEW;
         *pQuit = true;
     }
 }
@@ -258,15 +256,13 @@ void MenuButton_ok_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, boo
         if ( *pState == MenuState_EDITOR_LOAD ){
 
             gameState_prec = gameState;
-            gameState = States_EDITOR;
-            editorSessionType = EditorTypes_LOAD;
+            gameState = States_EDITOR_LOAD;
             *pQuit = true;
         }
         else if( *pState == MenuState_PLAY_LOAD ){
 
             gameState_prec = gameState;
-            gameState = States_GAME;
-            gameSessionType = GameTypes_PUZZLE;
+            gameState = States_GAME_PUZZLE;
             *pQuit = true;
         }
     }
@@ -280,7 +276,7 @@ void Menu_logic(){
 
 // =========================================================
 
-void MenuSession(){
+void MenuSession(char *puzzleName){
 
     fprintf(stdout, "menu.c -> MenuSession() : start \n");
 
@@ -374,7 +370,7 @@ void MenuSession(){
             MenuButton_editor_event(&button_editor, &event, &draw, &quit, &menuState);
             MenuButton_editor_load_event(&button_editor_load, &event, &draw, &quit, &menuState);
             MenuButton_editor_new_event(&button_editor_new, &event, &draw, &quit, &menuState);
-            MenuTextbox_files_event(&textBox_files, &event, &verticalScrollbar_files, &label_puzzleName, &button_ok, &draw);
+            MenuTextbox_files_event(&textBox_files, &event, &verticalScrollbar_files, &label_puzzleName, &button_ok, &draw, puzzleName);
             MenuVerticalScrollbar_files_event(&verticalScrollbar_files, &event, &textBox_files, &draw);
             MenuButton_ok_event(&button_ok, &event, &draw, &quit, &menuState);
 

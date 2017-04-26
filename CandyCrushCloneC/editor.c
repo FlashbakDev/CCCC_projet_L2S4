@@ -133,24 +133,6 @@ void ClearToken(Grid *pGrid, Token *token, int x, int y){
 
 // =========================================================
 
-void ResetToken(Token *token){
-
-    token->type = TokenTypes_NONE;
-    token->color = Colors_NONE;
-    token->aligned = false;
-    token->isMoving = false;
-    token->isDestruct = false;
-    token->startDestructAnim = -1;
-    token->drawBackground = false;
-    token->textureSize = 100;
-    token->image = image_tokens[0];
-    token->image_background = image_cursorBlue;
-    MakeRect(&token->rect_image,0,0,0,0);
-    token->canBeMoved = false;
-}
-
-// =========================================================
-
 bool EditorToggle_color_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
     if ( !pToggle->selected  ){
@@ -179,7 +161,7 @@ void EditorEntry_nbMove_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, 
 
 // =========================================================
 
-void EditorEntry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+void EditorEntry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, char *puzzleName ){
 
     if ( UI_entry_event(pEntry, pEvent, pDraw) ){
 
@@ -192,7 +174,7 @@ void EditorEntry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Gr
             }
         }
 
-        String_copy( &puzzleName, UI_MAX_LENGTH, pEntry->text, NULL );
+        String_copy( puzzleName, UI_MAX_LENGTH, pEntry->text, NULL );
     }
 }
 
@@ -222,30 +204,28 @@ void EditorButton_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw,
 
 // =========================================================
 
-void EditorButton_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+void EditorButton_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, char *puzzleName ){
 
     if( UI_button_event(pButton, pEvent, pDraw) ){
 
         // save
-        Save_grid(pGrid, &puzzleName);
+        Save_grid(pGrid, puzzleName);
 
         // test de chargement
-        pGrid = Load_grid(&puzzleName);
+        pGrid = Load_grid(puzzleName);
     }
 }
 
 // =========================================================
 
-void EditorButton_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit ){
+void EditorButton_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit, char *puzzleName ){
 
     if( UI_button_event(pButton, pEvent, pDraw) ){
 
-        if ( Save_grid( pGrid, &puzzleName ) == 0 ){
+        if ( Save_grid( pGrid, puzzleName ) == 0 ){
 
-            gameState_prec = gameState;
-            gameState = States_GAME;
-            gameSessionType = GameTypes_PUZZLE;
-            editorSessionType = EditorTypes_LOAD;
+            gameState_prec = States_EDITOR_LOAD;
+            gameState = States_GAME_PUZZLE;
             *pQuit = true;
         }
     }
@@ -371,7 +351,7 @@ void Editor_logic(Grid *pGrid){
 
 // =========================================================
 
-void EditorSession(Grid *pGrid){
+void EditorSession(char *puzzleName, bool newPuzzle){
 
     fprintf(stdout, "editor.c -> EditorSession(...) : start \n");
 
@@ -393,6 +373,12 @@ void EditorSession(Grid *pGrid){
     UI_entry entry_nbMove = {false};
     UI_label label_name = {false};
     UI_entry entry_name = {false};
+
+    Grid *pGrid;
+    if ( newPuzzle )
+        pGrid = NewEmptyPuzzle(10, 10);
+    else
+        pGrid = Load_grid(puzzleName);
 
     // création des zone de jeu et d'affichage
     SDL_Rect rect_grid = { 0,0,pGrid->width * TOKEN_WIDTH, pGrid->height * TOKEN_HEIGHT };
@@ -423,7 +409,7 @@ void EditorSession(Grid *pGrid){
     sprintf(label_mouvements.text,"Mouvements possibles : %d",pGrid->moveAvailable);
 
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_name, &window, "Nom", rect_UI.x + 20 , rect_UI.y + 300 ));
-    fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_name, &window, &puzzleName, rect_UI.x + 20 + 5 + TextWidth(font_default, label_name.text, NULL ) , rect_UI.y + 295, 220 ));
+    fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_name, &window, puzzleName, rect_UI.x + 20 + 5 + TextWidth(font_default, label_name.text, NULL ) , rect_UI.y + 295, 220 ));
 
     if ( strcmp( entry_name.text, "") == 0 ) String_copy(entry_name.text,UI_MAX_LENGTH,"puzzleTest",NULL);
     String_copy(puzzleName,UI_MAX_LENGTH,entry_name.text,NULL);
@@ -507,9 +493,9 @@ void EditorSession(Grid *pGrid){
             EditorButton_menu_event(&button_menu, &event, &draw, &quit);
             EditorEntry_nbMove_event(&entry_nbMove, &event, &draw, pGrid);
             EditorButton_reset_event(&button_reset, &event, &draw, pGrid);
-            EditorEntry_name_event(&entry_name, &event, &draw, pGrid);
-            EditorButton_save_event(&button_save, &event, &draw, pGrid);
-            EditorButton_test_event(&button_test, &event, &draw, pGrid, &quit);
+            EditorEntry_name_event(&entry_name, &event, &draw, pGrid, puzzleName);
+            EditorButton_save_event(&button_save, &event, &draw, pGrid, puzzleName);
+            EditorButton_test_event(&button_test, &event, &draw, pGrid, &quit, puzzleName);
 
             for(int i = 0; i < 7; i++){
 

@@ -28,11 +28,7 @@ typedef enum Colors { Colors_RED, Colors_BLUE, Colors_GREEN, Colors_YELLOW, Colo
 
 typedef enum ObjectTypes {ObjectTypes_OTHER, ObjectTypes_WINDOW, ObjectTypes_RENDERER, ObjectTypes_TEXTURE, ObjectTypes_SURFACE, ObjectTypes_FONT, ObjectTypes_ARRAY} ObjectTypes;
 
-typedef enum States { States_MENU, States_GAME, States_EDITOR, States_QUIT }States;
-
-typedef enum GameTypes { GameTypes_CLASSIC, GameTypes_PUZZLE }GameTypes;
-
-typedef enum EditorTypes { EditorTypes_NEW, EditorTypes_LOAD }EditorTypes;
+typedef enum States { States_MENU, States_GAME_CLASSIC, States_GAME_PUZZLE, States_EDITOR_NEW, States_EDITOR_LOAD, States_QUIT }States;
 
 // =========================================================
 
@@ -137,18 +133,8 @@ extern Image image_normal, image_prelight, image_active, image_selected, image_u
 image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 extern int screen_width, screen_height;
 
-// variables UI
-extern bool dragAndDrop;
-extern SDL_Point dragStart;
-extern SDL_Rect rect_CursorOver;
-
 // variable machine d'etat
 extern States gameState, gameState_prec;
-extern GameTypes gameSessionType;
-extern EditorTypes editorSessionType;
-
-// ?
-extern char puzzleName[UI_MAX_LENGTH];
 
 // ========================================================= Logique
 
@@ -201,6 +187,9 @@ void SaveTokensInPastTokens(Grid *pGrid);
 
 /* copie les token de la sauvegarde dans l'actuel */
 void LoadTokensInPastTokens(Grid *pGrid);
+
+/* met tout les parrametres de la structure aux valeurs par default */
+void ResetToken(Token *token);
 
 // ========================================================= Chargement de ressources
 

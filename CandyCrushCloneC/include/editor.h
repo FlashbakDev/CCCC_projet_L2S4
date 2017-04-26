@@ -34,22 +34,19 @@ void ClearGrid(Grid *pGrid);
 /* suprime le token */
 void ClearToken(Grid *pGrid, Token *token, int x, int y);
 
-/* met tout les parrametres de la structure aux valeurs par default */
-void ResetToken(Token *token);
-
 // =========================================================
 
 bool EditorToggle_color_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
 void EditorEntry_nbMove_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void EditorEntry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+void EditorEntry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, char *puzzleName);
 
 bool EditorButton_tokenType_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void EditorButton_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+void EditorButton_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, char *puzzleName);
 
-void EditorButton_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit );
+void EditorButton_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit, char *puzzleName );
 
 void EditorButton_reset_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
@@ -61,7 +58,7 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
 
 void Editor_logic(Grid *pGrid);
 
-void EditorSession(Grid *pGrid);
+void EditorSession(char *puzzleName, bool newPuzzle);
 
 // =========================================================
 

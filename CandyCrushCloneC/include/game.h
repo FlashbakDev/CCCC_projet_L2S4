@@ -67,9 +67,6 @@ bool Compare_TokenColor(Token t1, Token t2);
 /* compare la couleur d'un token avec la couleur donné */
 bool Compare_TokenColor_color(Token t1, Colors c);
 
-/*Change la direction de la grille aléatoirement */
-void ChangeDirectionRandom(Grid *pGrid);
-
 /*Change la direction de la grille*/
 void ChangeDirection(Grid *pGrid, Directions dir);
 
@@ -114,8 +111,6 @@ void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c);
 // evenements sur les éléments d'interface
 // =========================================================
 
-void GameButton_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
-
 void GameButton_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
 void GameButton_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
@@ -126,15 +121,17 @@ void GameButton_restart_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw
 
 void GameButton_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 
-void GameButton_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+void GameButton_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
+void GameButton_replay_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 
 // =========================================================
 
 /* apelle les evenement d'input de la grille */
-void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
+void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop, SDL_Point *pDragStart);
 
 /* gere l'aparition, la destruction des jetons */
-void Game_logic(Grid *pGrid);
+void Game_logic(Grid *pGrid, bool *pQuit);
 
 // =========================================================
 

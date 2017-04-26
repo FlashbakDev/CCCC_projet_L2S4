@@ -7,15 +7,7 @@ Image image_normal, image_prelight, image_active, image_selected, image_unselect
 image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 int screen_width, screen_height;
 
-bool dragAndDrop;
-SDL_Point dragStart;
-SDL_Rect rect_CursorOver;
-
 States gameState, gameState_prec;
-GameTypes gameSessionType;
-EditorTypes editorSessionType;
-
-char puzzleName[UI_MAX_LENGTH];
 
 // =========================================================
 
@@ -451,6 +443,25 @@ void LoadTokensInPastTokens(Grid *pGrid){
         }
     }
 }
+
+// =========================================================
+
+void ResetToken(Token *token){
+
+    token->type = TokenTypes_NONE;
+    token->color = Colors_NONE;
+    token->aligned = false;
+    token->isMoving = false;
+    token->isDestruct = false;
+    token->startDestructAnim = -1;
+    token->drawBackground = false;
+    token->textureSize = 100;
+    token->image = image_tokens[0];
+    token->image_background = image_cursorBlue;
+    MakeRect(&token->rect_image,0,0,0,0);
+    token->canBeMoved = false;
+}
+
 
 // ========================================================
 
