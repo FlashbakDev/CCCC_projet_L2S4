@@ -1835,7 +1835,7 @@ void GameSessionPuzzle(Grid *pGrid){
 
             // event UI
             Window_event(&window, &event, &draw );
-            GameButton_return_event(&button_quit, &event, &draw, &quit);
+            GameButton_quit_event(&button_quit, &event, &draw, &quit);
             GameButton_return_event(&button_return, &event, &draw, &quit);
             GameButton_restart_event(&button_restart, &event, &draw, &quit);
         }

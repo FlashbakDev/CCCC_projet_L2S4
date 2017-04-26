@@ -77,6 +77,7 @@ Grid *NewEmptyPuzzle(int x, int y){
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
     pGrid->isHelpActive = false;
+    pGrid->isSuperHelpActive = false;
 
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
@@ -334,11 +335,13 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
                 pGrid->cursorTokenPosition.x = (pEvent->motion.x / TOKEN_WIDTH);
                 pGrid->cursorTokenPosition.y = (pEvent->motion.y / TOKEN_HEIGHT);
 
-                ResetTokenImages(pGrid);
+                pGrid->tokens[cursorTokenPositionTemp.y][cursorTokenPositionTemp.x].drawBackground = false;
+                pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
             }
+            else{
 
-            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
-
+                pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = false;
+            }
         }
         break;
     }
@@ -574,11 +577,14 @@ void EditorSession(char *puzzleName, bool newPuzzle){
         if ( pGrid->is_cursorOnGrid ){
 
             Token token_save = pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x];
+
             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x] = tokenToPaste;
+
             CalculTokenImages(pGrid, &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x], pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+
             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
 
-            Grid_draw(pGrid,pRenderer); // désine la grille sur le renderer
+            Grid_draw(pGrid,pRenderer); // déssine la grille sur le renderer
 
             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x] = token_save;
         }

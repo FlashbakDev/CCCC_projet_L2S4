@@ -7,7 +7,10 @@ int Save_grid(Grid *pGrid, char* name){
     fprintf(stdout , "files.c : Save_grid(Grid *pGrid, char* name = %s) -> start\n", name);
 
     char filename[UI_MAX_LENGTH];
-    sprintf(filename,"data/puzzles/%s.puz",name);
+    if ( strcmp( get_filename_ext(name), "puz") == 0 )
+        sprintf(filename,"data/puzzles/%s",name);
+    else
+        sprintf(filename,"data/puzzles/%s.puz",name);
 
     FILE *f = fopen(filename, "w");
     if (f == NULL){

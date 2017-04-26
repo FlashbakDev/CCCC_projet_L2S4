@@ -85,12 +85,11 @@ void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
 
             if ( pGrid->tokens[i][j].type != TokenTypes_NONE || pGrid->tokens[i][j].isDestruct ){
 
-                if ( pGrid->isHelpActive && pGrid->tokens[i][j].canBeMoved ){
+                if ( pGrid->isHelpActive && pGrid->tokens[i][j].canBeMoved && !pGrid->tokens[i][j].isDestruct ){
 
                     pGrid->tokens[i][j].image_background = image_cursorGreen;
                     pGrid->tokens[i][j].drawBackground = true;
                 }
-
 
                 RenderImage(pRenderer,pGrid->tokens[i][j].image,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
             }
