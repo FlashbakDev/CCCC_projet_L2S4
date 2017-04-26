@@ -3,7 +3,7 @@
 game.h
 -----------
 
-Par Benjamin, pour le projet CCCC le 24/02/2017.
+Par Desbouchages Benjamin, Rousseau jérémy, pour le projet CCCC le 24/02/2017.
 
 Rôle : fonctions gérants une partie de CCCC.
 
@@ -52,17 +52,19 @@ void HighlightBestMove(Grid *pGrid);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
+/* déclanche les fonctions de destructions suivant le tye de jeton */
 int Token_special_action(TokenTypes t, Grid *pGrid, int y, int x);
 
-int destruct_color(Colors c, Grid *pGrid);
+/* Fonctions detruisants des jetons sur la grille suivant une certaine forme ou caracteristique */
+int Destruct_color(Colors c, Grid *pGrid);
+int Destruct_line(int y, Grid * pGrid);
+int Destruct_column(int x, Grid *pGrid);
+int Destruct_square(int y,int x,int l,Grid *pGrid);
 
-int destruct_lign(int y, Grid * pGrid);
-int destruct_colon(int x, Grid *pGrid);
-int destruct_square(int y,int x,int l,Grid *pGrid);
-
-/* */
+/* compare la couleur de 2 token */
 bool Compare_TokenColor(Token t1, Token t2);
 
+/* compare la couleur d'un token avec la couleur donné */
 bool Compare_TokenColor_color(Token t1, Colors c);
 
 /*Change la direction de la grille aléatoirement */
@@ -71,13 +73,13 @@ void ChangeDirectionRandom(Grid *pGrid);
 /*Change la direction de la grille*/
 void ChangeDirection(Grid *pGrid, Directions dir);
 
-/* regroupe les jetons dans la direction donné */
+/* regroupe les jetons dans la direction actuel de la grille */
 void RegroupTokens(Grid *pGrid);
 
-/* insère de nouveaux jetons aléatoirement */
+/* insère de nouveaux jetons aléatoires dans le sens de la grille */
 void InjectLigne(Grid *pGrid);
 
-/*Inverse la direction*/
+/* retourne la valeur inverse de la direction donné */
 Directions ReverseDirection(Directions dir);
 
 /* permute 2 jetons */
@@ -86,7 +88,7 @@ void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 /* permute les textures de 2 jetons ( prévisualisation ) */
 void PermuteTokenImage(Grid *pGrid,int x1,int y1,int x2,int y2);
 
-/* crée un nouveau jeton avec une couleur aléatoire parmis celles donnés */
+/* crée un nouveau jeton avec une couleur aléatoire parmis celles de la grille */
 void InitRandomToken(Grid *pGrid, Token *token, int x, int y);
 
 /* anime les mouvements des jetons */
@@ -109,20 +111,32 @@ void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image);
 void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c);
 
 // =========================================================
+// evenements sur les éléments d'interface
+// =========================================================
 
-void Button_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+void GameButton_direction_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void Button_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+void GameButton_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void Button_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+void GameButton_superHelp_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void Button_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
+void GameButton_revertOnce_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
 
-void Button_restart_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+void GameButton_restart_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
 
+void GameButton_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
+void GameButton_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
+
+// =========================================================
+
+/* apelle les evenement d'input de la grille */
 void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit);
 
+/* gere l'aparition, la destruction des jetons */
 void Game_logic(Grid *pGrid);
+
+// =========================================================
 
 void GameSessionRandom(int width, int height,int nbColor, int nbMove,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
 

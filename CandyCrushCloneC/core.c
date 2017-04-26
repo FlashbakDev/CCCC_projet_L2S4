@@ -11,9 +11,9 @@ bool dragAndDrop;
 SDL_Point dragStart;
 SDL_Rect rect_CursorOver;
 
-GameStates gameState, gameState_prec;
-GameSessionTypes gameSessionType;
-EditorSessionTypes editorSessionType;
+States gameState, gameState_prec;
+GameTypes gameSessionType;
+EditorTypes editorSessionType;
 
 char puzzleName[UI_MAX_LENGTH];
 
@@ -54,11 +54,11 @@ int Clean(Array *pArray){
 
             switch( Array_GET_id(pArray, i) ){
 
-                case FONT_TYPE :{ TTF_CloseFont((TTF_Font*)Array_GET_data(pArray,i)); } break;
-                case TEXTURE_TYPE : { SDL_DestroyTexture((SDL_Texture*)Array_GET_data(pArray,i)); } break;
-                case RENDERER_TYPE : { SDL_DestroyRenderer((SDL_Renderer*)Array_GET_data(pArray,i)); } break;
-                case WINDOW_TYPE : { SDL_DestroyWindow((SDL_Window*)Array_GET_data(pArray,i)); } break;
-                case ARRAY_TYPE : { Array_free((Array*)Array_GET_data(pArray,i)); } break;
+                case ObjectTypes_FONT :{ TTF_CloseFont((TTF_Font*)Array_GET_data(pArray,i)); } break;
+                case ObjectTypes_TEXTURE : { SDL_DestroyTexture((SDL_Texture*)Array_GET_data(pArray,i)); } break;
+                case ObjectTypes_RENDERER : { SDL_DestroyRenderer((SDL_Renderer*)Array_GET_data(pArray,i)); } break;
+                case ObjectTypes_WINDOW : { SDL_DestroyWindow((SDL_Window*)Array_GET_data(pArray,i)); } break;
+                case ObjectTypes_ARRAY : { Array_free((Array*)Array_GET_data(pArray,i)); } break;
                 default : { free( pArray->tab_data[i]); }
             }
         }
@@ -91,18 +91,23 @@ void Grid_draw(Grid *pGrid, SDL_Renderer *pRenderer){
             if ( pGrid->tokens[i][j].drawBackground && !pGrid->tokens[i][j].isDestruct)
                 RenderImage(pRenderer,pGrid->tokens[i][j].image_background,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
 
-            if ( pGrid->tokens[i][j].type != NONE || pGrid->tokens[i][j].isDestruct ){
+            if ( pGrid->tokens[i][j].type != TokenTypes_NONE || pGrid->tokens[i][j].isDestruct ){
 
-                if ( pGrid->isHelpActive )
-                    MoveAvailable(pGrid, true);
+                if ( pGrid->isHelpActive && pGrid->tokens[i][j].canBeMoved ){
 
-                if ( pGrid->isSuperHelpActive )
-                    HighlightBestMove(pGrid);
+                    pGrid->tokens[i][j].image_background = image_cursorGreen;
+                    pGrid->tokens[i][j].drawBackground = true;
+                }
+
 
                 RenderImage(pRenderer,pGrid->tokens[i][j].image,pGrid->tokens[i][j].rect_image.x, pGrid->tokens[i][j].rect_image.y, NULL);
             }
         }
     }
+
+    if ( pGrid->isSuperHelpActive )
+        HighlightBestMove(pGrid);
+
 
     if ( pGrid->outline ){
 
@@ -206,7 +211,7 @@ void CalculTokenImages(Grid *pGrid, Token *token, int x, int y){
     AssignImageToToken(token);
 
     token->image_background = image_cursorBlue;
-    //token->drawBackground = false;
+    token->drawBackground = false;
 
     token->rect_image.w = (float)(TOKEN_WIDTH / 100.0 * token->textureSize);
     token->rect_image.h = (float)(TOKEN_HEIGHT / 100.0 * token->textureSize);
@@ -223,12 +228,12 @@ void AssignImageToToken(Token *token){
 
     switch(token->type){
 
-        case TOKEN: token->image = image_tokens[token->color]; break;
-        case HORIZONTAL: token->image = image_tokens[token->color+6]; break;
-        case VERTICAL: token->image = image_tokens[token->color+12];break;
-        case PACKED: token->image = image_tokens[token->color+18];break;
-        case MULTI: token->image = image_tokens[24];break;
-        case BLOCK: token->image = image_tokens[25];break;
+        case TokenTypes_NORMAL: token->image = image_tokens[token->color]; break;
+        case TokenTypes_HORIZONTAL: token->image = image_tokens[token->color+6]; break;
+        case TokenTypes_VERTICAL: token->image = image_tokens[token->color+12]; break;
+        case TokenTypes_BOMB: token->image = image_tokens[token->color+18]; break;
+        case TokenTypes_MULTI: token->image = image_tokens[24]; break;
+        case TokenTypes_BLOCK: token->image = image_tokens[25]; break;
     }
 }
 
@@ -363,10 +368,15 @@ char *Backspace(char *str){
 
 // ========================================================
 
-void MoveAvailable(Grid * pGrid, bool highlight){
+void MoveAvailable(Grid * pGrid){
 
     //fprintf(stdout,"core.c : MoveAvailable(Grid * pGrid)\n");
 
+    for(int i=0; i< pGrid->height; i++){
+        for(int j=0;j < pGrid->width; j++){
+            pGrid->tokens[i][j].canBeMoved = false;
+        }
+    }
     pGrid->moveAvailable = 0;
 
     for(int i=0; i< pGrid->height; i++){
@@ -377,45 +387,37 @@ void MoveAvailable(Grid * pGrid, bool highlight){
 
             if ( j > 0 && j+1 < pGrid->width ){
 
-                if ( pGrid->tokens[j][i].type != NONE && pGrid->tokens[j+1][i].type != NONE && pGrid->tokens[j][i].color != pGrid->tokens[j+1][i].color ){
+                if ( pGrid->tokens[i][j].type != TokenTypes_NONE && pGrid->tokens[i][j+1].type != TokenTypes_NONE && pGrid->tokens[i][j+1].color != pGrid->tokens[i][j+1].color ){
 
                     // vers la droite
                     PermuteToken(pGrid,j,i,j+1,i);
 
-                    pGrid->moveAvailable += IsLineOnGrid(pGrid);
+                    if ( IsLineOnGrid(pGrid) ){
+
+                        pGrid->moveAvailable += 1;
+                        pGrid->tokens[i][j].canBeMoved = true;
+                        pGrid->tokens[i][j+1].canBeMoved = true;
+                    }
 
                     PermuteToken(pGrid,j,i,j+1,i);
-
-                    if ( n != pGrid->moveAvailable && highlight){
-
-                        pGrid->tokens[i][j].image_background = image_cursorGreen;
-                        pGrid->tokens[i][j].drawBackground = true;
-                        pGrid->tokens[i][j+1].image_background = image_cursorGreen;
-                        pGrid->tokens[i][j+1].drawBackground = true;
-
-                        n = pGrid->moveAvailable;
-                    }
                 }
             }
 
             if ( i > 0 && i+1 < pGrid->height ){
 
-                if ( pGrid->tokens[j][i].type != NONE && pGrid->tokens[j][i+1].type != NONE && pGrid->tokens[j][i].color != pGrid->tokens[j][i+1].color ){
+                if ( pGrid->tokens[i][j].type != TokenTypes_NONE && pGrid->tokens[i+1][i].type != TokenTypes_NONE && pGrid->tokens[i][j].color != pGrid->tokens[i+1][j].color ){
 
                     // vers le bas
                     PermuteToken(pGrid,j,i,j,i+1);
 
-                    pGrid->moveAvailable += IsLineOnGrid(pGrid);
+                    if ( IsLineOnGrid(pGrid) ){
+
+                        pGrid->moveAvailable += 1;
+                        pGrid->tokens[i][j].canBeMoved = true;
+                        pGrid->tokens[i+1][j].canBeMoved = true;
+                    }
 
                     PermuteToken(pGrid,j,i,j,i+1);
-
-                    if ( n != pGrid->moveAvailable && highlight){
-
-                        pGrid->tokens[i][j].image_background = image_cursorGreen;
-                        pGrid->tokens[i][j].drawBackground = true;
-                        pGrid->tokens[i+1][j].image_background = image_cursorGreen;
-                        pGrid->tokens[i+1][j].drawBackground = true;
-                    }
                 }
             }
         }
@@ -556,7 +558,7 @@ int Image_new(Image *pImage, char *pChar_name, Array *pArray, SDL_Renderer* pRen
 
     if ( pArray ){
 
-        Array_append(pArray, TEXTURE_TYPE, pImage->pTexture);
+        Array_append(pArray, ObjectTypes_TEXTURE, pImage->pTexture);
     }
 
     SDL_QueryTexture(pImage->pTexture, NULL, NULL, &pImage->w, &pImage->h);
@@ -582,7 +584,7 @@ int Font_new(Font *pFont, char *pChar_name, Array *pArray, int size){
 
     if ( pArray ){
 
-        Array_append(pArray, FONT_TYPE, pFont->pFont);
+        Array_append(pArray, ObjectTypes_FONT, pFont->pFont);
         pFont->fontHeight = TTF_FontHeight(pFont->pFont);
         pFont->spacing = (int) 0.5 * pFont->fontHeight;
         pFont->lineHeight = pFont->fontHeight + pFont->spacing;

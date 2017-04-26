@@ -5,7 +5,7 @@ constants.h
 
 Par Benjamin, pour le projet CCCC le 24/02/2017.
 
-RÃ´le : dÃ©finit des constantes pour tout le programme ( taille de la fenÃªtre... ).
+rôle : définit des constantes pour tout le programme ( taille de la fenêtre... ).
 
 */
 
@@ -30,22 +30,19 @@ RÃ´le : dÃ©finit des constantes pour tout le programme ( taille de la fenÃ�
 
 // =========================================================
 
-#define WINDOW_WIDTH        800
+#define WINDOW_WIDTH        800     // taille de la fenêtre de base
 #define WINDOW_HEIGHT       600
-#define TOKEN_WIDTH         64
+#define TOKEN_WIDTH         64      // taille d'un token par défault
 #define TOKEN_HEIGHT        64
 
-#define FRAME_PER_SECOND    60      // rafraichissement de l'Ã©cran
-#define FALL_SPEED          6       // en pixel par frame
-#define DESTRUCT_SPEED      250     // en ms ( pour aller de 100% Ã  0% de taille de texture )
+#define FRAME_PER_SECOND    60      // rafraichissement de l'écran.
+#define FALL_SPEED          6       // en pixel par coups d'horloge.
+#define DESTRUCT_SPEED      250     // en ms ( pour que la taille de la texture soit réduite à 0% ).
 
-#define TOKEN_SCORE         10      // score de base par jeton dÃ©truit
+#define TOKEN_SCORE         10      // score de base par jeton détruit.
 
-#define UI_MAX_TEXT         100     // longueur du texte maximal affiché à l'écran
-
-#define UI_MAX_LENGTH       200
+#define UI_MAX_LENGTH       200     // longueur du texte maximal affiché à l'écran.
 #define UI_MIN_LENGTH       10
-#define UI_MAX_LABEL        500
 
 // =========================================================
 

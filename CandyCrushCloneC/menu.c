@@ -23,11 +23,11 @@ SDL_Renderer *InitMenu(char * pChar_name, Array *pArray, int w, int h){
     Array_new(pArray);
 
     pWindow = SDL_CreateWindow(pChar_name, rect_bounds.w / 2 - w / 2, rect_bounds.h / 2 - h / 2, w, h, SDL_WINDOW_SHOWN);
-    if ( pWindow ) Array_append(pArray, WINDOW_TYPE , pWindow);
+    if ( pWindow ) Array_append(pArray, ObjectTypes_WINDOW , pWindow);
     // void SDL_SetWindowIcon(SDL_Window*  window , SDL_Surface* icon); //ajoute une icône à la fenêtre
 
     pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if ( pRenderer ) Array_append(pArray, RENDERER_TYPE, pRenderer);
+    if ( pRenderer ) Array_append(pArray, ObjectTypes_RENDERER, pRenderer);
 
     // init des ressources
     error += Font_new(&font_default, "data/fonts/arial.ttf", pArray, 15);
@@ -103,7 +103,7 @@ void dirent_read(UI_textBox *pTextBox, UI_verticalScrollbar *pVerticalScrollbar)
 
 // =========================================================
 
-void Textbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScrollbar *pVerticalScrollbar, UI_label *pLabel, UI_button *pButton, bool *pDraw){
+void MenuTextbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScrollbar *pVerticalScrollbar, UI_label *pLabel, UI_button *pButton, bool *pDraw){
 
 	int index;
 
@@ -123,7 +123,7 @@ void Textbox_files_event(UI_textBox *pTextBox, SDL_Event *pEvent, UI_verticalScr
 
 // =========================================================
 
-void VerticalScrollbar_files_event(UI_verticalScrollbar *pVerticalScrollbar, SDL_Event *pEvent, UI_textBox *pTextBox, bool *pDraw){
+void MenuVerticalScrollbar_files_event(UI_verticalScrollbar *pVerticalScrollbar, SDL_Event *pEvent, UI_textBox *pTextBox, bool *pDraw){
 
 	int firstLine;
 
@@ -146,7 +146,7 @@ void Menu_event(SDL_Event *pEvent, bool *pQuit){
 
 // =========================================================
 
-void Button_menu_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -156,7 +156,7 @@ void Button_menu_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, 
 
 // =========================================================
 
-void Button_menu_play_load_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_play_load_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -166,20 +166,20 @@ void Button_menu_play_load_event(UI_button *pButton, SDL_Event *pEvent, bool *pD
 
 // =========================================================
 
-void Button_menu_play_classic_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_play_classic_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
         gameState_prec = gameState;
-        gameState = GAME;
-        gameSessionType = RANDOM;
+        gameState = States_GAME;
+        gameSessionType = GameTypes_CLASSIC;
         *pQuit = true;
     }
 }
 
 // =========================================================
 
-void Button_menu_play_custom_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_play_custom_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -189,7 +189,7 @@ void Button_menu_play_custom_event(UI_button *pButton, SDL_Event *pEvent, bool *
 
 // =========================================================
 
-void Button_menu_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -199,7 +199,7 @@ void Button_menu_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw
 
 // =========================================================
 
-void Button_menu_editor_load_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_editor_load_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -209,20 +209,20 @@ void Button_menu_editor_load_event(UI_button *pButton, SDL_Event *pEvent, bool *
 
 // =========================================================
 
-void Button_menu_editor_new_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_editor_new_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
         gameState_prec = gameState;
-        gameState = EDITOR;
-        editorSessionType = NEWPUZZLE;
+        gameState = States_EDITOR;
+        editorSessionType = EditorTypes_NEW;
         *pQuit = true;
     }
 }
 
 // =========================================================
 
-void Button_menu_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
+void MenuButton_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState ){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -239,22 +239,34 @@ void Button_menu_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw
 
 // =========================================================
 
-void Button_ok_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState){
+void MenuButton_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        gameState_prec = gameState;
+        gameState = States_QUIT;
+        *pQuit = true;
+    }
+}
+
+// =========================================================
+
+void MenuButton_ok_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit, MenuState *pState){
 
     if ( UI_button_event(pButton, pEvent, pDraw) ){
 
         if ( *pState == MenuState_EDITOR_LOAD ){
 
             gameState_prec = gameState;
-            gameState = EDITOR;
-            editorSessionType = LOADPUZZLE;
+            gameState = States_EDITOR;
+            editorSessionType = EditorTypes_LOAD;
             *pQuit = true;
         }
         else if( *pState == MenuState_PLAY_LOAD ){
 
             gameState_prec = gameState;
-            gameState = GAME;
-            gameSessionType = PUZZLE;
+            gameState = States_GAME;
+            gameSessionType = GameTypes_PUZZLE;
             *pQuit = true;
         }
     }
@@ -298,7 +310,7 @@ void MenuSession(){
     if ( !pRenderer )
         return;
 
-    Array_append(&objects, ARRAY_TYPE, &files);
+    Array_append(&objects, ObjectTypes_ARRAY, &files);
 
     fprintf(stdout,"menu.c -> MenuSession() -> UI_button_new return %d.\n", UI_button_new(&button_return, &window, "Retour", screen_width / 2 - image_normal.w / 2 , screen_height - image_normal.h - 20 ));
 
@@ -342,7 +354,7 @@ void MenuSession(){
 
             if( event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)){
 
-                gameState = QUIT;
+                gameState = States_QUIT;
                 quit = true;
             }
 
@@ -351,20 +363,20 @@ void MenuSession(){
 
             // event UI
             Window_event(&window, &event, &draw );
-            Button_quit_event(&button_quit, &event, &draw, &quit);
+            MenuButton_quit_event(&button_quit, &event, &draw, &quit);
 
             MenuState menuState_temp = menuState;
-            Button_menu_return_event(&button_return, &event, &draw, &quit, &menuState);
-            Button_menu_play_event(&button_play, &event, &draw, &quit, &menuState);
-            Button_menu_play_classic_event(&button_play_classic, &event, &draw, &quit, &menuState);
-            Button_menu_play_custom_event(&button_play_custom, &event, &draw, &quit, &menuState);
-            Button_menu_play_load_event(&button_play_load, &event, &draw, &quit, &menuState);
-            Button_menu_editor_event(&button_editor, &event, &draw, &quit, &menuState);
-            Button_menu_editor_load_event(&button_editor_load, &event, &draw, &quit, &menuState);
-            Button_menu_editor_new_event(&button_editor_new, &event, &draw, &quit, &menuState);
-            Textbox_files_event(&textBox_files, &event, &verticalScrollbar_files, &label_puzzleName, &button_ok, &draw);
-            VerticalScrollbar_files_event(&verticalScrollbar_files, &event, &textBox_files, &draw);
-            Button_ok_event(&button_ok, &event, &draw, &quit, &menuState);
+            MenuButton_return_event(&button_return, &event, &draw, &quit, &menuState);
+            MenuButton_play_event(&button_play, &event, &draw, &quit, &menuState);
+            MenuButton_play_classic_event(&button_play_classic, &event, &draw, &quit, &menuState);
+            MenuButton_play_custom_event(&button_play_custom, &event, &draw, &quit, &menuState);
+            MenuButton_play_load_event(&button_play_load, &event, &draw, &quit, &menuState);
+            MenuButton_editor_event(&button_editor, &event, &draw, &quit, &menuState);
+            MenuButton_editor_load_event(&button_editor_load, &event, &draw, &quit, &menuState);
+            MenuButton_editor_new_event(&button_editor_new, &event, &draw, &quit, &menuState);
+            MenuTextbox_files_event(&textBox_files, &event, &verticalScrollbar_files, &label_puzzleName, &button_ok, &draw);
+            MenuVerticalScrollbar_files_event(&verticalScrollbar_files, &event, &textBox_files, &draw);
+            MenuButton_ok_event(&button_ok, &event, &draw, &quit, &menuState);
 
             if ( menuState_temp !=  menuState){
 
@@ -442,7 +454,7 @@ void MenuSession(){
             }
         }
 
-        VerticalScrollbar_files_event(&verticalScrollbar_files, NULL, &textBox_files, &draw);
+        MenuVerticalScrollbar_files_event(&verticalScrollbar_files, NULL, &textBox_files, &draw);
 
         Menu_logic();
 

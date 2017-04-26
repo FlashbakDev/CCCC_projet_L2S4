@@ -4,57 +4,51 @@
 #include "menu.h"
 #include "editor.h"
 
-void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-
 int main(int argc, char* argv[]){
 
     /* Initialisation */
     InitSDL();
 
-    // avec une pile Ã§a serais mieux !
-    gameState = MENU;
-    gameState_prec = QUIT;
-    gameSessionType = RANDOM;
-    editorSessionType = NEWPUZZLE;
+    // avec une pile ça serais mieux !
+    gameState = States_MENU;
+    gameState_prec = States_QUIT;
+    gameSessionType = GameTypes_CLASSIC;
+    editorSessionType = EditorTypes_NEW;
 
-    /* boucle */
+    /* boucle de la machine d'état */
     bool quit = false;
     while(quit == false){
 
         switch(gameState){
 
-            case MENU : {
+            case States_MENU : {
 
                 MenuSession();
             }
             break;
 
-            case GAME : {
+            case States_GAME : {
 
                 switch( gameSessionType ){
 
-                    case RANDOM : GameSessionRandom(10,10,6,5,false,5,2,2); break;
-                    case PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
+                    case GameTypes_CLASSIC : GameSessionRandom(10,10,6,5,false,5,2,2); break;
+                    case GameTypes_PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
                 }
             }
             break;
 
-            case EDITOR : {
+            case States_EDITOR : {
 
 
                 switch( editorSessionType ){
 
-                    case NEWPUZZLE : fprintf(stdout,"EDITOR -> NEWPUZZLE\n"); EditorSession(NewEmptyPuzzle(10, 10)); break;
-                    case LOADPUZZLE : fprintf(stdout,"EDITOR -> LOADPUZZLE\n"); EditorSession(Load_grid(&puzzleName)); break;
+                    case EditorTypes_NEW : fprintf(stdout,"EDITOR -> NEWPUZZLE\n"); EditorSession(NewEmptyPuzzle(10, 10)); break;
+                    case EditorTypes_LOAD : fprintf(stdout,"EDITOR -> LOADPUZZLE\n"); EditorSession(Load_grid(&puzzleName)); break;
                 }
             }
             break;
 
-            case QUIT : {
+            case States_QUIT : {
 
                 quit = true;
             }
@@ -62,60 +56,8 @@ int main(int argc, char* argv[]){
         }
     }
 
+    // Libération de la SDL
     CleanSDL();
 
     return 0;
-}
-
-// =========================================================
-
-void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = QUIT;
-        *pQuit = true;
-    }
-}
-
-void Button_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = MENU;
-        *pQuit = true;
-    }
-}
-
-void Button_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = GAME;
-        gameSessionType = RANDOM;
-        *pQuit = true;
-    }
-}
-
-void Button_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState = gameState_prec;
-        *pQuit = true;
-    }
-}
-
-void Button_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = EDITOR;
-        editorSessionType = NEWPUZZLE;
-        *pQuit = true;
-    }
 }

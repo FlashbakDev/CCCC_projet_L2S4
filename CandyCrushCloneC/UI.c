@@ -12,9 +12,10 @@ int UI_label_new(UI_label *pLabel, Window *pWindow, char *text, int x, int y){
     pLabel->font = font_default;
     pLabel->color_text = black;
     MakeRect(&pLabel->rect, x, y, 0, 0);
-    String_copy(pLabel->text, UI_MAX_LABEL, text, NULL);
+    String_copy(pLabel->text, UI_MAX_LENGTH, text, NULL);
     pLabel->visible = false;
     pLabel->pWindow = pWindow;
+    pLabel->draw = true;
 
     return 0;
 }
@@ -552,7 +553,7 @@ int UI_textBox_event(UI_textBox *pTextBox, SDL_Event *event, int *pDraw){
 
 int UI_label_draw(UI_label *pLabel, SDL_Renderer *pRenderer){
 
-    char buf[UI_MAX_LABEL], *p;
+    char buf[UI_MAX_LENGTH], *p;
 	int len, y;
 
 	if (pLabel && pLabel->pWindow)
@@ -564,7 +565,7 @@ int UI_label_draw(UI_label *pLabel, SDL_Renderer *pRenderer){
 	y = pLabel->rect.y + pLabel->font.spacing / 2;
 	len = strlen(pLabel->text);
 
-	if (len > UI_MAX_LABEL - 2)
+	if (len > UI_MAX_LENGTH - 2)
 		pLabel->text[len - 1] = '\n';
 	else
 		strcat(pLabel->text, "\n");

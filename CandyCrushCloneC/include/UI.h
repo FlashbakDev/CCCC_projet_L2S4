@@ -3,7 +3,7 @@
 UI.h
 -----------
 
-Par Benjamin, pour le projet CCCC le 12/03/2017.
+Par Desbouchages Benjamin, Rousseau jérémy, pour le projet CCCC le 12/03/2017.
 
 Rôle : gestion de linterface utilisateur au moyen de différents widget.
 
@@ -27,7 +27,7 @@ typedef struct UI_label {
 
 	bool visible;
 	SDL_Rect rect;
-	char text[UI_MAX_LABEL];
+	char text[UI_MAX_LENGTH];
 	SDL_Color color_text;
 	Font font;
 	Window *pWindow;
