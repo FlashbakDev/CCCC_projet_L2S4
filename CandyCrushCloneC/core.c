@@ -2,7 +2,7 @@
 
 // =========================================================
 
-Font font_default;
+Font font_default, font_hight;
 Image image_normal, image_prelight, image_active, image_selected, image_unselected, image_unselected, image_arrow_up, image_arrow_down,
 image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 int screen_width, screen_height;

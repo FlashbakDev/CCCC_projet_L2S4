@@ -46,6 +46,12 @@ bool IsTokenMoving(Grid *pGrid);
 /* indique si un jeton a une animation de destruction en cours */
 bool IsTokenDestructing(Grid *pGrid);
 
+/* indique si la grille est stable */
+bool IsRandomGridStabilized(Grid *pGrid);
+
+/* retourne me nombre de jeton autrez que Null dans la grille */
+int NbTokenOnGrid(Grid *pGrid);
+
 /* met en vert le meillur coup possible */
 void HighlightBestMove(Grid *pGrid);
 

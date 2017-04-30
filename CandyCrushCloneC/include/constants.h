@@ -44,6 +44,8 @@ rôle : définit des constantes pour tout le programme ( taille de la fenêtre..
 #define UI_MAX_LENGTH       200     // longueur du texte maximal affiché à l'écran.
 #define UI_MIN_LENGTH       10
 
+#define CHEAT_ENABLE        0       // active ou non la possibilité d'avoir les commande de cheat
+
 // =========================================================
 
 #endif // CONSTANTS_H_INCLUDED

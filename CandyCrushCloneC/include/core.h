@@ -128,7 +128,7 @@ typedef struct Window {
 // =========================================================
 
 // ressources
-extern Font font_default;
+extern Font font_default, font_hight;
 extern Image image_normal, image_prelight, image_active, image_selected, image_unselected, image_arrow_up, image_arrow_down,
 image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 extern int screen_width, screen_height;

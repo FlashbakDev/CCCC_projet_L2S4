@@ -31,6 +31,7 @@ SDL_Renderer *InitMenu(char * pChar_name, Array *pArray, int w, int h){
 
     // init des ressources
     error += Font_new(&font_default, "data/fonts/arial.ttf", pArray, 15);
+    error += Font_new(&font_hight, "data/fonts/arial.ttf", pArray, 40);
     error += Image_new(&image_active, "data/UI/image_active.png", pArray, pRenderer);
     error += Image_new(&image_prelight, "data/UI/image_prelight.png", pArray, pRenderer);
     error += Image_new(&image_normal, "data/UI/image_normal.png", pArray, pRenderer);

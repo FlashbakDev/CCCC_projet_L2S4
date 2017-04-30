@@ -32,6 +32,7 @@ SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h){
 
     // init des ressources
     error += Font_new(&font_default, "data/fonts/arial.ttf", pArray, 15);
+    error += Font_new(&font_hight, "data/fonts/arial.ttf", pArray, 40);
     error += Image_new(&image_active, "data/UI/image_active.png", pArray, pRenderer);
     error += Image_new(&image_prelight, "data/UI/image_prelight.png", pArray, pRenderer);
     error += Image_new(&image_normal, "data/UI/image_normal.png", pArray, pRenderer);
@@ -689,7 +690,8 @@ bool IsLineOnGrid(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].aligned == true ){ return true; }
+            if ( pGrid->tokens[i][j].aligned == true )
+                return true;
         }
     }
 
@@ -703,7 +705,8 @@ bool IsTokenMoving(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].isMoving == true ){ return true; }
+            if ( pGrid->tokens[i][j].isMoving == true )
+                return true;
         }
     }
 
@@ -717,11 +720,38 @@ bool IsTokenDestructing(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].isDestruct == true ){ return true; }
+            if ( pGrid->tokens[i][j].isDestruct == true )
+                return true;
         }
     }
 
     return false;
+}
+
+// =========================================================
+
+bool IsRandomGridStabilized(Grid *pGrid){
+
+    if( IsTokenOfType(pGrid, TokenTypes_NONE) || IsTokenMoving(pGrid) || IsTokenDestructing(pGrid) || IsLineOnGrid(pGrid) ) return false;
+
+    return true;
+}
+
+// =========================================================
+
+int NbTokenOnGrid(Grid *pGrid){
+
+    int cpt = 0;
+
+    for(int i = 0; i < pGrid->height; i++){
+        for(int j = 0; j < pGrid->width; j++){
+
+            if ( pGrid->tokens[i][j].type != TokenTypes_NONE )
+                cpt++;
+        }
+    }
+
+    return cpt;
 }
 
 // =========================================================
@@ -1289,94 +1319,106 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
 
                 case SDLK_d :{
 
-                    pGrid->nbMove ++;
+                    if( CHEAT_ENABLE != 0 ) pGrid->nbMove ++;
                 }
                 break;
 
                 case SDLK_q :{
 
-                    pGrid->nbMove --;
+                    if( CHEAT_ENABLE != 0 ) pGrid->nbMove --;
                 }
                 break;
 
                 case SDLK_z :{
 
-                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color < pGrid->nbColor-1){
+                    if( CHEAT_ENABLE != 0 ){
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color ++;
+                        if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color < pGrid->nbColor-1){
+
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color ++;
+                        }
+                        else {
+
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = 0;
+                        }
+                        CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
+
+                        CalculTokenImages(  pGrid,
+                                            &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
+                                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
+                                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                     }
-                    else {
-
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = 0;
-                    }
-                    CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
-
-                    CalculTokenImages(  pGrid,
-                                        &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
-                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
-                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                 }
                 break;
 
                 case SDLK_s :{
 
-                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color >0){
+                    if( CHEAT_ENABLE != 0 ){
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
+                        if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color >0){
+
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color --;
+                        }
+                        else{
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
+                        }
+                        CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
+
+
+                        CalculTokenImages(  pGrid,
+                                            &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
+                                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
+                                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                     }
-                    else{
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color = pGrid->nbColor-1;
-                    }
-                    CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
-
-
-                    CalculTokenImages(  pGrid,
-                                        &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
-                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
-                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                 }
                 break;
 
                 case SDLK_e : {
 
-                    if ( !pGrid->is_puzzle )
-                        RandomizeGrid(pGrid);
+                    if( CHEAT_ENABLE != 0 )
+                        if ( !pGrid->is_puzzle )
+                            RandomizeGrid(pGrid);
                 }
                 break;
 
 
                 case SDLK_a : {
 
-                    if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type >1){
+                    if( CHEAT_ENABLE != 0 ){
 
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type --;
+                        if(pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type >1){
+
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type --;
+                        }
+                        else{
+                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type = 5;
+                        }
+                        CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
+
+
+                        CalculTokenImages(  pGrid,
+                                            &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
+                                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
+                                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                     }
-                    else{
-                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type = 5;
-                    }
-                    CalculTokenImages(pGrid,&pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],pGrid->cursorTokenPosition.x,pGrid->cursorTokenPosition.y);
-
-
-                    CalculTokenImages(  pGrid,
-                                        &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x],
-                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.x/TOKEN_WIDTH,
-                                        pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].rect_image.y/TOKEN_HEIGHT);
                 }
                 break;
 
 
                 case SDLK_j :{
 
-                    if ( !pGrid->is_puzzle )
-                        ChangeDirection(pGrid,Directions_LEFT);
+                    if( CHEAT_ENABLE != 0 )
+                        if ( !pGrid->is_puzzle )
+                            ChangeDirection(pGrid,Directions_LEFT);
 
                 }
                 break;
 
                 case SDLK_i :{
 
-                    if ( !pGrid->is_puzzle )
-                        ChangeDirection(pGrid,Directions_UP);
+                    if( CHEAT_ENABLE != 0 )
+                        if ( !pGrid->is_puzzle )
+                            ChangeDirection(pGrid,Directions_UP);
 
                 }
                 break;
@@ -1384,8 +1426,9 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
 
                 case SDLK_k :{
 
-                    if ( !pGrid->is_puzzle )
-                        ChangeDirection(pGrid,Directions_DOWN);
+                    if( CHEAT_ENABLE != 0 )
+                        if ( !pGrid->is_puzzle )
+                            ChangeDirection(pGrid,Directions_DOWN);
 
                 }
                 break;
@@ -1393,8 +1436,9 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
 
                 case SDLK_l :{
 
-                    if ( !pGrid->is_puzzle )
-                        ChangeDirection(pGrid,Directions_RIGHT);
+                    if( CHEAT_ENABLE != 0 )
+                        if ( !pGrid->is_puzzle )
+                            ChangeDirection(pGrid,Directions_RIGHT);
 
                 }
                 break;
@@ -1470,6 +1514,13 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
 
                                 /* coups réussi */
                                 pGrid->nbMove --;
+
+                                if ( pGrid->nbMove <= 0 ){
+
+                                    pGrid->nbHelp = 0;
+                                    pGrid->nbSuperHelp = 0;
+                                    pGrid->nbRevertOnce = 0;
+                                }
 
                                 if(pGrid->tokens[dragEnd.y][dragEnd.x].type == TokenTypes_MULTI )
                                 {
@@ -1638,6 +1689,7 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
     Window window;
 
     SDL_Color black = {0,0,0,255};
+    SDL_Color white = {255,255,255,255};
 
     UI_label label_score = {false};
     UI_button button_return = {false};
@@ -1648,6 +1700,7 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
     UI_button button_replay = {false};
     UI_label label_mouvements = {false};
     UI_label label_nbMove = {false};
+    UI_label label_end = {false};
 
     // création des zone de jeu et d'affichage
     SDL_Rect rect_grid = { 0,0,gridWidth * TOKEN_WIDTH, gridHeight * TOKEN_HEIGHT };
@@ -1670,6 +1723,9 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
     fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_score, &window, "Test", rect_UI.x + 20 , rect_UI.y + 20 ));
     fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
     fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "Test", rect_UI.x + 20 , rect_UI.y + 60 ));
+
+    fprintf(stdout,"game.c -> GameSessionRandom(...) -> UI_label_new return %d.\n", UI_label_new(&label_end, &window, "Termine !", rect_grid.x + rect_grid.w/2 - TextWidth(font_hight, "Termine !", NULL)/2, rect_grid.y + rect_grid.h/2 - font_hight.fontHeight/2 ));
+    label_end.font = font_hight;
 
     sprintf(label_score.text,"Score : %d ",grid1->score);
     sprintf(label_nbMove.text,"NbCoups : %d", grid1->nbMove);
@@ -1752,6 +1808,15 @@ void GameSessionRandom(int gridWidth, int gridHeight,int nbColor, int nbMove,boo
         UI_button_draw(&button_revertOnce, pRenderer);
         UI_button_draw(&button_replay, pRenderer);
 
+        if ( IsRandomGridStabilized(grid1) && grid1->nbMove <= 0 ){
+
+            button_help.draw = false;
+            button_revertOnce.draw = false;
+            button_superHelp.draw = false;
+            UI_fillRect(pRenderer, &rect_grid, white);
+            UI_label_draw(&label_end,pRenderer);
+        }
+
         UI_outline(pRenderer, &rect_UI, black, -1 );
 
         SDL_RenderPresent(pRenderer);                                                           // déssine le renderer à l'écran
@@ -1778,11 +1843,13 @@ void GameSessionPuzzle(Grid *pGrid){
     Window window;
 
     SDL_Color black = {0,0,0,255};
+    SDL_Color white = {255,255,255,255};
 
     UI_button button_quit = {false};
     UI_button button_return = {false};
     UI_button button_restart = {false};
     UI_label label_nbMove = {false};
+    UI_label label_end = {false};
 
     // création des zone de jeu et d'affichage
     SDL_Rect rect_grid = { 0,0,pGrid->width * TOKEN_WIDTH, pGrid->height * TOKEN_HEIGHT };
@@ -1803,6 +1870,9 @@ void GameSessionPuzzle(Grid *pGrid){
 
     fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
     fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Test", rect_UI.x + 20 , rect_UI.y + 40 ));
+
+    fprintf(stdout,"game.c -> GameSessionPuzzle(...) -> UI_label_new return %d.\n", UI_label_new(&label_end, &window, "", rect_grid.x + rect_grid.w/2, rect_grid.y + rect_grid.h/2 - font_hight.fontHeight/2 ));
+    label_end.font = font_hight;
 
     sprintf(label_nbMove.text,"NbCoups : %d", pGrid->nbMove);
 
@@ -1860,6 +1930,23 @@ void GameSessionPuzzle(Grid *pGrid){
         UI_button_draw(&button_quit, pRenderer);
         UI_button_draw(&button_return, pRenderer);
         UI_button_draw(&button_restart, pRenderer);
+
+        if ( !IsTokenMoving(pGrid) && !IsTokenDestructing(pGrid) && !IsLineOnGrid(pGrid) && ( pGrid->nbMove <= 0 || NbTokenOnGrid(pGrid) == 0) ){
+
+            if ( NbTokenOnGrid(pGrid) == 0 ){
+
+                String_copy(&label_end.text, UI_MAX_LENGTH, "Gagné !", NULL);
+            }
+            else{
+
+                String_copy(&label_end.text, UI_MAX_LENGTH, "Perdu !", NULL);
+            }
+
+            label_end.rect.x = rect_grid.x + rect_grid.w/2 - TextWidth(font_hight ,label_end.text, NULL);
+
+            UI_fillRect(pRenderer, &rect_grid, white);
+            UI_label_draw(&label_end,pRenderer);
+        }
 
         UI_outline(pRenderer, &rect_UI, black, -1 );
 
