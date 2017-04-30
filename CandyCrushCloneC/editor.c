@@ -407,16 +407,15 @@ void EditorSession(char *puzzleName, bool newPuzzle){
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_nbMove, &window, "", rect_UI.x + 20 , rect_UI.y + 25, 50 ));
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Coups alloues", rect_UI.x + 20 + entry_nbMove.rect.w + 5 , rect_UI.y + 30 ));
     sprintf(entry_nbMove.text,"%d",pGrid->nbMove);
-    if ( pGrid->nbMove <= 0 ) String_copy(entry_nbMove.text,UI_MAX_LENGTH,"1",NULL); pGrid->nbMove = 1;
+    if ( pGrid->nbMove <= 0 ) { String_copy(entry_nbMove.text,UI_MAX_LENGTH,"1",NULL); pGrid->nbMove = 1; }
 
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "", rect_UI.x + 20 , rect_UI.y + 120 ));
     sprintf(label_mouvements.text,"Mouvements possibles : %d",pGrid->moveAvailable);
 
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_name, &window, "Nom", rect_UI.x + 20 , rect_UI.y + 300 ));
-    fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_name, &window, puzzleName, rect_UI.x + 20 + 5 + TextWidth(font_default, label_name.text, NULL ) , rect_UI.y + 295, 220 ));
+    fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_name, &window, "puzzleTest", rect_UI.x + 20 + 5 + TextWidth(font_default, label_name.text, NULL ) , rect_UI.y + 295, 220 ));
 
-    if ( strcmp( entry_name.text, "") == 0 ) String_copy(entry_name.text,UI_MAX_LENGTH,"puzzleTest",NULL);
-    String_copy(puzzleName,UI_MAX_LENGTH,entry_name.text,NULL);
+    if ( strcmp( puzzleName, "") != 0 ) String_copy(entry_name.text,UI_MAX_LENGTH,puzzleName,NULL);
 
     /*fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_direction, &window, "Direction aleatoire", rect_UI.x + 20 + image_selected.w + 5 , rect_UI.y + 90 ));
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_toggle_new return %d.\n", UI_toggle_new(&toggle_direction, &window, rect_UI.x + 20 , rect_UI.y + 90 ));

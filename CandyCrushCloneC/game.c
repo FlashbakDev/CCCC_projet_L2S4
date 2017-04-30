@@ -746,7 +746,7 @@ int NbTokenOnGrid(Grid *pGrid){
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
 
-            if ( pGrid->tokens[i][j].type != TokenTypes_NONE )
+            if ( pGrid->tokens[i][j].type != TokenTypes_NONE && pGrid->tokens[i][j].type != TokenTypes_BLOCK )
                 cpt++;
         }
     }
@@ -1458,7 +1458,7 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
                         pDragStart->x = pGrid->cursorTokenPosition.x;
                         pDragStart->y = pGrid->cursorTokenPosition.y;
 
-                        *pDragAndDrop = pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_NONE;
+                        *pDragAndDrop = pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_NONE && pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_BLOCK;
                     }
                 }
                 break;
@@ -1498,52 +1498,55 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
 
                         if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                            HardPermuteToken(pGrid, pDragStart->x, pDragStart->y, dragEnd.x, dragEnd.y);
+                            //if ( pGrid->tokens[dragEnd.y][dragEnd.x].type != TokenTypes_NONE && pGrid->tokens[dragEnd.y][dragEnd.x].type != TokenTypes_BLOCK ){
 
-                            if ( IsLineOnGrid(pGrid) == false && pGrid->tokens[dragEnd.y][dragEnd.x].type != TokenTypes_MULTI && pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_MULTI){
+                                HardPermuteToken(pGrid, pDragStart->x, pDragStart->y, dragEnd.x, dragEnd.y);
 
-                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, pDragStart->x, pDragStart->y);
-                            }
-                            else {
+                                if ( IsLineOnGrid(pGrid) == false && pGrid->tokens[dragEnd.y][dragEnd.x].type != TokenTypes_MULTI && pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_MULTI){
 
-                                ResetTokenImages(pGrid);
-
-                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, pDragStart->x, pDragStart->y);
-                                SaveTokensInPastTokens(pGrid);
-                                HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, pDragStart->x, pDragStart->y);
-
-                                /* coups réussi */
-                                pGrid->nbMove --;
-
-                                if ( pGrid->nbMove <= 0 ){
-
-                                    pGrid->nbHelp = 0;
-                                    pGrid->nbSuperHelp = 0;
-                                    pGrid->nbRevertOnce = 0;
+                                    HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, pDragStart->x, pDragStart->y);
                                 }
+                                else {
 
-                                if(pGrid->tokens[dragEnd.y][dragEnd.x].type == TokenTypes_MULTI )
-                                {
-                                    Destruct_color(pGrid->tokens[pDragStart->y][pDragStart->x].color, pGrid);
-                                    pGrid->tokens[dragEnd.y][dragEnd.x].isDestruct = true;
-                                    pGrid->tokens[dragEnd.y][dragEnd.x].type = TokenTypes_NONE;
-                                    pGrid->tokens[dragEnd.y][dragEnd.x].startDestructAnim = -1;
-                                }else if(pGrid->tokens[pDragStart->y][pDragStart->x].type == TokenTypes_MULTI)
-                                {
-                                    Destruct_color(pGrid->tokens[dragEnd.y][dragEnd.x].color, pGrid);
-                                    pGrid->tokens[pDragStart->y][pDragStart->x].isDestruct = true;
-                                    pGrid->tokens[pDragStart->y][pDragStart->x].type = TokenTypes_NONE;
-                                    pGrid->tokens[pDragStart->y][pDragStart->x].startDestructAnim = -1;
+                                    ResetTokenImages(pGrid);
+
+                                    HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, pDragStart->x, pDragStart->y);
+                                    SaveTokensInPastTokens(pGrid);
+                                    HardPermuteToken(pGrid, dragEnd.x, dragEnd.y, pDragStart->x, pDragStart->y);
+
+                                    /* coups réussi */
+                                    pGrid->nbMove --;
+
+                                    if ( pGrid->nbMove <= 0 ){
+
+                                        pGrid->nbHelp = 0;
+                                        pGrid->nbSuperHelp = 0;
+                                        pGrid->nbRevertOnce = 0;
+                                    }
+
+                                    if(pGrid->tokens[dragEnd.y][dragEnd.x].type == TokenTypes_MULTI )
+                                    {
+                                        Destruct_color(pGrid->tokens[pDragStart->y][pDragStart->x].color, pGrid);
+                                        pGrid->tokens[dragEnd.y][dragEnd.x].isDestruct = true;
+                                        pGrid->tokens[dragEnd.y][dragEnd.x].type = TokenTypes_NONE;
+                                        pGrid->tokens[dragEnd.y][dragEnd.x].startDestructAnim = -1;
+                                    }else if(pGrid->tokens[pDragStart->y][pDragStart->x].type == TokenTypes_MULTI)
+                                    {
+                                        Destruct_color(pGrid->tokens[dragEnd.y][dragEnd.x].color, pGrid);
+                                        pGrid->tokens[pDragStart->y][pDragStart->x].isDestruct = true;
+                                        pGrid->tokens[pDragStart->y][pDragStart->x].type = TokenTypes_NONE;
+                                        pGrid->tokens[pDragStart->y][pDragStart->x].startDestructAnim = -1;
+                                    }
+
+                                    pGrid->isHelpActive = false;
+                                    pGrid->isSuperHelpActive = false;
+
+                                    if(pGrid->is_randomizeInsert == true){
+
+                                        ChangeDirection(pGrid, rand()%4);
+                                    }
                                 }
-
-                                pGrid->isHelpActive = false;
-                                pGrid->isSuperHelpActive = false;
-
-                                if(pGrid->is_randomizeInsert == true){
-
-                                    ChangeDirection(pGrid, rand()%4);
-                                }
-                            }
+                            //}
                         }
 
                         *pDragAndDrop = false;
@@ -1576,29 +1579,32 @@ void Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, bool *pDragAndDrop,
 
                     if ( ( distX == 1 && distY == 0 ) || ( distX == 0 && distY == 1 ) ){
 
-                        PermuteToken(pGrid, pDragStart->x, pDragStart->y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+                        if ( pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type != TokenTypes_NONE && pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type != TokenTypes_BLOCK ){
 
-                        if ( IsLineOnGrid(pGrid) == false && pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type != TokenTypes_MULTI && pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_MULTI ){
+                            PermuteToken(pGrid, pDragStart->x, pDragStart->y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
 
-                            //fprintf(stdout,"game.c -> Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit) -> switch(pEvent->type) -> case SDL_MOUSEMOTION -> !IsLineOnGrid(pGrid) ");
-                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].image_background = image_cursorRed;
-                            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                            if ( IsLineOnGrid(pGrid) == false && pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type != TokenTypes_MULTI && pGrid->tokens[pDragStart->y][pDragStart->x].type != TokenTypes_MULTI ){
+
+                                //fprintf(stdout,"game.c -> Game_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit) -> switch(pEvent->type) -> case SDL_MOUSEMOTION -> !IsLineOnGrid(pGrid) ");
+                                pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].image_background = image_cursorRed;
+                                pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
+                            }
+
+                            if( pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type == TokenTypes_MULTI){
+
+                                ChangeColorTokenBackgroundImage(pGrid,image_cursorGreen,pGrid->tokens[pDragStart->y][pDragStart->x].color);
+
+                            }else if(pGrid->tokens[pDragStart->y][pDragStart->x].type == TokenTypes_MULTI){
+
+                                ChangeColorTokenBackgroundImage(pGrid,image_cursorGreen,pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color);
+                            }
+
+                            ChangeAlignedTokenBackgroundImage(pGrid, image_cursorGreen);
+
+                            PermuteToken(pGrid, pDragStart->x, pDragStart->y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
+
+                            PermuteTokenImage(pGrid, pDragStart->x, pDragStart->y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
                         }
-
-                        if( pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].type == TokenTypes_MULTI){
-
-                            ChangeColorTokenBackgroundImage(pGrid,image_cursorGreen,pGrid->tokens[pDragStart->y][pDragStart->x].color);
-
-                        }else if(pGrid->tokens[pDragStart->y][pDragStart->x].type == TokenTypes_MULTI){
-
-                            ChangeColorTokenBackgroundImage(pGrid,image_cursorGreen,pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].color);
-                        }
-
-                        ChangeAlignedTokenBackgroundImage(pGrid, image_cursorGreen);
-
-                        PermuteToken(pGrid, pDragStart->x, pDragStart->y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
-
-                        PermuteTokenImage(pGrid, pDragStart->x, pDragStart->y, pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
                     }
                     else{
 
