@@ -12,6 +12,8 @@ int Save_grid(Grid *pGrid, char* name){
     else
         sprintf(filename,"data/puzzles/%s.puz",name);
 
+    fprintf(stdout , "files.c : Save_grid(...) -> filename = %s\n", filename);
+
     FILE *f = fopen(filename, "w");
     if (f == NULL){
 
@@ -52,6 +54,8 @@ Grid *Load_grid(char* name){
         sprintf(filename,"data/puzzles/%s",name);
     else
         sprintf(filename,"data/puzzles/%s.puz",name);
+
+    fprintf(stdout , "files.c : Load_grid(...) -> filename = %s\n", filename);
 
     FILE *f = fopen(filename, "r");
     if (f == NULL){

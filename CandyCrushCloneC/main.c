@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
 
             case States_MENU : MenuSession(&puzzleName); break;
 
-            case States_GAME_CLASSIC : GameSessionRandom(10,10,6,2,false,5,2,2); break;
+            case States_GAME_CLASSIC : GameSessionRandom(10,10,6,5,false,5,2,2); break;
 
             case States_GAME_PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
 
