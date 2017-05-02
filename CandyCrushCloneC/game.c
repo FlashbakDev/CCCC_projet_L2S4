@@ -900,23 +900,27 @@ int DestroyAlignedTokens(Grid *pGrid){
 
     int cpt = 0; //Nombre de tokens detruit dans ce tour
     int score = 0;//Valeurs à ajouté au score (uniquement les tokens speciaux)
+
     //On parcours le tableau
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
+
             //Si le token est aligné, pas en train d'etre detruit
             if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].isDestruct == false){
 
                 //Si il s'agit d'un token special on active son pouvoir
-                if(pGrid->tokens [i][j].type != TOKEN && pGrid->tokens [i][j].type != NULL ){
+                if(pGrid->tokens [i][j].type != TokenTypes_NORMAL && pGrid->tokens [i][j].type != TokenTypes_NONE ){
+
                     score += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);//Ajout des tokens detruit par les speciaux au scores
                 }
                 else{
-                //Le token est detruit
-                pGrid->tokens[i][j].type = NONE;
-                pGrid->tokens[i][j].isDestruct = true;
-                pGrid->tokens[i][j].startDestructAnim = -1;
-                pGrid->tokens[i][j].aligned = false;
-                cpt++;
+
+                    //Le token est detruit
+                    pGrid->tokens[i][j].type = TokenTypes_NONE;
+                    pGrid->tokens[i][j].isDestruct = true;
+                    pGrid->tokens[i][j].startDestructAnim = -1;
+                    pGrid->tokens[i][j].aligned = false;
+                    cpt++;
 
                 }
             }
@@ -940,16 +944,16 @@ int Destruct_square(int y,int x, int l, Grid *pGrid){
     int cpt = 0;
     //printf("fin x : %d, fin y : %d",debut_x+l-1,debut_y +l-1 );
 
-    for(int i = debut_y; i<debut_y +l && i < pGrid->height;i++)
-    {
-        for(int j = debut_x; j< debut_x+l && j< pGrid->width;j++)
-        {
-            if(j >= 0 && i >=0 && pGrid->tokens[i][j].type != BLOCK )
-            {
-                 if(pGrid->tokens[i][j].type != TokenTypes_NORMAL && pGrid->tokens[i][j].type != TokenTypes_NONE && (i != y || j != x))
-                {
-                 cpt += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
+    for(int i = debut_y; i<debut_y +l && i < pGrid->height;i++){
+        for(int j = debut_x; j< debut_x+l && j< pGrid->width;j++){
+
+            if(j >= 0 && i >=0 ){
+
+                if(pGrid->tokens[i][j].type != TokenTypes_NORMAL && pGrid->tokens[i][j].type != TokenTypes_NONE && (i != y || j != x)){
+
+                    cpt += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
                 }
+
                 pGrid->tokens[i][j].type = TokenTypes_NONE;
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
@@ -957,6 +961,7 @@ int Destruct_square(int y,int x, int l, Grid *pGrid){
             }
         }
     }
+
     CheckGrid(pGrid);
     //printf("nb detruit carre : %d \n",cpt);
 
@@ -968,23 +973,24 @@ int Destruct_square(int y,int x, int l, Grid *pGrid){
 int Destruct_column(int x,Grid * pGrid){
 
     int cpt =0;
-    for(int i =0; i< pGrid->height; i++)
-    {
+    for(int i =0; i< pGrid->height; i++){
 
-        if(pGrid->tokens[i][x].type != MULTI && pGrid->tokens[i][x].type != BLOCK ){
-          
-            if(pGrid->tokens[i][x].type != TokenTypes_NORMAL &&pGrid->tokens[i][x].type !=TokenTypes_NONE &&pGrid->tokens[i][x].type !=TokenTypes_VERTICAL)
-            {
+        if(pGrid->tokens[i][x].type != TokenTypes_MULTI ){
+
+            if(pGrid->tokens[i][x].type != TokenTypes_NORMAL &&pGrid->tokens[i][x].type !=TokenTypes_NONE &&pGrid->tokens[i][x].type !=TokenTypes_VERTICAL){
+
                 cpt += Token_special_action(pGrid->tokens[i][x].type,pGrid,i,x);
             }
-         pGrid->tokens[i][x].type = TokenTypes_NONE;
-         pGrid->tokens[i][x].isDestruct = true;
-         pGrid->tokens[i][x].startDestructAnim = -1;
-         cpt ++;
+
+            pGrid->tokens[i][x].type = TokenTypes_NONE;
+            pGrid->tokens[i][x].isDestruct = true;
+            pGrid->tokens[i][x].startDestructAnim = -1;
+            cpt ++;
         }
 
     }
-   // CheckGrid(pGrid);
+
+    // CheckGrid(pGrid);
     printf("nb detruit colonne : %d \n",cpt);
 
     return cpt;
@@ -995,23 +1001,22 @@ int Destruct_column(int x,Grid * pGrid){
 int Destruct_line(int y,Grid * pGrid){
 
     int cpt = 0;
-    for(int j =0; j< pGrid->width; j++)
-    {
+    for(int j =0; j< pGrid->width; j++){
 
-        if(pGrid->tokens[y][j].type != MULTI && pGrid->tokens[y][j].type != BLOCK)
-        {
-            if(pGrid->tokens[y][j].type != TokenTypes_NORMAL &&pGrid->tokens[y][j].type != TokenTypes_NONE && pGrid->tokens[y][j].type != TokenTypes_HORIZONTAL)
-            {
-              cpt +=  Token_special_action(pGrid->tokens[y][j].type,pGrid,y,j);
+        if(pGrid->tokens[y][j].type != TokenTypes_MULTI ){
+
+            if(pGrid->tokens[y][j].type != TokenTypes_NORMAL &&pGrid->tokens[y][j].type != TokenTypes_NONE && pGrid->tokens[y][j].type != TokenTypes_HORIZONTAL){
+
+                cpt +=  Token_special_action(pGrid->tokens[y][j].type,pGrid,y,j);
             }
-         pGrid->tokens[y][j].type = TokenTypes_NONE;
-         pGrid->tokens[y][j].isDestruct = true;
-         pGrid->tokens[y][j].startDestructAnim = -1;
-         cpt ++;
-        }
 
+            pGrid->tokens[y][j].type = TokenTypes_NONE;
+            pGrid->tokens[y][j].isDestruct = true;
+            pGrid->tokens[y][j].startDestructAnim = -1;
+            cpt ++;
+        }
     }
-   // CheckGrid(pGrid);
+
     printf("nb detruit ligne : %d \n",cpt);
 
     return cpt;
