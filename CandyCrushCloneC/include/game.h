@@ -52,17 +52,19 @@ void HighlightBestMove(Grid *pGrid);
 /* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
+/* Active l'action d'un token special*/
 int Token_special_action(TokenTypes t, Grid *pGrid, int y, int x);
-
+/* Détruit tous les jetons de la couleur specifié */
 int destruct_color(Colors c, Grid *pGrid);
 
+/* Detruit la forme correspondante */
 int destruct_lign(int y, Grid * pGrid);
 int destruct_colon(int x, Grid *pGrid);
 int destruct_square(int y,int x,int l,Grid *pGrid);
 
-/* */
+/* Compare la couleur de deux tokens (true si egal) */
 bool Compare_TokenColor(Token t1, Token t2);
-
+/*Compare la couleur d'un token à une couleur specifié (true si egal)*/
 bool Compare_TokenColor_color(Token t1, Colors c);
 
 /*Change la direction de la grille aléatoirement */
@@ -74,7 +76,7 @@ void ChangeDirection(Grid *pGrid, Directions dir);
 /* regroupe les jetons dans la direction donné */
 void RegroupTokens(Grid *pGrid);
 
-/* insère de nouveaux jetons aléatoirement */
+/* insère de nouveaux jetons aléatoirement dans la direction de la grille*/
 void InjectLigne(Grid *pGrid);
 
 /*Inverse la direction*/

@@ -511,8 +511,8 @@ int Calc_Score(Grid *pGrid ){
     /* actualisation de la grille */
     CheckGrid(pGrid);
 
-    int score = 0;
-    int nb_align;
+    int score = 0;//Variable tampon du score sur la grille
+    int nb_align; //Variable tampon pour enregistrer le nombres de jetons de la même couleurs alignées
     int multi;
     int val = 0;
     Token Token_save;
@@ -521,21 +521,23 @@ int Calc_Score(Grid *pGrid ){
 
     //Verification des allignements horizontaux
     for(int i = 0; i < pGrid->height; i++){
-
+        //Enregistrement du premier token de la ligne pour commencer a compter les alignements
         nb_align = 1;
         Token_save = pGrid->tokens[i][0];
-        val = pGrid->tokens[i][0].score;
+        val = TOKEN_SCORE; //Valeur de la ligne avant les multiplicateurs
 
         for(int j = 1; j < pGrid->width; j++){
 
+            //Compare la couleur du jeton avec celle du premier de la ligne
             if(Compare_TokenColor(pGrid->tokens[i][j], Token_save)){
-
+                //Si la couleur est identique, augmentation de la taille de la ligne
                 nb_align++;
                 val += TOKEN_SCORE;
 
             }
             else {
-
+                //Si on change de couleur, la ligne est fini
+                //En cas d'alignement, on ajoute le score correspondant à la ligne
                 if(nb_align >= 3){
 
                     multi = 1;
@@ -548,19 +550,15 @@ int Calc_Score(Grid *pGrid ){
                             multi = 10;
                         }
                     }
-                    //Faire boucle en ajoutant les scores de jetons individuels
-                    //Puis multiplier par Multi
-
                     score += multi * val;
-
-                    //printf("Score de la ligne : %d \n", score);
                 }
+                //Debut d'une nouvelle ligne
                 nb_align = 1;
                 Token_save = pGrid->tokens[i][j];
                 val = TOKEN_SCORE;
             }
         }
-
+        //Verification au changement de Ligne si il n'y avait pas un allignement à la fin de la grille
         if(nb_align >= 3){
 
             multi = 1;
@@ -574,30 +572,29 @@ int Calc_Score(Grid *pGrid ){
 
                 }
             }
-            //Faire boucle en ajoutant les scores de jetons individuels
-            //Puis multiplier par Multi
-
             score += multi * val;
-
-            //printf("Score de la ligne : %d \n", score);
         }
+
+
     }
     //Verification des alignements verticaux
     for(int j = 0; j < pGrid->width; j++){
 
+    //Enregistrement du premier token de la colonne pour commencer a compter les alignements
         nb_align = 1;
         Token_save = pGrid->tokens[0][j];
-         val = TOKEN_SCORE;
+         val = TOKEN_SCORE; //Valeur de la colonne avant les multiplicateurs
 
         for(int i = 1; i < pGrid->height; i++){
-
+             //Compare la couleur du jeton avec celle du premier de la colonne
             if(Compare_TokenColor(pGrid->tokens[i][j],Token_save)){
-
+                //Si la couleur est identique, augmentation de la taille de la colonne
                 nb_align++;
                 val += TOKEN_SCORE;
             }
             else {
-
+                //Si on change de couleur, la colonne est fini
+                //En cas d'alignement, on ajoute le score correspondant à la colonne
                 if(nb_align >= 3){
 
                     multi = 1;
@@ -612,13 +609,14 @@ int Calc_Score(Grid *pGrid ){
                     }
 
                     score += multi * val;
-                    //printf("Score de la colonne : %d \n", score);
                 }
+                //Debut d'une nouvelle colonne
                 nb_align = 1;
                 Token_save = pGrid->tokens[i][j];
                 val = TOKEN_SCORE;
             }
         }
+        //Verification au changement de Ligne si il n'y avait pas un allignement à la fin de la grille
         if(nb_align >= 3){
 
             multi = 1;
@@ -792,8 +790,14 @@ bool IsTokenOfType(Grid *pGrid, TokenTypes type){
 
 Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 {
-    int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} };
+    //En parametre on passe la direction de la grille
+    //On passe egalement la ligne ou la colonne a verifié
+
+    int DirectionsVectors[4][2] = { {0,-1},{0,1},{-1,0},{1,0} }; //Vecteur de direction, en fonction de la direction on obtient les valeurs à ajouté (x,y)
     Token T;
+
+    //Pour chaque direction, on verifie l'integralité de la colonne/ligne et on renvoit le premier token trouvé
+    //Si aucun n'est trouvé on renvoie la valeur en dehors de la grille
     switch(dir){
 
         case UP:{
@@ -805,7 +809,7 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
                     return &pGrid->tokens[i][x];
                 }
             }
-            //Renvoie un token ayant comme position vertical "juste en dehors de la grille
+            //Renvoie un token ayant comme position vertical "juste en dehors de la grille"
             T.rect_image.y = pGrid->height;
 
         }
@@ -858,39 +862,34 @@ Token *GetFirstDirToken(Grid *pGrid, int x, Directions dir)
 
 int DestroyAlignedTokens(Grid *pGrid){
 
-    //fprintf(stdout,"game.c : DestroyAlignedTokens(Grid *pGrid)\n");
-
-    int cpt = 0;
-    int score = 0;
-
+    int cpt = 0; //Nombre de tokens detruit dans ce tour
+    int score = 0;//Valeurs à ajouté au score (uniquement les tokens speciaux)
+    //On parcours le tableau
     for(int i = 0; i < pGrid->height; i++){
         for(int j = 0; j < pGrid->width; j++){
-
+            //Si le token est aligné, pas en train d'etre detruit
             if ( pGrid->tokens[i][j].aligned == true && pGrid->tokens[i][j].isDestruct == false){
-                if(pGrid->tokens [i][j].type != TOKEN && pGrid->tokens [i][j].type != NULL )
-                {
-                    score += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);
-                    i=0;j=0;
+                //Si il s'agit d'un token special on active son pouvoir
+                if(pGrid->tokens [i][j].type != TOKEN && pGrid->tokens [i][j].type != NULL ){
+                    score += Token_special_action(pGrid->tokens[i][j].type,pGrid,i,j);//Ajout des tokens detruit par les speciaux au scores
                 }
                 else{
-
+                //Le token est detruit
                 pGrid->tokens[i][j].type = NONE;
                 pGrid->tokens[i][j].isDestruct = true;
                 pGrid->tokens[i][j].startDestructAnim = -1;
                 pGrid->tokens[i][j].aligned = false;
                 cpt++;
                 }
-
-               // pGrid->tokens[i][j].color = NONE_COLOR;
-
-
             }
         }
     }
-    cpt += score;
-    if(pGrid->isCalc == false)pGrid->score += score * TOKEN_SCORE;
+    if(pGrid->isCalc == false)pGrid->score += score * TOKEN_SCORE; //Si l'ont est en jeu ajout du score à la grille
+
+    cpt += score; //On ajoute les tokens detruits par les speciaux a ceux detruit dans la fonction
     return cpt;
 }
+
 //===========================================================
 int destruct_square(int y,int x, int l, Grid *pGrid)
 {
@@ -903,7 +902,7 @@ int destruct_square(int y,int x, int l, Grid *pGrid)
     {
         for(int j = debut_x; j< debut_x+l && j< pGrid->width;j++)
         {
-            if(j >= 0 && i >=0)
+            if(j >= 0 && i >=0 && pGrid->tokens[i][j].type != BLOCK )
             {
                  if(pGrid->tokens[i][j].type != TOKEN && pGrid->tokens[i][j].type != NONE && (i != y || j != x))
                 {
@@ -928,7 +927,7 @@ int destruct_colon(int x,Grid * pGrid)
     int cpt =0;
     for(int i =0; i< pGrid->height; i++)
     {
-        if(pGrid->tokens[i][x].type != MULTI)
+        if(pGrid->tokens[i][x].type != MULTI && pGrid->tokens[i][x].type != BLOCK )
         {
             if(pGrid->tokens[i][x].type != TOKEN &&pGrid->tokens[i][x].type !=NONE &&pGrid->tokens[i][x].type !=VERTICAL)
             {
@@ -952,7 +951,7 @@ int destruct_lign(int y,Grid * pGrid)
     int cpt = 0;
     for(int j =0; j< pGrid->width; j++)
     {
-        if(pGrid->tokens[y][j].type != MULTI)
+        if(pGrid->tokens[y][j].type != MULTI && pGrid->tokens[y][j].type != BLOCK)
         {
             if(pGrid->tokens[y][j].type != TOKEN &&pGrid->tokens[y][j].type != NONE && pGrid->tokens[y][j].type != HORIZONTAL)
             {
@@ -985,11 +984,15 @@ int Token_special_action(TokenTypes t, Grid *pGrid, int y, int x){
         break;
 
     case MULTI:
-
+        return 0;
         break;
 
     case PACKED:
        return  destruct_square(y,x,3,pGrid);
+        break;
+
+    case BLOCK:
+        return 0;
         break;
 
     }
