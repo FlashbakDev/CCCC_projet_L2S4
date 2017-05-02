@@ -3,9 +3,9 @@
 game.h
 -----------
 
-Par Desbouchages Benjamin, Rousseau jérémy, pour le projet CCCC le 24/02/2017.
+Par Desbouchages Benjamin, Rousseau jÃ©rÃ©my, pour le projet CCCC le 24/02/2017.
 
-Rôle : fonctions gérants une partie de CCCC.
+RÃ´le : fonctions gÃ©rants une partie de CCCC.
 
 */
 
@@ -25,22 +25,22 @@ Rôle : fonctions gérants une partie de CCCC.
 /* initailisation et chargement des ressources */
 SDL_Renderer *InitGame(char * pChar_name, Array *pArray, int w, int h);
 
-/* Crée une grille de largeur X hauteur remplie aléatoirement */
+/* CrÃ©e une grille de largeur X hauteur remplie alÃ©atoirement */
 Grid *NewGrid(SDL_Rect rect, int nbMove, int nbColor,bool randomizeInsert,int nbHelp, int nbSuperHelp, int nbRevertOnce);
 
-/* remplie la grille aléatoirement */
+/* remplie la grille alÃ©atoirement */
 void RandomizeGrid(Grid *pGrid);
 
-/* marque les jetons alignés */
+/* marque les jetons alignÃ©s */
 void CheckGrid(Grid *pGrid);
 
-/* vérifie s'il y a des lignes complete sur la grille */
+/* vÃ©rifie s'il y a des lignes complete sur la grille */
 bool IsLineOnGrid(Grid *pGrid);
 
-/* vérifie s'il y a un token du type donné */
+/* vÃ©rifie s'il y a un token du type donnÃ© */
 bool IsTokenOfType(Grid *pGrid, TokenTypes type);
 
-/* indique si une animation d'un jeton en train de se déplacer est en cours */
+/* indique si une animation d'un jeton en train de se dÃ©placer est en cours */
 bool IsTokenMoving(Grid *pGrid);
 
 /* indique si un jeton a une animation de destruction en cours */
@@ -55,22 +55,24 @@ int NbTokenOnGrid(Grid *pGrid);
 /* met en vert le meillur coup possible */
 void HighlightBestMove(Grid *pGrid);
 
-/* détruit les jetons alignés ( retourne le nombre de jetons détruit ) */
+/* dÃ©truit les jetons alignÃ©s ( retourne le nombre de jetons dÃ©truit ) */
 int DestroyAlignedTokens(Grid *pGrid);
 
-/* déclanche les fonctions de destructions suivant le tye de jeton */
+/* Active l'action d'un token special*/
 int Token_special_action(TokenTypes t, Grid *pGrid, int y, int x);
 
-/* Fonctions detruisants des jetons sur la grille suivant une certaine forme ou caracteristique */
-int Destruct_color(Colors c, Grid *pGrid);
-int Destruct_line(int y, Grid * pGrid);
-int Destruct_column(int x, Grid *pGrid);
-int Destruct_square(int y,int x,int l,Grid *pGrid);
+/* DÃ©truit tous les jetons de la couleur specifiÃ© */
+int destruct_color(Colors c, Grid *pGrid);
 
-/* compare la couleur de 2 token */
+/* Detruit la forme correspondante */
+int destruct_lign(int y, Grid * pGrid);
+int destruct_colon(int x, Grid *pGrid);
+int destruct_square(int y,int x,int l,Grid *pGrid);
+
+/* Compare la couleur de deux tokens (true si egal) */
 bool Compare_TokenColor(Token t1, Token t2);
 
-/* compare la couleur d'un token avec la couleur donné */
+/*Compare la couleur d'un token Ã  une couleur specifiÃ© (true si egal)*/
 bool Compare_TokenColor_color(Token t1, Colors c);
 
 /*Change la direction de la grille*/
@@ -79,42 +81,42 @@ void ChangeDirection(Grid *pGrid, Directions dir);
 /* regroupe les jetons dans la direction actuel de la grille */
 void RegroupTokens(Grid *pGrid);
 
-/* insère de nouveaux jetons aléatoires dans le sens de la grille */
+/* insÃ¨re de nouveaux jetons alÃ©atoirement dans la direction de la grille*/
 void InjectLigne(Grid *pGrid);
 
-/* retourne la valeur inverse de la direction donné */
+/* retourne la valeur inverse de la direction donnÃ© */
 Directions ReverseDirection(Directions dir);
 
 /* permute 2 jetons */
 void PermuteToken(Grid *pGrid,int x1,int y1,int x2,int y2);
 
-/* permute les textures de 2 jetons ( prévisualisation ) */
+/* permute les textures de 2 jetons ( prÃ©visualisation ) */
 void PermuteTokenImage(Grid *pGrid,int x1,int y1,int x2,int y2);
 
-/* crée un nouveau jeton avec une couleur aléatoire parmis celles de la grille */
+/* crÃ©e un nouveau jeton avec une couleur alÃ©atoire parmis celles de la grille */
 void InitRandomToken(Grid *pGrid, Token *token, int x, int y);
 
 /* anime les mouvements des jetons */
 void AnimMovingTokens(Grid *pGrid);
 
-/* anime les déstructions des jetons */
+/* anime les dÃ©structions des jetons */
 void AnimDestructingTokens(Grid *pGrid);
 
 /* anime la grille */
 void Grid_anim(Grid *pGrid);
 
-/* detect les coudées et ajoute les jetons speciaux */
+/* detect les coudÃ©es et ajoute les jetons speciaux */
 void Token_speciaux(Grid *pGrid);
 
 /* calcul le score */
 int Calc_Score(Grid *pGrid );
 
-/* change la couleur de fond des jetons alignés */
+/* change la couleur de fond des jetons alignÃ©s */
 void ChangeAlignedTokenBackgroundImage(Grid *pGrid, Image image);
 void ChangeColorTokenBackgroundImage(Grid *pGrid, Image image, Colors c);
 
 // =========================================================
-// evenements sur les éléments d'interface
+// evenements sur les Ã©lÃ©ments d'interface
 // =========================================================
 
 void GameButton_help_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid );
