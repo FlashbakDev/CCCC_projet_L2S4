@@ -3,7 +3,7 @@
 core.h
 -----------
 
-Par Benjamin, pour le projet CCCC le 09/03/2017.
+Par Desbouchages Benjamin, Rousseau jérémy, pour le projet CCCC le 09/03/2017.
 
 Rôle : fonctions générales du jeu, aussi bien affichage que logique.
 
@@ -20,19 +20,17 @@ Rôle : fonctions générales du jeu, aussi bien affichage que logique.
 
 // =========================================================
 
-typedef enum Directions { UP, DOWN, LEFT, RIGHT }Directions;
+typedef enum Directions { Directions_UP, Directions_DOWN, Directions_LEFT, Directions_RIGHT }Directions;
 
-typedef enum TokenTypes { TOKEN, HORIZONTAL, VERTICAL, PACKED, MULTI, BLOCK, NONE }TokenTypes;
+typedef enum TokenTypes { TokenTypes_NORMAL, TokenTypes_HORIZONTAL, TokenTypes_VERTICAL, TokenTypes_BOMB, TokenTypes_MULTI, TokenTypes_BLOCK, TokenTypes_NONE }TokenTypes;
 
-typedef enum Colors { RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, NONE_COLOR }Colors;
+typedef enum Colors { Colors_RED, Colors_BLUE, Colors_GREEN, Colors_YELLOW, Colors_PURPLE, Colors_ORANGE, Colors_NONE }Colors;
 
-typedef enum ObjectTypes {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE, FONT_TYPE, ARRAY_TYPE} ObjectTypes;
+typedef enum ObjectTypes {ObjectTypes_OTHER, ObjectTypes_WINDOW, ObjectTypes_RENDERER, ObjectTypes_TEXTURE, ObjectTypes_SURFACE, ObjectTypes_FONT, ObjectTypes_ARRAY} ObjectTypes;
 
-typedef enum GameStates { MENU, GAME, EDITOR, QUIT }GameStates;
+typedef enum States { States_MENU, States_GAME_CLASSIC, States_GAME_PUZZLE, States_EDITOR_NEW, States_EDITOR_LOAD, States_QUIT }States;
 
-typedef enum GameSessionTypes { RANDOM, PUZZLE }GameSessionTypes;
-
-typedef enum EditorSessionTypes { NEWPUZZLE, LOADPUZZLE }EditorSessionTypes;
+// =========================================================
 
 typedef struct Image{
 
@@ -49,10 +47,12 @@ typedef struct Token{
     bool aligned;
     int score;
 
+    bool canBeMoved;
+
+    // graphics
     Image image;
     SDL_Rect rect_image;
     int textureSize;
-
     Image image_background;
     bool drawBackground;
 
@@ -87,7 +87,7 @@ typedef struct Grid{
     bool isSuperHelpActive;
 
     bool isCalc;
-  
+
     bool is_puzzle;
     bool outline;
 
@@ -128,23 +128,13 @@ typedef struct Window {
 // =========================================================
 
 // ressources
-extern Font font_default;
-extern Image image_normal, image_prelight, image_active, image_selected,image_unselected,
-image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26];
+extern Font font_default, font_hight;
+extern Image image_normal, image_prelight, image_active, image_selected, image_unselected, image_arrow_up, image_arrow_down,
+image_cursorBlue, image_cursorRed, image_cursorGreen, image_tokens[26], image_verticalSlider;
 extern int screen_width, screen_height;
 
-// variables UI
-extern bool dragAndDrop;
-extern SDL_Point dragStart;
-extern SDL_Rect rect_CursorOver;
-
 // variable machine d'etat
-extern GameStates gameState, gameState_prec;
-extern GameSessionTypes gameSessionType;
-extern EditorSessionTypes editorSessionType;
-
-// ?
-extern char puzzleName[UI_MAX_LENGTH];
+extern States gameState, gameState_prec;
 
 // ========================================================= Logique
 
@@ -190,13 +180,16 @@ int Utf8next(char *str, int index);
 
 char *Backspace(char *str);
 
-void MoveAvailable(Grid * pGrid, bool highlight);
+void MoveAvailable(Grid * pGrid);
 
 /* copie les token actuel dans la sauvegarde */
 void SaveTokensInPastTokens(Grid *pGrid);
 
 /* copie les token de la sauvegarde dans l'actuel */
 void LoadTokensInPastTokens(Grid *pGrid);
+
+/* met tout les parrametres de la structure aux valeurs par default */
+void ResetToken(Token *token);
 
 // ========================================================= Chargement de ressources
 
@@ -251,6 +244,8 @@ int Array_SET(Array *pArray, int index, int id, void *pData);
 
 /* ajoute un item à la liste */
 int Array_append(Array *pArray, int id, void *pData);
+
+int Array_append_string(Array *a, int id, char *pText1, char *pText2);
 
 /* Insertion d'un élément dans le champ */
 int Array_insert(Array *pArray, int index, int id, void *pData);

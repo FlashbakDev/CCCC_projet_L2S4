@@ -12,9 +12,10 @@ int UI_label_new(UI_label *pLabel, Window *pWindow, char *text, int x, int y){
     pLabel->font = font_default;
     pLabel->color_text = black;
     MakeRect(&pLabel->rect, x, y, 0, 0);
-    String_copy(pLabel->text, UI_MAX_LABEL, text, NULL);
+    String_copy(pLabel->text, UI_MAX_LENGTH, text, NULL);
     pLabel->visible = false;
     pLabel->pWindow = pWindow;
+    pLabel->draw = true;
 
     return 0;
 }
@@ -142,6 +143,78 @@ int UI_entry_new(UI_entry *pEntry, Window *pWindow, char *pText, int x, int y, i
 
 // =========================================================
 
+int UI_verticalScrollbar_new(UI_verticalScrollbar *pVerticalScrollbar, Window *pWindow, int x, int y, int h, int w,  SDL_Color color){
+
+    int edge = 2;
+    int slider_padding = 2;
+
+	if (!pVerticalScrollbar)
+        return -1;
+
+    pVerticalScrollbar->image_up = image_arrow_up;
+    pVerticalScrollbar->image_down = image_arrow_down;
+    pVerticalScrollbar->image_slider = image_verticalSlider;
+
+	if (pVerticalScrollbar->image_up.h + pVerticalScrollbar->image_down.h + 2 * edge + 2 * slider_padding + pVerticalScrollbar->image_slider.h > h)
+		return -1;
+
+	MakeRect(&pVerticalScrollbar->rect_up, x, y + edge, pVerticalScrollbar->image_up.w, pVerticalScrollbar->image_up.h + slider_padding);
+	MakeRect(&pVerticalScrollbar->rect_down, x, y + h - pVerticalScrollbar->image_down.h - slider_padding - edge, pVerticalScrollbar->image_down.w, pVerticalScrollbar->image_down.h + slider_padding);
+	MakeRect(&pVerticalScrollbar->rect_slider, x, y + pVerticalScrollbar->rect_up.h + edge, pVerticalScrollbar->image_slider.w, pVerticalScrollbar->image_slider.h);
+
+	pVerticalScrollbar->maxPos = h - 2 * slider_padding - 2 * edge - pVerticalScrollbar->image_up.h - pVerticalScrollbar->image_down.h - pVerticalScrollbar->image_slider.h;
+	pVerticalScrollbar->fraction = 0.;
+	pVerticalScrollbar->step = 0.1;
+	pVerticalScrollbar->mouseClick_up = false;
+	pVerticalScrollbar->mouseClick_down = false;
+	pVerticalScrollbar->mouseClick_slider = false;
+	pVerticalScrollbar->lastTick = 0;
+	pVerticalScrollbar->visible = 0;
+	pVerticalScrollbar->focus = 0;
+	pVerticalScrollbar->pWindow = pWindow;
+
+	return 0;
+}
+
+// =========================================================
+
+int UI_textBox_new(UI_textBox *pTextBox, Window *pWindow, bool outline, Array *pArray, int x, int y, int w, int h){
+
+	int border = 6;
+
+	if (!pTextBox || !pArray)
+        return -1;
+
+	pTextBox->font = font_default;
+
+	if (h - 2 * border < pTextBox->font.lineHeight)
+        return -1;
+
+    SDL_Color white = {255, 255, 255, 255};
+    SDL_Color black = {0, 0, 0, 255};
+    SDL_Color lightBlue = {200, 225, 255, 255};
+
+	pTextBox->color_background = white;
+	pTextBox->color_text = black;
+	pTextBox->color_highlight = lightBlue;
+	MakeRect(&pTextBox->rect, x, y, w, h);
+	MakeRect(&pTextBox->rect_text, x + border, y + border, w - 2 * border, h - 2 * border);
+	pTextBox->outline = outline;
+	pTextBox->array = pArray;
+	pTextBox->firstLine = 0;
+	pTextBox->maxLines = (h - 2 * border) / pTextBox->font.lineHeight;
+	pTextBox->textWidth = w - 2 * border;
+	pTextBox->highlightLine = -1;
+	pTextBox->selectedLine = -1;
+	pTextBox->visible = false;
+	pTextBox->focus = false;
+	pTextBox->pWindow = pWindow;
+
+	return 0;
+}
+
+// =========================================================
+
 int UI_outline(SDL_Renderer *pRenderer, SDL_Rect *pRect, SDL_Color color, int edge){
 
     SDL_Rect rect_outline;
@@ -178,6 +251,41 @@ int UI_fillRect(SDL_Renderer *pRenderer, SDL_Rect *pRect, SDL_Color color){
     SDL_RenderFillRect(pRenderer, pRect);
 
     return 0;
+}
+
+// =========================================================
+
+void UI_verticalScrollbar_newPos(UI_verticalScrollbar *pVerticalScrollbar, double step, bool *pDraw){
+
+	*pDraw = true;
+	pVerticalScrollbar->fraction += step;
+	pVerticalScrollbar->lastTick = SDL_GetTicks();
+
+	if (pVerticalScrollbar->fraction < -0.000001)
+        pVerticalScrollbar->fraction = 0.;
+
+	if (pVerticalScrollbar->fraction > 0.999999)
+        pVerticalScrollbar->fraction = 1.;
+
+	pVerticalScrollbar->rect_slider.y = pVerticalScrollbar->rect_down.y - pVerticalScrollbar->rect_slider.h - (int) (pVerticalScrollbar->fraction * pVerticalScrollbar->maxPos + 0.5);
+
+	if (pVerticalScrollbar->fraction > 0.000001 && pVerticalScrollbar->fraction < 0.999999)
+		return;
+
+	pVerticalScrollbar->mouseClick_up = false;
+	pVerticalScrollbar->mouseClick_down = false;
+}
+
+// =========================================================
+
+int textBox_numOfLines(UI_textBox *pTextBox){
+
+	int numOfLines = pTextBox->maxLines;
+
+	if (pTextBox->array->length - pTextBox->firstLine < pTextBox->maxLines)
+		numOfLines = pTextBox->array->length - pTextBox->firstLine;
+
+	return numOfLines;
 }
 
 // =========================================================
@@ -300,24 +408,164 @@ int UI_entry_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw){
 }
 
 // =========================================================
+
+int UI_verticalScrollbar_event(UI_verticalScrollbar *pVerticalScrollbar, SDL_Event *event, int *pDraw){
+
+    int clickInterval = 70;
+
+	if (!pVerticalScrollbar || !pVerticalScrollbar->visible)
+        return 0;
+
+	if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))) {
+
+		pVerticalScrollbar->mouseClick_up = false;
+		pVerticalScrollbar->mouseClick_down = false;
+		pVerticalScrollbar->lastTick = 0;
+
+	} else if (pVerticalScrollbar->mouseClick_up && SDL_GetTicks() > pVerticalScrollbar->lastTick + clickInterval) {
+
+		UI_verticalScrollbar_newPos(pVerticalScrollbar, -pVerticalScrollbar->step, pDraw);
+		return 1;
+
+	} else if (pVerticalScrollbar->mouseClick_down && SDL_GetTicks() > pVerticalScrollbar->lastTick + clickInterval) {
+
+		UI_verticalScrollbar_newPos(pVerticalScrollbar, pVerticalScrollbar->step, pDraw);
+		return 1;
+	}
+
+	if (!event)
+        return 0;
+
+	if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
+		*pDraw = true;
+
+	if (!pVerticalScrollbar->focus && (!pVerticalScrollbar->pWindow || (pVerticalScrollbar->pWindow && !pVerticalScrollbar->pWindow->focus)))
+		return 0;
+
+	if (event->type == SDL_MOUSEBUTTONDOWN && PointInRect(event->button.x, event->button.y, &pVerticalScrollbar->rect_up) && pVerticalScrollbar->step > 0.000001) {
+
+		if (pVerticalScrollbar->fraction > 0.000001) {
+
+			pVerticalScrollbar->mouseClick_up = true;
+
+			if (pVerticalScrollbar->pWindow)
+                pVerticalScrollbar->pWindow->focus = false;
+
+			pVerticalScrollbar->focus = true;
+		}
+
+		pVerticalScrollbar->lastTick = SDL_GetTicks() - clickInterval - 1;
+
+	} else if (event->type == SDL_MOUSEBUTTONDOWN && PointInRect(event->button.x, event->button.y, &pVerticalScrollbar->rect_down) && pVerticalScrollbar->step > 0.000001) {
+
+		if (pVerticalScrollbar->fraction < 0.999999) {
+
+			pVerticalScrollbar->mouseClick_down = true;
+
+			if (pVerticalScrollbar->pWindow)
+                pVerticalScrollbar->pWindow->focus = false;
+
+			pVerticalScrollbar->focus = true;
+		}
+
+		pVerticalScrollbar->lastTick = SDL_GetTicks() - clickInterval - 1;
+
+	} else if (event->type == SDL_MOUSEBUTTONDOWN && PointInRect(event->button.x, event->button.y, &pVerticalScrollbar->rect_slider) && pVerticalScrollbar->step > 0.000001) {
+
+		if (pVerticalScrollbar->pWindow)
+            pVerticalScrollbar->pWindow->focus = false;
+
+		pVerticalScrollbar->focus = true;
+		pVerticalScrollbar->mouseClick_slider = true;
+
+	} else if (event->type == SDL_MOUSEBUTTONUP) {
+
+		pVerticalScrollbar->mouseClick_up = false;
+		pVerticalScrollbar->mouseClick_down = false;
+		pVerticalScrollbar->mouseClick_slider = false;
+		pVerticalScrollbar->lastTick = 0;
+
+		if (pVerticalScrollbar->pWindow)
+            pVerticalScrollbar->pWindow->focus = true;
+
+		pVerticalScrollbar->focus = false;
+
+	} else if (event->type == SDL_MOUSEMOTION && (event->motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) && pVerticalScrollbar->mouseClick_slider) {
+
+		UI_verticalScrollbar_newPos(pVerticalScrollbar, 1. * event->motion.yrel / pVerticalScrollbar->maxPos, pDraw);
+		return 1;
+	}
+
+	return 0;
+}
+
+// =========================================================
+
+int UI_textBox_event(UI_textBox *pTextBox, SDL_Event *event, int *pDraw){
+
+	int textY, textMaxY, numOfLines;
+
+	if (!pTextBox || !pTextBox->visible || !event || !pTextBox->array || !pTextBox->array->length)
+		return 0;
+
+	if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
+		*pDraw = true;
+
+	if (!pTextBox->focus && (!pTextBox->pWindow || (pTextBox->pWindow && !pTextBox->pWindow->focus)))
+		return 0;
+
+	if (event->type == SDL_MOUSEBUTTONDOWN && PointInRect(event->button.x, event->button.y, &pTextBox->rect_text)) {
+
+		numOfLines = textBox_numOfLines(pTextBox);
+		textY = event->button.y - pTextBox->rect_text.y;
+		textMaxY = numOfLines * pTextBox->font.lineHeight;
+
+		if (textY < textMaxY) {
+
+			pTextBox->selectedLine = textY / pTextBox->font.lineHeight;
+			return 1;
+		}
+
+	} else if (event->type == SDL_MOUSEMOTION && PointInRect(event->motion.x, event->motion.y, &pTextBox->rect_text)) {
+
+		numOfLines = textBox_numOfLines(pTextBox);
+		textY = event->motion.y - pTextBox->rect_text.y;
+		textMaxY = numOfLines * pTextBox->font.lineHeight;
+		pTextBox->highlightLine = -1;
+
+		if (textY < textMaxY)
+			pTextBox->highlightLine = textY / pTextBox->font.lineHeight;
+
+		*pDraw = true;
+
+	} else if (event->type == SDL_MOUSEMOTION && !PointInRect(event->motion.x, event->motion.y, &pTextBox->rect_text)) {
+
+		pTextBox->highlightLine = -1;
+		*pDraw = true;
+	}
+
+	return 0;
+}
+
+// =========================================================
 // affichage des widgets
 // =========================================================
 
 int UI_label_draw(UI_label *pLabel, SDL_Renderer *pRenderer){
 
-    char buf[UI_MAX_LABEL], *p;
+    char buf[UI_MAX_LENGTH], *p;
 	int len, y;
 
 	if (pLabel && pLabel->pWindow)
         pLabel->visible = pLabel->pWindow->visible;
 
-	if (!pLabel || !pLabel->visible || !pRenderer)
+	if (!pLabel || !pLabel->visible || !pRenderer || !pLabel->draw )
         return 0;
 
 	y = pLabel->rect.y + pLabel->font.spacing / 2;
 	len = strlen(pLabel->text);
 
-	if (len > UI_MAX_LABEL - 2)
+	if (len > UI_MAX_LENGTH - 2)
 		pLabel->text[len - 1] = '\n';
 	else
 		strcat(pLabel->text, "\n");
@@ -405,7 +653,68 @@ int UI_entry_draw(UI_entry *pEntry, SDL_Renderer *pRenderer){
 
 	RenderText(pRenderer, pEntry->text, pEntry->position_text.x, pEntry->position_text.y, pEntry->font, color);
 
+	return 1;
+}
 
+// =========================================================
+
+int UI_verticalScrollbar_draw(UI_verticalScrollbar *pVerticalScrollbar, SDL_Renderer *pRenderer){
+
+    int slider_padding = 2;
+
+	if (pVerticalScrollbar && pVerticalScrollbar->pWindow)
+		pVerticalScrollbar->visible = pVerticalScrollbar->pWindow->visible;
+
+	if (!pVerticalScrollbar || !pVerticalScrollbar->visible || !pRenderer || !pVerticalScrollbar->draw )
+        return 0;
+
+	pVerticalScrollbar->rect_slider.y = pVerticalScrollbar->rect_up.y + pVerticalScrollbar->rect_up.h + (int) (pVerticalScrollbar->fraction * pVerticalScrollbar->maxPos);
+
+	RenderImage(pRenderer, pVerticalScrollbar->image_up, pVerticalScrollbar->rect_up.x, pVerticalScrollbar->rect_up.y, NULL);
+	RenderImage(pRenderer, pVerticalScrollbar->image_down, pVerticalScrollbar->rect_down.x, pVerticalScrollbar->rect_down.y + slider_padding, NULL);
+	RenderImage(pRenderer, pVerticalScrollbar->image_slider, pVerticalScrollbar->rect_slider.x, pVerticalScrollbar->rect_slider.y, NULL);
+
+	return 1;
+}
+
+// =========================================================
+
+int UI_textBox_draw(UI_textBox *pTextBox, SDL_Renderer *pRenderer){
+
+	SDL_Rect highlightRect;
+	char buf[UI_MAX_LENGTH];
+	int numOfLines, i;
+
+	SDL_Color blue = { 0, 0, 255, 255 };
+	int edge = 2;
+
+	if ( pTextBox && pTextBox->pWindow )
+		pTextBox->visible = pTextBox->pWindow->visible;
+
+	if ( !pTextBox || !pTextBox->visible || !pRenderer || !pTextBox->draw )
+        return 0;
+
+	UI_fillRect(pRenderer, &pTextBox->rect, pTextBox->color_background);
+
+	if (pTextBox->outline)
+		UI_outline(pRenderer, &pTextBox->rect, blue, edge);
+
+	if (pTextBox->highlightLine >= 0) {
+
+		MakeRect(&highlightRect, pTextBox->rect_text.x, pTextBox->rect_text.y + pTextBox->highlightLine * pTextBox->font.lineHeight, pTextBox->rect_text.w, pTextBox->font.lineHeight);
+		UI_fillRect(pRenderer, &highlightRect, pTextBox->color_highlight);
+	}
+
+	if (!pTextBox->array || !pTextBox->array->length)
+        return 0;
+
+	numOfLines = textBox_numOfLines(pTextBox);
+
+	for (i = 0; i < numOfLines; i++) {
+
+		String_copy(buf, MaxLength(pTextBox->font, pTextBox->textWidth, (char *) Array_GET_data(pTextBox->array, pTextBox->firstLine + i), NULL), (char *) Array_GET_data(pTextBox->array, pTextBox->firstLine + i), NULL);
+		RenderText(pRenderer, buf, pTextBox->rect_text.x, pTextBox->rect_text.y + i * pTextBox->font.lineHeight + pTextBox->font.spacing / 2, pTextBox->font, pTextBox->color_text);
+	}
 
 	return 1;
 }

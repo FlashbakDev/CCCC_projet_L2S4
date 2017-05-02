@@ -23,14 +23,15 @@ SDL_Renderer *InitEditor(char * pChar_name, Array *pArray, int w, int h){
     Array_new(pArray);
 
     pWindow = SDL_CreateWindow(pChar_name, rect_bounds.w / 2 - w / 2, rect_bounds.h / 2 - h / 2, w, h, SDL_WINDOW_SHOWN);
-    if ( pWindow ) Array_append(pArray, WINDOW_TYPE , pWindow);
+    if ( pWindow ) Array_append(pArray, ObjectTypes_WINDOW , pWindow);
     // void SDL_SetWindowIcon(SDL_Window*  window , SDL_Surface* icon); //ajoute une icône à la fenêtre
 
     pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if ( pRenderer ) Array_append(pArray, RENDERER_TYPE, pRenderer);
+    if ( pRenderer ) Array_append(pArray, ObjectTypes_RENDERER, pRenderer);
 
     // init des ressources
     error += Font_new(&font_default, "data/fonts/arial.ttf", pArray, 15);
+    error += Font_new(&font_hight, "data/fonts/arial.ttf", pArray, 40);
     error += Image_new(&image_active, "data/UI/image_active.png", pArray, pRenderer);
     error += Image_new(&image_prelight, "data/UI/image_prelight.png", pArray, pRenderer);
     error += Image_new(&image_normal, "data/UI/image_normal.png", pArray, pRenderer);
@@ -61,7 +62,7 @@ Grid *NewEmptyPuzzle(int x, int y){
     pGrid->height = y;
     pGrid->nbMove = 1;
     pGrid->nbColor = 6;
-    pGrid->direction = DOWN;
+    pGrid->direction = Directions_DOWN;
     pGrid->is_randomizeInsert = false;
     pGrid->score = 0;
     pGrid->nbHelp = 0;
@@ -77,6 +78,7 @@ Grid *NewEmptyPuzzle(int x, int y){
     pGrid->cursorTokenPosition.x = 0;
     pGrid->cursorTokenPosition.y = 0;
     pGrid->isHelpActive = false;
+    pGrid->isSuperHelpActive = false;
 
     /* allocation de la grille et remplissage */
     pGrid->tokens = (Token*)malloc( pGrid->height * sizeof(Token*));
@@ -119,7 +121,7 @@ void ClearGrid(Grid *pGrid){
         }
     }
 
-    MoveAvailable(pGrid, false);
+    MoveAvailable(pGrid);
 }
 
 // =========================================================
@@ -133,24 +135,7 @@ void ClearToken(Grid *pGrid, Token *token, int x, int y){
 
 // =========================================================
 
-void ResetToken(Token *token){
-
-    token->type = NONE;
-    token->color = NONE_COLOR;
-    token->aligned = false;
-    token->isMoving = false;
-    token->isDestruct = false;
-    token->startDestructAnim = -1;
-    token->drawBackground = false;
-    token->textureSize = 100;
-    token->image = image_tokens[0];
-    token->image_background = image_cursorBlue;
-    MakeRect(&token->rect_image,0,0,0,0);
-}
-
-// =========================================================
-
-bool Toggle_color_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+bool EditorToggle_color_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
     if ( !pToggle->selected  ){
         if ( UI_toggle_event(pToggle, pEvent, pDraw) ){
@@ -164,7 +149,7 @@ bool Toggle_color_event(UI_toggle *pToggle, SDL_Event *pEvent, bool *pDraw, Grid
 
 // =========================================================
 
-void Entry_nbMove_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+void EditorEntry_nbMove_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
     if ( UI_entry_event(pEntry, pEvent, pDraw) ){
 
@@ -178,7 +163,7 @@ void Entry_nbMove_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *
 
 // =========================================================
 
-void Entry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+void EditorEntry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, char *puzzleName ){
 
     if ( UI_entry_event(pEntry, pEvent, pDraw) ){
 
@@ -191,13 +176,13 @@ void Entry_name_event(UI_entry *pEntry, SDL_Event *pEvent, bool *pDraw, Grid *pG
             }
         }
 
-        String_copy( &puzzleName, UI_MAX_LENGTH, pEntry->text, NULL );
+        String_copy( puzzleName, UI_MAX_LENGTH, pEntry->text, NULL );
     }
 }
 
 // =========================================================
 
-bool Button_tokenType_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+bool EditorButton_tokenType_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
     if( UI_button_event(pButton, pEvent, pDraw) ){
 
@@ -209,30 +194,40 @@ bool Button_tokenType_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, 
 
 // =========================================================
 
-void Button_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+void EditorButton_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
 
-    if( UI_button_event(pButton, pEvent, pDraw) ){
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
 
-        // save
-        Save_grid(pGrid, &puzzleName);
-
-        // test de chargement
-        pGrid = Load_grid(&puzzleName);
+        gameState_prec = gameState;
+        gameState = States_MENU;
+        *pQuit = true;
     }
 }
 
 // =========================================================
 
-void Button_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit ){
+void EditorButton_save_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, char *puzzleName ){
 
     if( UI_button_event(pButton, pEvent, pDraw) ){
 
-        if ( Save_grid( pGrid, &puzzleName ) == 0 ){
+        // save
+        Save_grid(pGrid, puzzleName);
 
-            gameState_prec = gameState;
-            gameState = GAME;
-            gameSessionType = PUZZLE;
-            editorSessionType = LOADPUZZLE;
+        // test de chargement
+        pGrid = Load_grid(puzzleName);
+    }
+}
+
+// =========================================================
+
+void EditorButton_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid, bool *pQuit, char *puzzleName ){
+
+    if( UI_button_event(pButton, pEvent, pDraw) ){
+
+        if ( Save_grid( pGrid, puzzleName ) == 0 ){
+
+            gameState_prec = States_EDITOR_LOAD;
+            gameState = States_GAME_PUZZLE;
             *pQuit = true;
         }
     }
@@ -240,11 +235,23 @@ void Button_test_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid 
 
 // =========================================================
 
-void Button_reset_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
+void EditorButton_reset_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, Grid *pGrid ){
 
    if( UI_button_event(pButton, pEvent, pDraw) ){
 
         ClearGrid(pGrid);
+    }
+}
+
+// =========================================================
+
+void EditorButton_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
+
+    if ( UI_button_event(pButton, pEvent, pDraw) ){
+
+        gameState_prec = gameState;
+        gameState = States_QUIT;
+        *pQuit = true;
     }
 }
 
@@ -267,7 +274,7 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
                         pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ] = tokenToPaste;
                         CalculTokenImages(pGrid, &pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ], pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y );
 
-                        MoveAvailable(pGrid, false);
+                        MoveAvailable(pGrid);
                     }
                 }
                 break;
@@ -278,7 +285,7 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
 
                         ClearToken(pGrid, &pGrid->tokens[ pGrid->cursorTokenPosition.y ][ pGrid->cursorTokenPosition.x ], pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
 
-                        MoveAvailable(pGrid, false);
+                        MoveAvailable(pGrid);
                     }
                 }
                 break;
@@ -329,12 +336,7 @@ void Editor_event(Grid *pGrid, SDL_Event *pEvent, bool *pQuit, Token tokenToPast
                 pGrid->cursorTokenPosition.x = (pEvent->motion.x / TOKEN_WIDTH);
                 pGrid->cursorTokenPosition.y = (pEvent->motion.y / TOKEN_HEIGHT);
 
-                for(int i = 0; i < pGrid->height; i++){
-                    for(int j = 0; j < pGrid->width; j++){
-
-                        pGrid->tokens[i][j].drawBackground = false;
-                    }
-                }
+                pGrid->tokens[cursorTokenPositionTemp.y][cursorTokenPositionTemp.x].drawBackground = false;
                 pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
             }
             else{
@@ -353,7 +355,7 @@ void Editor_logic(Grid *pGrid){
 
 // =========================================================
 
-void EditorSession(Grid *pGrid){
+void EditorSession(char *puzzleName, bool newPuzzle){
 
     fprintf(stdout, "editor.c -> EditorSession(...) : start \n");
 
@@ -376,6 +378,12 @@ void EditorSession(Grid *pGrid){
     UI_label label_name = {false};
     UI_entry entry_name = {false};
 
+    Grid *pGrid;
+    if ( newPuzzle )
+        pGrid = NewEmptyPuzzle(10, 10);
+    else
+        pGrid = Load_grid(puzzleName);
+
     // création des zone de jeu et d'affichage
     SDL_Rect rect_grid = { 0,0,pGrid->width * TOKEN_WIDTH, pGrid->height * TOKEN_HEIGHT };
     SDL_Rect rect_UI = { rect_grid.x + rect_grid.w, 0, 300, rect_grid.h };
@@ -394,21 +402,20 @@ void EditorSession(Grid *pGrid){
     ResetTokenImages(pGrid);
 
     fprintf(stdout,"editor.c -> GameSession(...) -> Window_new return %d.\n", Window_new(&window, NULL, false, 0, 0, screen_width, screen_height));
-    Array_append(&objects, WINDOW_TYPE, &window);
+    Array_append(&objects, ObjectTypes_WINDOW, &window);
 
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_nbMove, &window, "", rect_UI.x + 20 , rect_UI.y + 25, 50 ));
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_nbMove, &window, "Coups alloues", rect_UI.x + 20 + entry_nbMove.rect.w + 5 , rect_UI.y + 30 ));
     sprintf(entry_nbMove.text,"%d",pGrid->nbMove);
-    if ( pGrid->nbMove <= 0 ) String_copy(entry_nbMove.text,UI_MAX_LENGTH,"1",NULL); pGrid->nbMove = 1;
+    if ( pGrid->nbMove <= 0 ) { String_copy(entry_nbMove.text,UI_MAX_LENGTH,"1",NULL); pGrid->nbMove = 1; }
 
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_mouvements, &window, "", rect_UI.x + 20 , rect_UI.y + 120 ));
     sprintf(label_mouvements.text,"Mouvements possibles : %d",pGrid->moveAvailable);
 
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_name, &window, "Nom", rect_UI.x + 20 , rect_UI.y + 300 ));
-    fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_name, &window, &puzzleName, rect_UI.x + 20 + 5 + TextWidth(font_default, label_name.text, NULL ) , rect_UI.y + 295, 220 ));
+    fprintf(stdout,"editor.c -> GameSession(...) -> UI_entry_new return %d.\n", UI_entry_new(&entry_name, &window, "puzzleTest", rect_UI.x + 20 + 5 + TextWidth(font_default, label_name.text, NULL ) , rect_UI.y + 295, 220 ));
 
-    if ( strcmp( entry_name.text, "") == 0 ) String_copy(entry_name.text,UI_MAX_LENGTH,"puzzleTest",NULL);
-    String_copy(puzzleName,UI_MAX_LENGTH,entry_name.text,NULL);
+    if ( strcmp( puzzleName, "") != 0 ) String_copy(entry_name.text,UI_MAX_LENGTH,puzzleName,NULL);
 
     /*fprintf(stdout,"editor.c -> GameSession(...) -> UI_label_new return %d.\n", UI_label_new(&label_direction, &window, "Direction aleatoire", rect_UI.x + 20 + image_selected.w + 5 , rect_UI.y + 90 ));
     fprintf(stdout,"editor.c -> GameSession(...) -> UI_toggle_new return %d.\n", UI_toggle_new(&toggle_direction, &window, rect_UI.x + 20 , rect_UI.y + 90 ));
@@ -458,9 +465,8 @@ void EditorSession(Grid *pGrid){
 
     Token tokenToPaste;
     ResetToken(&tokenToPaste);
-    tokenToPaste.color = RED;
-    tokenToPaste.type = TOKEN;
-    tokenToPaste.drawBackground = true;
+    tokenToPaste.color = Colors_RED;
+    tokenToPaste.type = TokenTypes_NORMAL;
     AssignImageToToken(&tokenToPaste);
 
     SDL_Point selectedTokenType = { button_token[0].rect.x , button_token[0].rect.y};
@@ -477,7 +483,7 @@ void EditorSession(Grid *pGrid){
 
             if( event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)){
 
-                gameState = QUIT;
+                gameState = States_QUIT;
                 quit = true;
             }
 
@@ -486,17 +492,17 @@ void EditorSession(Grid *pGrid){
 
             // event UI
             Window_event(&window, &event, &draw );
-            Button_quit_event(&button_quit, &event, &draw, &quit);
-            Button_menu_event(&button_menu, &event, &draw, &quit);
-            Entry_nbMove_event(&entry_nbMove, &event, &draw, pGrid);
-            Button_reset_event(&button_reset, &event, &draw, pGrid);
-            Entry_name_event(&entry_name, &event, &draw, pGrid);
-            Button_save_event(&button_save, &event, &draw, pGrid);
-            Button_test_event(&button_test, &event, &draw, pGrid, &quit);
+            EditorButton_quit_event(&button_quit, &event, &draw, &quit);
+            EditorButton_menu_event(&button_menu, &event, &draw, &quit);
+            EditorEntry_nbMove_event(&entry_nbMove, &event, &draw, pGrid);
+            EditorButton_reset_event(&button_reset, &event, &draw, pGrid);
+            EditorEntry_name_event(&entry_name, &event, &draw, pGrid, puzzleName);
+            EditorButton_save_event(&button_save, &event, &draw, pGrid, puzzleName);
+            EditorButton_test_event(&button_test, &event, &draw, pGrid, &quit, puzzleName);
 
             for(int i = 0; i < 7; i++){
 
-                if ( Toggle_color_event( &toggle_token_colors[i], &event, &draw, pGrid ) ){
+                if ( EditorToggle_color_event( &toggle_token_colors[i], &event, &draw, pGrid ) ){
 
                     // changer les couleurs de token ici
                     tokenToPaste.color = (Colors)i;
@@ -513,7 +519,7 @@ void EditorSession(Grid *pGrid){
 
                         if ( tokenToPaste.type > 3 ){
 
-                            tokenToPaste.type = TOKEN;
+                            tokenToPaste.type = TokenTypes_NORMAL;
                             selectedTokenType.x = button_token[0].rect.x;
                             selectedTokenType.y = button_token[0].rect.y;
                         }
@@ -526,7 +532,7 @@ void EditorSession(Grid *pGrid){
                         UI_set_button_images(&button_token[1], image_tokens[25], image_tokens[25], image_tokens[25]);
                         button_token[2].draw = false;
                         button_token[3].draw = false;
-                        tokenToPaste.type = MULTI;
+                        tokenToPaste.type = TokenTypes_MULTI;
                     }
 
                     for(int j = 0; j < 7 ; j++){
@@ -540,7 +546,7 @@ void EditorSession(Grid *pGrid){
 
             for(int i = 0; i < 4; i++){
 
-                if ( Button_tokenType_event(&button_token[i], &event, &draw, pGrid)){
+                if ( EditorButton_tokenType_event(&button_token[i], &event, &draw, pGrid)){
 
                     selectedTokenType.x = button_token[i].rect.x;
                     selectedTokenType.y = button_token[i].rect.y;
@@ -571,12 +577,14 @@ void EditorSession(Grid *pGrid){
         if ( pGrid->is_cursorOnGrid ){
 
             Token token_save = pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x];
+
             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x] = tokenToPaste;
+
             CalculTokenImages(pGrid, &pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x], pGrid->cursorTokenPosition.x, pGrid->cursorTokenPosition.y);
 
-            //RenderImage(pRenderer, tokenToPaste.image, pGrid->cursorTokenPosition.x * TOKEN_WIDTH, pGrid->cursorTokenPosition.y * TOKEN_HEIGHT, NULL );
+            pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x].drawBackground = true;
 
-            Grid_draw(pGrid,pRenderer); // désine la grille sur le renderer
+            Grid_draw(pGrid,pRenderer); // déssine la grille sur le renderer
 
             pGrid->tokens[pGrid->cursorTokenPosition.y][pGrid->cursorTokenPosition.x] = token_save;
         }

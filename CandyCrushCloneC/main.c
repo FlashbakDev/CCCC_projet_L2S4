@@ -4,118 +4,40 @@
 #include "menu.h"
 #include "editor.h"
 
-void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-void Button_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit );
-
 int main(int argc, char* argv[]){
 
     /* Initialisation */
     InitSDL();
 
-    // avec une pile Ã§a serais mieux !
-    gameState = MENU;
-    gameState_prec = QUIT;
-    gameSessionType = RANDOM;
-    editorSessionType = NEWPUZZLE;
+    // avec une pile ça serais mieux !
+    gameState = States_MENU;
+    gameState_prec = States_QUIT;
 
-    /* boucle */
+    // nom du fichier grille à chargé / éditer / jouer
+    char puzzleName[UI_MAX_LENGTH];
+
+    /* boucle de la machine d'état */
     bool quit = false;
     while(quit == false){
 
         switch(gameState){
 
-            case MENU : {
+            case States_MENU : MenuSession(&puzzleName); break;
 
-                MenuSession();
-            }
-            break;
+            case States_GAME_CLASSIC : GameSessionRandom(10,10,6,5,false,5,2,2); break;
 
-            case GAME : {
+            case States_GAME_PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
 
-                switch( gameSessionType ){
+            case States_EDITOR_NEW : EditorSession(&puzzleName, true); break;
 
-                    case RANDOM : GameSessionRandom(10,10,6,5,false,5,2,2); break;
-                    case PUZZLE : GameSessionPuzzle(Load_grid(&puzzleName)); break;
-                }
-            }
-            break;
+            case States_EDITOR_LOAD : EditorSession(&puzzleName, false); break;
 
-            case EDITOR : {
-
-
-                switch( editorSessionType ){
-
-                    case NEWPUZZLE : EditorSession(NewEmptyPuzzle(10, 10)); break;
-                    case LOADPUZZLE : EditorSession(Load_grid(&puzzleName)); break;
-                }
-            }
-            break;
-
-            case QUIT : {
-
-                quit = true;
-            }
-            break;
+            case States_QUIT : quit = true; break;
         }
     }
 
+    // Libération de la SDL
     CleanSDL();
 
     return 0;
-}
-
-// =========================================================
-
-void Button_quit_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = QUIT;
-        *pQuit = true;
-    }
-}
-
-void Button_menu_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = MENU;
-        *pQuit = true;
-    }
-}
-
-void Button_play_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = GAME;
-        gameSessionType = RANDOM;
-        *pQuit = true;
-    }
-}
-
-void Button_return_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState = gameState_prec;
-        *pQuit = true;
-    }
-}
-
-void Button_editor_event(UI_button *pButton, SDL_Event *pEvent, bool *pDraw, bool *pQuit ){
-
-    if ( UI_button_event(pButton, pEvent, pDraw) ){
-
-        gameState_prec = gameState;
-        gameState = EDITOR;
-        editorSessionType = NEWPUZZLE;
-        *pQuit = true;
-    }
 }
